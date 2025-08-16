@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>346 Is LIF3 - Living in Frequency of Mind Body & Soul Trinity</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e2db 100%);
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+        
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(74, 144, 226, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #2c3e50;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            color: #2c5aa0;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(44, 90, 160, 0.05) 0%, rgba(184, 134, 11, 0.05) 100%);
+        }
+        
+        .hero-content h1 {
+            font-size: 4rem;
+            color: #2c5aa0;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero-content .subtitle {
+            font-size: 1.8rem;
+            color: #2c5aa0;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+        
+        .hero-content .tagline {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 1s both;
+        }
+        
+        /* Trinity Diagram */
+        .trinity-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .trinity-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+        
+        .triangle {
+            position: relative;
+            width: 300px;
+            height: 260px;
+        }
+        
+        .triangle svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .triangle-path {
+            fill: none;
+            stroke: #2c5aa0;
+            stroke-width: 4;
+            animation: drawTriangle 3s ease-in-out;
+        }
+        
+        .triangle-number {
+            font-size: 2rem;
+            font-weight: bold;
+            fill: #2c5aa0;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        
+        @keyframes drawTriangle {
+            0% { stroke-dasharray: 0 800; }
+            100% { stroke-dasharray: 800 0; }
+        }
+        
+        /* Steps Section */
+        .steps-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .step-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(45deg, #2c5aa0, #b8860b);
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .step-number {
+            font-size: 3rem;
+            color: #b8860b;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .step-title {
+            font-size: 1.5rem;
+            color: #2c5aa0;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .step-insight {
+            margin-bottom: 1.5rem;
+        }
+        
+        .insight-label {
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        
+        .translation-label {
+            font-weight: bold;
+            color: #b8860b;
+        }
+        
+        /* Trinity Elements Section */
+        .trinity-elements {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .elements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .element-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(44, 90, 160, 0.05) 0%, rgba(184, 134, 11, 0.05) 100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .element-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .element-number {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .element-card:nth-child(1) .element-number { color: #2c5aa0; }
+        .element-card:nth-child(2) .element-number { color: #b8860b; }
+        .element-card:nth-child(3) .element-number { color: #6b8e23; }
+        
+        .element-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .element-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        /* Philosophy Section */
+        .philosophy {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .philosophy h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .philosophy-text {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e2db 100%);
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            color: #2c5aa0;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #2c5aa0, #b8860b);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(44, 90, 160, 0.3);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 2.5rem; }
+            .hero-content .subtitle { font-size: 1.3rem; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+        
+        /* Scroll animations */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg"></div>
+    
+    <nav>
+        <div class="container">
+            <div class="logo">346 Is LIF3</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#framework">Framework</a></li>
+                <li><a href="#trinity">Trinity</a></li>
+                <li><a href="#philosophy">Philosophy</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>346 is LIF3</h1>
+                <p class="subtitle">Reframing the 5 Steps</p>
+                <p class="tagline">Living in Frequency of Mind Body & Soul Trinity<br>
+                Create. Innovate. Sustain. For Lif3. For Lov3. For3ver.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="trinity-section" id="framework">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; color: #2c5aa0; margin-bottom: 3rem;">The 346 Framework</h2>
+            
+            <div class="trinity-container">
+                <div class="triangle">
+                    <svg viewBox="0 0 300 260">
+                        <path class="triangle-path" d="M150,30 L270,200 L30,200 Z" stroke-dasharray="800" stroke-dashoffset="0"/>
+                        <line class="triangle-path" x1="150" y1="30" x2="150" y2="200" stroke-dasharray="170"/>
+                        <line class="triangle-path" x1="30" y1="200" x2="270" y2="200" stroke-dasharray="240"/>
+                        <text class="triangle-number" x="150" y="80">3</text>
+                        <text class="triangle-number" x="90" y="180">4</text>
+                        <text class="triangle-number" x="210" y="180">6</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="steps-section">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; color: #2c5aa0; margin-bottom: 1rem;">The Four Steps of Transformation</h2>
+            
+            <div class="steps-grid">
+                <div class="step-card scroll-reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-title">You Experience Contrast → 3 (Mind) – Awareness & Observation</div>
+                    <div class="step-insight">
+                        <span class="insight-label">346 Insight:</span> The mind initiates frequency correction. It identifies where you are versus where you know you belong.
+                    </div>
+                    <div class="step-insight">
+                        <span class="translation-label">LIF3 Translation:</span> Every complaint, frustration, or idea for improvement is sacred – it's the mind's natural urge to elevate the frequency of your experience.
+                    </div>
+                </div>
+
+                <div class="step-card scroll-reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Source Answers Your Request → 4 (Body) – Blueprint & Formation</div>
+                    <div class="step-insight">
+                        <span class="insight-label">346 Insight:</span> As soon as you think, Source forms. Your body begins to adjust to the energetic blueprint – your cellular field gets the memo.
+                    </div>
+                    <div class="step-insight">
+                        <span class="translation-label">LIF3 Translation:</span> You don't have to "do" anything yet – but your physical frequency is now encoded. The world around you begins reshaping.
+                    </div>
+                </div>
+
+                <div class="step-card scroll-reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Align With the Vibration → 6 (Soul) – Resonance & Reception</div>
+                    <div class="step-insight">
+                        <span class="insight-label">346 Insight:</span> No forcing. No controlling. Just vibing in trust.
+                    </div>
+                    <div class="step-insight">
+                        <span class="translation-label">LIF3 Translation:</span> Your soul doesn't chase – it harmonizes. That harmony pulls your vision to you. It's magnetic.
+                    </div>
+                </div>
+
+                <div class="step-card scroll-reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Maintain Your Alignment → 346 Loop Begins – Trinity Integration</div>
+                    <div class="step-insight">
+                        <span class="insight-label">346 Insight:</span> This is self-governance. You feel yourself slip out of alignment and you know how to return – breath, intention, sound.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="trinity-elements" id="trinity">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; color: #2c5aa0; margin-bottom: 1rem;">The Trinity Elements</h2>
+            
+            <div class="elements-grid">
+                <div class="element-card scroll-reveal">
+                    <div class="element-number">3</div>
+                    <div class="element-title">CREATE</div>
+                    <div class="element-subtitle">IN THE MIND</div>
+                    <p>The power of conscious thought and awareness. Where all transformation begins through observation and intention.</p>
+                </div>
+
+                <div class="element-card scroll-reveal">
+                    <div class="element-number">4</div>
+                    <div class="element-title">INNOVATE</div>
+                    <div class="element-subtitle">WITH THE BODY</div>
+                    <p>Physical manifestation and energetic blueprint formation. Where ideas take shape in the material world.</p>
+                </div>
+
+                <div class="element-card scroll-reveal">
+                    <div class="element-number">6</div>
+                    <div class="element-title">SUSTAIN</div>
+                    <div class="element-subtitle">THE SOUL</div>
+                    <p>Vibrational alignment and magnetic attraction. Where harmony creates lasting transformation and reception.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="philosophy" id="philosophy">
+        <div class="container">
+            <h2>Is LIF3</h2>
+            <p class="philosophy-text">
+                Living in the frequency of Mind, Body & Soul Trinity. This is not just a framework – it's a way of being. 
+                When we align these three aspects of ourselves, we create a powerful resonance that attracts our highest potential. 
+                We move from surviving to thriving, from reacting to creating, from separation to integration.
+            </p>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Begin Your 346 Journey</h2>
+                <p style="margin-bottom: 2rem; font-size: 1.2rem; color: #666;">
+                    Ready to align your Mind, Body, and Soul in perfect harmony?
+                </p>
+                <a href="#" class="cta-button">Start Your Transformation</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Nav background on scroll
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(255, 255, 255, 0.98)';
+            } else {
+                nav.style.background = 'rgba(255, 255, 255, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
