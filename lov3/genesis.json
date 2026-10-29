@@ -1,0 +1,140 @@
+{
+  "schema": "lov3.v1",
+  "edition": "genesis-draft-001",
+  "publicationStatus": "unpublished",
+  "entries": [
+    {
+      "id": "lov3:0001",
+      "title": "The Life of the Observer",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0002",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0002",
+      "title": "346 IS LIF3",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0003",
+          "type": "relates-to"
+        },
+        {
+          "to": "lov3:0004",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0003",
+      "title": "The Continuous Cycle",
+      "status": "draft",
+      "links": []
+    },
+    {
+      "id": "lov3:0004",
+      "title": "LOV3 Is Creation",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0005",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0005",
+      "title": "Reciprocity",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0006",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0006",
+      "title": "Do No Harm",
+      "status": "draft",
+      "links": []
+    },
+    {
+      "id": "lov3:0007",
+      "title": "Nothing New Under the Sun",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0008",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0008",
+      "title": "The Creation Story",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0009",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0009",
+      "title": "The Egg of Life",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0010",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0010",
+      "title": "The Flower of Life",
+      "status": "draft",
+      "links": []
+    },
+    {
+      "id": "lov3:0011",
+      "title": "3–4–6–9",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0002",
+          "type": "relates-to"
+        }
+      ]
+    },
+    {
+      "id": "lov3:0012",
+      "title": "The Four Directions",
+      "status": "draft",
+      "links": [
+        {
+          "to": "lov3:0013",
+          "type": "relates-to"
+        }
+      ],
+      "directions": {
+        "east": "yellow",
+        "south": "pink",
+        "west": "sky blue",
+        "north": "emerald green"
+      }
+    },
+    {
+      "id": "lov3:0013",
+      "title": "The 72 Angles",
+      "status": "draft",
+      "links": []
+    }
+  ]
+}
