@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LOV3 Public Project Memory</title>
+<style>body{font:16px/1.55 system-ui;background:#07111f;color:#eef5ff;max-width:760px;margin:auto;padding:25px}input,select{font:inherit;padding:12px;background:#112c48;color:white;border:1px solid #7899b2;border-radius:8px}input{width:min(95%,450px)}li{margin:12px 0;padding:12px;border:1px solid #47617e;border-radius:10px}small{color:#c5d4e4}a{color:#b8dfff}</style>
+<h1>LOV3 Project Memory</h1><p>This searches curated public project decisions, not private chats or internal AI memory.</p><label for="query">Search memory</label><p><input id="query" placeholder="Try: creation, website, Genesis"><select id="kind"><option value="">All</option><option>principle</option><option>decision</option><option>roadmap</option><option value="next">next</option></select></p><p id="status" role="status"></p><ul id="results"></ul><p><a href="../explorer.html">Explore the LOV3 globe</a></p>
+<script type="module">
+import {searchMemory} from "./search.mjs";
+const q=document.querySelector("#query"),k=document.querySelector("#kind"),out=document.querySelector("#results"),status=document.querySelector("#status");
+let memory;
+try{const r=await fetch("./project-memory.json");if(!r.ok)throw Error("HTTP "+r.status);memory=await r.json();status.textContent="Public memory loaded. Enter a keyword.";}catch(e){status.textContent="Memory unavailable: "+e.message;}
+function render(){out.replaceChildren();if(!memory)return;const matches=searchMemory(memory,q.value,{kind:k.value||undefined});status.textContent=matches.length+" matching records";for(const item of matches){const li=document.createElement("li"),strong=document.createElement("strong"),body=document.createElement("p"),label=document.createElement("small");strong.textContent=item.title;body.textContent=item.text;label.textContent=item.kind;li.append(strong,body,label);out.append(li);}}
+q.addEventListener("input",render);k.addEventListener("change",render);
+</script></html>
