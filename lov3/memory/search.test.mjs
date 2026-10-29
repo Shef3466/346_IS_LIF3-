@@ -1,0 +1,11 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {flattenMemory,searchMemory,inspectMemory} from "./search.mjs";
+const memory=JSON.parse(readFileSync(new URL("./project-memory.json",import.meta.url),"utf8"));
+test("valid project memory loaded",()=>assert.ok(inspectMemory(memory).total>0));
+test("creation search retrieves principle",()=>assert.ok(searchMemory(memory,"create").some(r=>r.kind==="principle")));
+test("domain search retrieves website decision",()=>assert.ok(searchMemory(memory,"website").length>0));
+test("specific kind filter",()=>assert.ok(searchMemory(memory,"Genesis",{kind:"roadmap"}).every(r=>r.kind==="roadmap")));
+test("empty query never dumps all records",()=>assert.deepEqual(searchMemory(memory,"   "),[]));
+test("unsupported schema rejected",()=>assert.throws(()=>flattenMemory({schema:"other"})));
