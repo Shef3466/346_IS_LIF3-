@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Relationship Globe (prototype)</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#080e1b;color:#eff5ff;font:16px system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:20px}h1{margin-bottom:5px}p{color:#b9c9dd}
+.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px}
+canvas{width:100%;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #536c84;border-radius:18px;touch-action:pan-y}
+aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
+button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
+button:focus-visible{outline:3px solid #ffdc85}button:hover{background:#235d91}
+small{color:#b9c9dd}#status{min-height:1.5em}
+@media(max-width:680px){.layout{grid-template-columns:1fr}}
+</style>
+<main><h1>BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
+<div><button id="toggle">Pause rotation</button><button id="reset">Reset view</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
+<div class="layout"><canvas id="globe" width="720" height="540" aria-label="Rotating globe displaying thirteen linked knowledge entries"></canvas>
+<aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="detail">Select a numbered point to inspect its relationships.</div><div id="entrylist"></div></aside></div>
+<p><small>Drag the globe to rotate. Use the entries list to select a concept. Rotating spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
+<script type="module">
+const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
+let entries=[],angle=.2,tilt=.12,running=true,selected=null,points=[],drag=null;
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+try{
+ const result=await fetch("./genesis.json");
+ if(!result.ok)throw new Error("HTTP "+result.status);
+ const book=await result.json();
+ if(book.schema!=="lov3.v1"||!Array.isArray(book.entries))throw Error("Unrecognized entry format");
+ entries=book.entries;
+ entries.forEach((e,i)=>{
+ const b=document.createElement("button");b.textContent=e.id+" — "+e.title;
+ b.addEventListener("click",()=>select(i));list.append(b);
+ });
+ status.textContent=entries.length+" draft concepts loaded";
+}catch(err){status.textContent="Cannot load genesis.json: "+err.message;}
+function select(i){
+ selected=i;const e=entries[i];if(!e)return;
+ const related=e.links.map(x=>entries.find(t=>t.id===x.to)?.title).filter(Boolean);
+ detail.innerHTML="<h3>"+esc(e.title)+"</h3><p>ID: "+esc(e.id)+"</p><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><small>Editorial draft; source texts pending review</small>";
+}
+function draw(){
+ const w=canvas.width,h=canvas.height,r=Math.min(w,h)*.37;
+ cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
+ cx.strokeStyle="#326595";cx.lineWidth=1;
+ cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
+ for(let j=-2;j<=2;j++){const lat=j*Math.PI/8,rr=r*Math.cos(lat);cx.beginPath();cx.ellipse(0,r*Math.sin(lat),rr,rr*.20,0,0,Math.PI*2);cx.stroke();}
+ points=entries.map((e,i)=>{
+ const z=1-2*(i+.5)/Math.max(entries.length,1),radius=Math.sqrt(1-z*z),az=i*2.399963229728653;
+ const x=radius*Math.cos(az+angle),y=radius*Math.sin(az+angle),yy=y*Math.cos(tilt)-z*Math.sin(tilt),depth=y*Math.sin(tilt)+z*Math.cos(tilt);
+ return{x:x*r,y:yy*r,depth,i};
+ });
+ if(document.querySelector("#edges").checked){
+ for(const p of points)for(const link of entries[p.i].links){
+ const q=points.find(x=>entries[x.i].id===link.to);if(!q)continue;
+ cx.strokeStyle="rgba(132,205,255,.30)";cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
+ }
+ }
+ points.slice().sort((a,b)=>a.depth-b.depth).forEach(p=>{
+ const active=p.i===selected;cx.beginPath();cx.arc(p.x,p.y,active?10:6,0,Math.PI*2);
+ cx.fillStyle=active?"#ffdb84":p.depth<0?"#728aa0":"#71d9ff";cx.fill();
+ cx.font="13px system-ui";cx.fillStyle="#fff";cx.fillText(String(p.i+1),p.x+10,p.y+4);
+ });
+ cx.restore();
+ if(running)angle+=.0025;
+ requestAnimationFrame(draw);
+}
+canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;angle+=dx*.01;tilt=Math.max(-1.3,Math.min(1.3,tilt+dy*.006));drag.x=e.clientX;drag.y=e.clientY;});
+canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=(e.clientX-box.left)*canvas.width/box.width-canvas.width/2,y=(e.clientY-box.top)*canvas.height/box.height-canvas.height/2;const p=points.find(p=>Math.hypot(p.x-x,p.y-y)<12);if(p)select(p.i);}drag=null;});
+document.querySelector("#toggle").onclick=()=>{running=!running;document.querySelector("#toggle").textContent=running?"Pause rotation":"Resume rotation";};
+document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;};
+draw();
+</script></html>
