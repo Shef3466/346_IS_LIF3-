@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { initSectionTransitions, shouldAnimate } from './section-transitions.mjs';
@@ -80,4 +81,12 @@ test('cleanup restores content and no-target pages do not animate', () => {
   assert.equal(f.elements.every(e => e.classList.contains('is-visible')), true);
   assert.equal(f.root.classList.contains('motion-ready'), false);
   assert.equal(initSectionTransitions(fixture({ count: 0 }).doc, fixture({ count: 0 }).win).enabled, false);
+});
+
+test('actual homepage wires four sections and four cards to progressive reveals', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.equal((html.match(/<section id="(?:philosophy|universe|worlds|about)" data-reveal>/g) || []).length, 4);
+  assert.equal((html.match(/<div class="card" data-reveal>/g) || []).length, 4);
+  assert.match(html, /initSectionTransitions\(\)/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
 });
