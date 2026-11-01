@@ -11,10 +11,14 @@ export function validate(book) {
   const ids = new Set(book.entries.map(e => e.id));
   if (ids.size !== book.entries.length) throw Error("Duplicate IDs");
   for (const entry of book.entries) {
+    const seenLinks = new Set();
     for (const link of entry.links) {
       if (!link || typeof link !== 'object' || Array.isArray(link) ||
           !nonempty(link.to) || !ids.has(link.to) || !relationTypes.includes(link.type))
         throw Error("Invalid link");
+      const key = JSON.stringify([link.to, link.type]);
+      if (seenLinks.has(key)) throw Error("Duplicate relation");
+      seenLinks.add(key);
     }
     validateEntrySources(entry);
   }
