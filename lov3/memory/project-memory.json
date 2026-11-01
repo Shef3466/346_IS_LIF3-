@@ -26,19 +26,23 @@
   "decisions": [
     {
       "date": "2026-10-28",
-      "decision": "Use the existing GitHub repository; preserve main until reviewed"
+      "decision": "Use the existing GitHub repository; preserve main until reviewed",
+      "rationale": "Reuse existing version control and avoid risking the main branch while work remains under review."
     },
     {
       "date": "2026-10-28",
-      "decision": "Implement 13 draft Genesis nodes and typed relationships"
+      "decision": "Implement 13 draft Genesis nodes and typed relationships",
+      "rationale": "Start with a bounded, testable concept graph before expanding the full knowledge network."
     },
     {
       "date": "2026-10-28",
-      "decision": "Develop a rotating concept globe before a full VR experience"
+      "decision": "Develop a rotating concept globe before a full VR experience",
+      "rationale": "Prove a navigable 2D concept experience before taking on spatial interaction and VR complexity."
     },
     {
       "date": "2026-10-28",
-      "decision": "Never put private chat transcripts or sensitive information in the public repository"
+      "decision": "Never put private chat transcripts or sensitive information in the public repository",
+      "rationale": "Public repository history is not a safe place for confidential transcripts or personal records."
     }
   ],
   "next": "Verify graph tests and preview deployment, preserve source references, add deterministic publication manifests. Review changes through PR.",
@@ -46,5 +50,6 @@
     "This file is public project memory; not an automatic archive of ChatGPT chats",
     "GitHub access is not a modification of the model's internal memory",
     "Future coding sessions must explicitly load the file; scheduled tasks can be instructed to do so"
-  ]
+  ],
+  "rationaleNote": "Rationales are engineering interpretations for continuity, not claims about the user's original motives."
 }
