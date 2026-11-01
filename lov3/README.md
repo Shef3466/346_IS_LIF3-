@@ -33,3 +33,9 @@ Example (illustrative only; **not** a verified source or publication claim):
 ```
 
 `validate(book)` rejects duplicate or missing source references and unsafe source URLs. The explorer displays how many references and relations have citations, without treating citations as proof. Existing Genesis entries remain uncited drafts; no sources have been fabricated or marked reviewed. Adding source data changes the canonical provenance hash and requires a new manifest. Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs`.
+
+## Meaning-first Book of LOV3 navigation (draft)
+
+The explorer displays **Subject → Category → Word → Number**, with the final number only when an editor explicitly records a relevant numerical relationship. Technical IDs such as `lov3:0011` remain stable graph identifiers, **not** visible knowledge labels or inferred numerical meaning. The rotating chain-link globe uses short word labels; the concept list and selected detail show the full hierarchy.
+
+Genesis entries now include editorial `subject`, `category` and `word` strings and may include `number` as a string (for example `3–4–6–9`). These draft classifications are navigational interpretations, not verified historical or mathematical correspondences. The `lov3/taxonomy.mjs` helper keeps older entries readable with explicit unclassified fallbacks. This change alters the unpublished Genesis JSON and its future provenance digest; regenerate any manifest before publication.
