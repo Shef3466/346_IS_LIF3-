@@ -10,6 +10,10 @@ export function loadContext(root=process.cwd()){
  });
  if(memory.schema!=="lov3.project-memory.v1")throw Error("Unexpected project memory schema");
  if(!Array.isArray(memory.decisions)||!Array.isArray(memory.principles))throw Error("Incomplete project memory");
+ const nonempty = value => typeof value === "string" && value.trim().length > 0;
+ if(memory.principles.some(p=>!nonempty(p)))throw Error("Invalid project principle");
+ if(memory.project?.roadmap !== undefined && (!Array.isArray(memory.project.roadmap) || memory.project.roadmap.some(p=>!nonempty(p))))throw Error("Invalid project roadmap");
+ if(memory.next !== undefined && !nonempty(memory.next))throw Error("Invalid project next action");
  if(memory.decisions.some(d=>!d || typeof d.date!=="string" || !d.date.trim() || typeof d.decision!=="string" || !d.decision.trim() || (d.rationale!==undefined && (typeof d.rationale!=="string" || !d.rationale.trim()))))throw Error("Invalid project decision or rationale");
  if(!Array.isArray(genesis.entries))throw Error("Invalid Genesis entries");
  if(new Set(genesis.entries.map(e=>e.id)).size!==genesis.entries.length)throw Error("Duplicate Genesis IDs");
