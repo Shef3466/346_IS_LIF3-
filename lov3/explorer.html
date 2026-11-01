@@ -59,6 +59,21 @@ function showSpotlight(identity){
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
 let entries=[],buttons=[],angle=.2,tilt=.12,running=initialAutoRotate(motionQuery?.matches),selected=null,points=[],drag=null;
 let frameId=null,lastFrame=null,inView=true;
+// Reuse expensive gradient stops across animation frames; rebuild only on canvas resize.
+let lightingCache=null;
+function globeLighting(w,h,r){
+ if(lightingCache?.w===w && lightingCache?.h===h)return lightingCache;
+ const aura=cx.createRadialGradient(0,0,r*.2,0,0,r*1.38);
+ aura.addColorStop(0,'rgba(38,146,212,.24)');
+ aura.addColorStop(.7,'rgba(31,97,164,.13)');
+ aura.addColorStop(1,'rgba(8,20,41,0)');
+ const sphere=cx.createRadialGradient(-r*.36,-r*.4,r*.04,0,0,r);
+ sphere.addColorStop(0,'rgba(37,105,160,.40)');
+ sphere.addColorStop(.65,'rgba(12,41,80,.35)');
+ sphere.addColorStop(1,'rgba(3,12,30,.9)');
+ lightingCache={w,h,aura,sphere};
+ return lightingCache;
+}
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function syncRotation(){toggle.textContent='Auto-rotate: '+(running?'on':'off');toggle.setAttribute('aria-pressed',String(running));}
 syncRotation();
@@ -106,6 +121,7 @@ function resizeCanvas(){
  if(canvas.width!==width || canvas.height!==height){
    canvas.width=width;canvas.height=height;
    lastFrame=null; // Reset animation timing after a backing-store resize.
+   lightingCache=null;
    scheduleDraw();
  }
 }
@@ -115,16 +131,9 @@ function draw(time){
  angle=advanceAngle(angle,elapsed,running);
  const w=canvas.width,h=canvas.height,r=Math.min(w,h)*.35;
  cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
- // Layered light is rendered with gradients rather than heavyweight video or textures.
- const aura=cx.createRadialGradient(0,0,r*.2,0,0,r*1.38);
- aura.addColorStop(0,'rgba(38,146,212,.24)');
- aura.addColorStop(.7,'rgba(31,97,164,.13)');
- aura.addColorStop(1,'rgba(8,20,41,0)');
+ // Keep the approved luminous layers, but avoid allocating gradients every frame.
+ const {aura,sphere}=globeLighting(w,h,r);
  cx.fillStyle=aura;cx.beginPath();cx.arc(0,0,r*1.38,0,Math.PI*2);cx.fill();
- const sphere=cx.createRadialGradient(-r*.36,-r*.4,r*.04,0,0,r);
- sphere.addColorStop(0,'rgba(37,105,160,.40)');
- sphere.addColorStop(.65,'rgba(12,41,80,.35)');
- sphere.addColorStop(1,'rgba(3,12,30,.9)');
  cx.fillStyle=sphere;cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.fill();
  cx.strokeStyle='rgba(105,192,243,.42)';cx.lineWidth=1;
  cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
