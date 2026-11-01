@@ -20,6 +20,7 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 <script type="module">
 import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
+import { validate } from './graph.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -32,7 +33,7 @@ try{
  const result=await fetch("./genesis.json");
  if(!result.ok)throw new Error("HTTP "+result.status);
  const book=await result.json();
- if(book.schema!=="lov3.v1"||!Array.isArray(book.entries))throw Error("Unrecognized entry format");
+ validate(book); // Reject malformed or dangling Genesis records before rendering.
  entries=book.entries;
  entries.forEach((e,i)=>{
  const b=document.createElement("button");b.type="button";b.textContent=e.id+" — "+e.title;b.setAttribute('aria-pressed','false');
