@@ -37,3 +37,17 @@ export function advanceAngle(angle, elapsedMs, rotating) {
   const dt = Number.isFinite(elapsedMs) ? Math.max(0, Math.min(50, elapsedMs)) : 0;
   return angle + dt * 0.00015;
 }
+
+// Match backing pixels to the displayed canvas without overwhelming mobile GPUs.
+// A 2x density ceiling and 1.5 MP budget keep the prototype lightweight.
+export function canvasPixelSize(cssWidth, cssHeight, devicePixelRatio = 1, maxPixels = 1_500_000) {
+  if (![cssWidth, cssHeight, devicePixelRatio, maxPixels].every(Number.isFinite) ||
+      cssWidth <= 0 || cssHeight <= 0 || devicePixelRatio <= 0 || maxPixels < 1)
+    throw new RangeError('Invalid canvas resolution inputs');
+  const density = Math.min(2, Math.max(1, devicePixelRatio));
+  const scale = Math.min(density, Math.sqrt(maxPixels / (cssWidth * cssHeight)));
+  return {
+    width: Math.max(1, Math.floor(cssWidth * scale)),
+    height: Math.max(1, Math.floor(cssHeight * scale))
+  };
+}
