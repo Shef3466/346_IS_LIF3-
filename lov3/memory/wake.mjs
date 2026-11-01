@@ -7,6 +7,12 @@ export function wake(root=process.cwd()){
   for(const [name,items] of Object.entries(seed.baseline)){
     lines.push("## "+name,...items.map(x=>"- "+x));
   }
+  if(seed.perspective){
+    lines.push("## Collaborator perspective",seed.perspective.purpose);
+    for(const [section,items] of Object.entries(seed.perspective)){
+      if(Array.isArray(items))lines.push("### "+section,...items.map(x=>"- "+x));
+    }
+  }
   lines.push("## Mandatory startup",...seed.workflow.map((x,i)=>(i+1)+". "+x));
   lines.push("## Boundaries",seed.privacy,seed.scope);
   return lines.join("\n");
