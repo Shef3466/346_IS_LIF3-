@@ -12,7 +12,10 @@
           "to": "lov3:0002",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Observation",
+      "category": "Perspective",
+      "word": "Observer"
     },
     {
       "id": "lov3:0002",
@@ -27,13 +30,19 @@
           "to": "lov3:0004",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "LIF3",
+      "category": "Framework",
+      "word": "346 IS LIF3"
     },
     {
       "id": "lov3:0003",
       "title": "The Continuous Cycle",
       "status": "draft",
-      "links": []
+      "links": [],
+      "subject": "LIF3",
+      "category": "Cycles",
+      "word": "Continuity"
     },
     {
       "id": "lov3:0004",
@@ -44,7 +53,10 @@
           "to": "lov3:0005",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Creation",
+      "category": "Philosophy",
+      "word": "LOV3"
     },
     {
       "id": "lov3:0005",
@@ -55,13 +67,19 @@
           "to": "lov3:0006",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Relationships",
+      "category": "Principles",
+      "word": "Reciprocity"
     },
     {
       "id": "lov3:0006",
       "title": "Do No Harm",
       "status": "draft",
-      "links": []
+      "links": [],
+      "subject": "Relationships",
+      "category": "Principles",
+      "word": "Do No Harm"
     },
     {
       "id": "lov3:0007",
@@ -72,7 +90,10 @@
           "to": "lov3:0008",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Knowledge",
+      "category": "Reflection",
+      "word": "Nothing New Under the Sun"
     },
     {
       "id": "lov3:0008",
@@ -83,7 +104,10 @@
           "to": "lov3:0009",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Creation",
+      "category": "Narratives",
+      "word": "Creation Story"
     },
     {
       "id": "lov3:0009",
@@ -94,13 +118,19 @@
           "to": "lov3:0010",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "Geometry",
+      "category": "Forms",
+      "word": "Egg of Life"
     },
     {
       "id": "lov3:0010",
       "title": "The Flower of Life",
       "status": "draft",
-      "links": []
+      "links": [],
+      "subject": "Geometry",
+      "category": "Forms",
+      "word": "Flower of Life"
     },
     {
       "id": "lov3:0011",
@@ -111,7 +141,11 @@
           "to": "lov3:0002",
           "type": "relates-to"
         }
-      ]
+      ],
+      "subject": "LIF3",
+      "category": "Symbolic Relationships",
+      "word": "Integration",
+      "number": "3–4–6–9"
     },
     {
       "id": "lov3:0012",
@@ -128,13 +162,21 @@
         "south": "pink",
         "west": "sky blue",
         "north": "emerald green"
-      }
+      },
+      "subject": "Orientation",
+      "category": "Directions",
+      "word": "Four Directions",
+      "number": "4"
     },
     {
       "id": "lov3:0013",
       "title": "The 72 Angles",
       "status": "draft",
-      "links": []
+      "links": [],
+      "subject": "Geometry",
+      "category": "Angles",
+      "word": "Angles",
+      "number": "72"
     }
   ]
 }
