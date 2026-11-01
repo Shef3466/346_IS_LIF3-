@@ -1,5 +1,6 @@
 import {readFileSync,existsSync} from "node:fs";
 import {join} from "node:path";
+import {validate} from "../graph.mjs";
 export function loadContext(root=process.cwd()){
  const paths=["lov3/memory/project-memory.json","lov3/genesis.json"];
  const [memory,genesis]=paths.map(path=>{
@@ -12,6 +13,7 @@ export function loadContext(root=process.cwd()){
  if(memory.decisions.some(d=>!d || typeof d.date!=="string" || !d.date.trim() || typeof d.decision!=="string" || !d.decision.trim() || (d.rationale!==undefined && (typeof d.rationale!=="string" || !d.rationale.trim()))))throw Error("Invalid project decision or rationale");
  if(!Array.isArray(genesis.entries))throw Error("Invalid Genesis entries");
  if(new Set(genesis.entries.map(e=>e.id)).size!==genesis.entries.length)throw Error("Duplicate Genesis IDs");
+ validate(genesis);
  return {memory,genesis};
 }
 export function brief({memory,genesis}){
