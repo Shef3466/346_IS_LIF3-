@@ -28,3 +28,15 @@ test("reject malformed or dangling link targets",()=>{
  for(const to of [null,{},"  ","lov3:9999"])
   assert.throws(()=>validate({...book,entries:[{...book.entries[0],links:[{to,type:"relates-to"}]},...book.entries.slice(1)]}),/Invalid link/);
 });
+
+test("reject duplicate typed relations but allow different relation types",()=>{
+ const entry=book.entries[0];
+ const duplicate={...entry,links:[...entry.links,{...entry.links[0]}]};
+ assert.throws(()=>validate({...book,entries:[duplicate,...book.entries.slice(1)]}),/Duplicate relation/);
+ const distinct={...entry,links:[...entry.links,{to:entry.links[0].to,type:"supports"}]};
+ assert.equal(validate({...book,entries:[distinct,...book.entries.slice(1)]}),true);
+});
+test("connect remains idempotent for an existing typed relation",()=>{
+ const result=connect(book,"lov3:0001","lov3:0002");
+ assert.deepEqual(result,book);
+});
