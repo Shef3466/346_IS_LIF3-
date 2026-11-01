@@ -5,7 +5,9 @@ export function wake(root=process.cwd()){
   if(seed.schema!=="lov3.continuity-kernel.v1"||!seed.activation||!Array.isArray(seed.workflow)||!seed.baseline?.conversation?.length)throw new Error("Invalid LOV3 continuity kernel");
   const lines=[seed.activation,"# "+seed.name,seed.purpose];
   for(const [name,items] of Object.entries(seed.baseline)){
-    lines.push("## "+name,...items.map(x=>"- "+x));
+    if(typeof items==="string") lines.push("## "+name,items);
+    else if(Array.isArray(items) && items.every(x=>typeof x==="string")) lines.push("## "+name,...items.map(x=>"- "+x));
+    else throw new Error("Invalid baseline section: "+name);
   }
   if(seed.perspective){
     lines.push("## Collaborator perspective",seed.perspective.purpose);
