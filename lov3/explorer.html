@@ -5,7 +5,7 @@
 :root{color-scheme:dark}body{margin:0;background:#080e1b;color:#eff5ff;font:16px system-ui,sans-serif}
 main{max-width:1120px;margin:auto;padding:20px}h1{margin-bottom:5px}p{color:#b9c9dd}
 .layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px}
-canvas{width:100%;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #536c84;border-radius:18px;touch-action:pan-y}
+canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #6d94b8;border-radius:18px;box-shadow:0 0 65px #2379c32e,inset 0 0 50px #2164a422;touch-action:pan-y}
 aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
 button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
 button:focus-visible{outline:3px solid #ffdc85}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
@@ -21,14 +21,16 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
 import { validate } from './graph.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle } from './globe-geometry.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
 let entries=[],buttons=[],angle=.2,tilt=.12,running=initialAutoRotate(motionQuery?.matches),selected=null,points=[],drag=null;
+let frameId=null,lastFrame=null,inView=true;
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function syncRotation(){toggle.textContent='Auto-rotate: '+(running?'on':'off');toggle.setAttribute('aria-pressed',String(running));}
 syncRotation();
-motionQuery?.addEventListener?.('change',e=>{if(e.matches){running=false;syncRotation();}});
+motionQuery?.addEventListener?.('change',e=>{if(e.matches){running=false;syncRotation();scheduleDraw();}});
 try{
  const result=await fetch("./genesis.json");
  if(!result.ok)throw new Error("HTTP "+result.status);
@@ -41,6 +43,7 @@ try{
  });
  previous.disabled=next.disabled=entries.length===0;
  status.textContent=entries.length+" draft concepts loaded";
+ scheduleDraw();
 }catch(err){status.textContent="Cannot load genesis.json: "+err.message;}
 function select(i){
  const e=entries[i];if(!e)return;
@@ -49,6 +52,7 @@ function select(i){
  const coverage=citationCoverage(e);
  detail.innerHTML="<h3>"+esc(e.title)+"</h3><p>ID: "+esc(e.id)+"</p><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><p>Editorial references: "+coverage.sourceCount+" attached ("+coverage.reviewedCount+" reviewed). Relations with citations: "+coverage.citedRelationCount+"/"+coverage.relationCount+".</p><small>Source pointers do not establish the truth of a claim. Editorial draft; source texts pending review.</small>";
  selectionStatus.textContent='Selected '+(i+1)+' of '+entries.length+': '+e.title;
+ scheduleDraw();
 }
 function step(direction){const i=nextEntryIndex(selected,entries.length,direction);if(i!==null)select(i);}
 list.addEventListener('keydown',e=>{
@@ -57,38 +61,83 @@ list.addEventListener('keydown',e=>{
  const i=nextEntryIndex(focused<0?selected:focused,entries.length,e.key==='ArrowDown'?1:-1);
  if(i!==null){select(i);buttons[i].focus();}
 });
-function draw(){
- const w=canvas.width,h=canvas.height,r=Math.min(w,h)*.37;
- cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
- cx.strokeStyle="#326595";cx.lineWidth=1;
- cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
- for(let j=-2;j<=2;j++){const lat=j*Math.PI/8,rr=r*Math.cos(lat);cx.beginPath();cx.ellipse(0,r*Math.sin(lat),rr,rr*.20,0,0,Math.PI*2);cx.stroke();}
- points=entries.map((e,i)=>{
- const z=1-2*(i+.5)/Math.max(entries.length,1),radius=Math.sqrt(1-z*z),az=i*2.399963229728653;
- const x=radius*Math.cos(az+angle),y=radius*Math.sin(az+angle),yy=y*Math.cos(tilt)-z*Math.sin(tilt),depth=y*Math.sin(tilt)+z*Math.cos(tilt);
- return{x:x*r,y:yy*r,depth,i};
- });
- if(document.querySelector("#edges").checked){
- for(const p of points)for(const link of entries[p.i].links){
- const q=points.find(x=>entries[x.i].id===link.to);if(!q)continue;
- cx.strokeStyle="rgba(132,205,255,.30)";cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
- }
- }
- points.slice().sort((a,b)=>a.depth-b.depth).forEach(p=>{
- const active=p.i===selected;cx.beginPath();cx.arc(p.x,p.y,active?10:6,0,Math.PI*2);
- cx.fillStyle=active?"#ffdb84":p.depth<0?"#728aa0":"#71d9ff";cx.fill();
- cx.font="13px system-ui";cx.fillStyle="#fff";cx.fillText(String(p.i+1),p.x+10,p.y+4);
- });
- cx.restore();
- if(running)angle+=.0025;
- requestAnimationFrame(draw);
+function scheduleDraw(){
+ if(frameId===null && inView && !document.hidden)
+   frameId=requestAnimationFrame(time=>{frameId=null;draw(time);});
 }
+function draw(time){
+ const elapsed=lastFrame===null?16.67:time-lastFrame;
+ lastFrame=time;
+ angle=advanceAngle(angle,elapsed,running);
+ const w=canvas.width,h=canvas.height,r=Math.min(w,h)*.35;
+ cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
+ // Layered light is rendered with gradients rather than heavyweight video or textures.
+ const aura=cx.createRadialGradient(0,0,r*.2,0,0,r*1.38);
+ aura.addColorStop(0,'rgba(38,146,212,.24)');
+ aura.addColorStop(.7,'rgba(31,97,164,.13)');
+ aura.addColorStop(1,'rgba(8,20,41,0)');
+ cx.fillStyle=aura;cx.beginPath();cx.arc(0,0,r*1.38,0,Math.PI*2);cx.fill();
+ const sphere=cx.createRadialGradient(-r*.36,-r*.4,r*.04,0,0,r);
+ sphere.addColorStop(0,'rgba(37,105,160,.40)');
+ sphere.addColorStop(.65,'rgba(12,41,80,.35)');
+ sphere.addColorStop(1,'rgba(3,12,30,.9)');
+ cx.fillStyle=sphere;cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.fill();
+ cx.strokeStyle='rgba(105,192,243,.42)';cx.lineWidth=1;
+ cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
+ cx.strokeStyle='rgba(84,164,225,.26)';
+ for(let j=-3;j<=3;j++){
+   const lat=j*Math.PI/10,rr=r*Math.cos(lat);
+   cx.beginPath();cx.ellipse(0,r*Math.sin(lat),rr,rr*.19,0,0,Math.PI*2);cx.stroke();
+ }
+ for(let j=0;j<4;j++){
+   cx.beginPath();cx.ellipse(0,0,r*.23,r,angle+j*Math.PI/4,0,Math.PI*2);cx.stroke();
+ }
+ points=projectConcepts(entries.length,angle,tilt,r);
+ if(document.querySelector('#edges').checked){
+   const byId=new Map(points.map(p=>[entries[p.i].id,p]));
+   for(const p of points)for(const link of entries[p.i].links){
+     const q=byId.get(link.to);if(!q)continue;
+     const active=selected===p.i||selected===q.i;
+     cx.strokeStyle=active?'rgba(255,222,150,.86)':'rgba(126,202,252,.25)';
+     cx.lineWidth=active?2:1;
+     cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
+   }
+ }
+ for(const p of points.slice().sort((a,b)=>a.depth-b.depth)){
+   const active=p.i===selected,front=p.depth>=-.15;
+   cx.beginPath();cx.arc(p.x,p.y,active?10:front?6:4,0,Math.PI*2);
+   cx.shadowColor=active?'#ffdf9c':'#55d5ff';
+   cx.shadowBlur=active?23:front?10:0;
+   cx.fillStyle=active?'#ffe3a5':front?'#8ce5ff':'#537491';cx.fill();
+   cx.shadowBlur=0;
+   cx.font=active?'bold 14px system-ui':'13px system-ui';
+   cx.fillStyle=front?'#f5f9ff':'#a1b6d2';
+   cx.fillText(String(p.i+1),p.x+11,p.y+4);
+ }
+ cx.restore();
+ if(running || drag) scheduleDraw();
+}
+// Stop work when the globe is offscreen or the browser tab is hidden.
+if(typeof IntersectionObserver==='function'){
+ const observer=new IntersectionObserver(records=>{
+   inView=records[0]?.isIntersecting??true;
+   if(!inView && frameId!==null){cancelAnimationFrame(frameId);frameId=null;}
+   if(inView){lastFrame=null;scheduleDraw();}
+ },{threshold:0});
+ observer.observe(canvas);
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){if(frameId!==null)cancelAnimationFrame(frameId);frameId=null;lastFrame=null;}
+ else scheduleDraw();
+});
+
 canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;angle+=dx*.01;tilt=Math.max(-1.3,Math.min(1.3,tilt+dy*.006));drag.x=e.clientX;drag.y=e.clientY;});
-canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=(e.clientX-box.left)*canvas.width/box.width-canvas.width/2,y=(e.clientY-box.top)*canvas.height/box.height-canvas.height/2;const p=points.find(p=>Math.hypot(p.x-x,p.y-y)<12);if(p)select(p.i);}drag=null;});
+canvas.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;angle+=dx*.01;tilt=Math.max(-1.3,Math.min(1.3,tilt+dy*.006));drag.x=e.clientX;drag.y=e.clientY;scheduleDraw();});
+canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=(e.clientX-box.left)*canvas.width/box.width-canvas.width/2,y=(e.clientY-box.top)*canvas.height/box.height-canvas.height/2;const hit=hitTestConcept(points,x,y,18);if(hit!==null)select(hit);}drag=null;});
 canvas.addEventListener('pointercancel',()=>{drag=null;});
-toggle.onclick=()=>{running=!running;syncRotation();};
+toggle.onclick=()=>{running=!running;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);
-document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a numbered point or concept button to inspect its relationships.';selectionStatus.textContent='View reset; no concept selected.';};
-draw();
+document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a numbered point or concept button to inspect its relationships.';selectionStatus.textContent='View reset; no concept selected.';scheduleDraw();};
+document.querySelector('#edges').addEventListener('change',scheduleDraw);
+scheduleDraw();
 </script></html>
