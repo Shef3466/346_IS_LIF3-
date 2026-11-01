@@ -20,9 +20,22 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 #entrylist button{display:block;width:100%;text-align:left;margin:8px 0;line-height:1.4;overflow-wrap:anywhere}
 .concept-path{font-size:.86rem;color:#e4d09a;line-height:1.6;overflow-wrap:anywhere}
 @media(max-width:680px){.layout{grid-template-columns:1fr}.globe-focus{left:10px;bottom:10px;padding:9px 12px;max-width:80%}}
+/* Native same-origin portal transitions; unsupported browsers navigate normally. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  #universe h2, main > h1.lov3-portal-title { view-transition-name: lov3-portal-title; }
+  ::view-transition-old(root) { animation: .24s ease-in both lov3-portal-exit; }
+  ::view-transition-new(root) { animation: .4s cubic-bezier(.2,.7,.2,1) both lov3-portal-enter; }
+  ::view-transition-old(lov3-portal-title),
+  ::view-transition-new(lov3-portal-title) { animation-duration: .4s; }
+  @keyframes lov3-portal-exit { to { opacity: 0; transform: translate3d(0,-10px,0); } }
+  @keyframes lov3-portal-enter { from { opacity: 0; transform: translate3d(0,14px,0); } }
+}
+.return-link{display:inline-block;color:#baddff;margin-bottom:12px;text-underline-offset:4px}
+.return-link:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.globe-focus{transition:none;transform:none}}
 </style>
-<main><h1>BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
+<main><a class="return-link" href="../index.html#universe">← Back to the Living Universe</a><h1 class="lov3-portal-title">BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
 <div><button id="toggle" type="button" aria-pressed="false">Auto-rotate: off</button><button id="reset" type="button">Reset view</button><button id="previous" type="button" disabled>Previous concept</button><button id="next" type="button" disabled>Next concept</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
 <div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="img" aria-label="Visual rotating relationship globe. Select concepts using the accessible buttons beside it." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
 <aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
