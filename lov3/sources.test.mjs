@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateEntrySources, citationCoverage } from './sources.mjs';
 import { validate } from './graph.mjs';
+import { buildManifest } from './provenance.mjs';
 
 const book = {
   schema: 'lov3.v1',
@@ -73,4 +74,12 @@ test('sources property and relation sourceIds must be arrays', () => {
   const other = cited();
   other.entries[0].links[0].sourceIds = 'ref:1';
   assert.throws(() => validate(other), /Invalid relation source references/);
+});
+
+test('editorial citation changes alter the deterministic provenance fingerprint', () => {
+  const next = cited();
+  next.edition = 'test-draft';
+  const first = buildManifest(next).digest;
+  next.entries[0].sources[0].title = 'Revised editorial note';
+  assert.notEqual(buildManifest(next).digest, first);
 });
