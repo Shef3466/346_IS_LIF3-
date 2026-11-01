@@ -1,3 +1,4 @@
+import { validateEntrySources } from './sources.mjs';
 export const relationTypes = ["relates-to","explains","supports","extends","questions"];
 export function validate(book) {
   if (book.schema !== "lov3.v1" || !Array.isArray(book.entries)) throw Error("Invalid book");
@@ -8,6 +9,7 @@ export function validate(book) {
     for (const link of entry.links) {
       if (!ids.has(link.to) || !relationTypes.includes(link.type)) throw Error("Invalid link");
     }
+    validateEntrySources(entry);
   }
   return true;
 }
