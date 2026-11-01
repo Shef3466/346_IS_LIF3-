@@ -6,17 +6,25 @@
 main{max-width:1120px;margin:auto;padding:20px}h1{margin-bottom:5px}p{color:#b9c9dd}
 .layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px}
 canvas{display:block;box-sizing:border-box;width:100%;height:auto;aspect-ratio:4/3;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #6d94b8;border-radius:18px;box-shadow:0 0 65px #2379c32e,inset 0 0 50px #2164a422;touch-action:pan-y}
+.globe-stage{position:relative;min-width:0}
+.globe-focus{position:absolute;left:16px;bottom:16px;max-width:min(75%,360px);padding:12px 16px;border:1px solid #e7c98599;border-radius:14px;background:linear-gradient(135deg,#142f4cf0,#0a182eea);box-shadow:0 0 35px #4fb8f92a,inset 0 1px #e8d69e40;pointer-events:none;opacity:0;transform:translate3d(0,12px,0);transition:opacity .32s ease,transform .32s ease;overflow-wrap:anywhere}
+.globe-focus.is-active{opacity:1;transform:translate3d(0,0,0)}
+.focus-path{display:block;font-size:.72rem;letter-spacing:.04em;color:#b9d8ed}
+.focus-word{display:block;font-size:clamp(1rem,2.3vw,1.35rem);line-height:1.25;margin-top:3px;color:#ffe4a5}
+.focus-number{display:inline-block;margin-top:5px;font-size:.8rem;color:#9ee5ff}
+.focus-number[hidden]{display:none}
 aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
 button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
 button:focus-visible{outline:3px solid #ffdc85}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
 small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 #entrylist button{display:block;width:100%;text-align:left;margin:8px 0;line-height:1.4;overflow-wrap:anywhere}
 .concept-path{font-size:.86rem;color:#e4d09a;line-height:1.6;overflow-wrap:anywhere}
-@media(max-width:680px){.layout{grid-template-columns:1fr}}
+@media(max-width:680px){.layout{grid-template-columns:1fr}.globe-focus{left:10px;bottom:10px;padding:9px 12px;max-width:80%}}
+@media(prefers-reduced-motion:reduce){.globe-focus{transition:none;transform:none}}
 </style>
 <main><h1>BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
 <div><button id="toggle" type="button" aria-pressed="false">Auto-rotate: off</button><button id="reset" type="button">Reset view</button><button id="previous" type="button" disabled>Previous concept</button><button id="next" type="button" disabled>Next concept</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
-<div class="layout"><canvas id="globe" width="720" height="540" role="img" aria-label="Visual rotating relationship globe. Select concepts using the accessible buttons beside it." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas>
+<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="img" aria-label="Visual rotating relationship globe. Select concepts using the accessible buttons beside it." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
 <aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
 <p id="globe-help"><small>Drag the globe to rotate, or use Previous/Next concept and the concept buttons. Labels follow Subject → Category → Word → Number (only when explicitly correlated). Arrow Up/Down moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
 <script type="module">
@@ -27,6 +35,14 @@ import { validate } from './graph.mjs';
 import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
+const spotlight=document.querySelector('#globe-focus'),focusPath=document.querySelector('#focus-path'),focusWord=document.querySelector('#focus-word'),focusNumber=document.querySelector('#focus-number');
+function showSpotlight(identity){
+ focusPath.textContent=identity.subject+' / '+identity.category;
+ focusWord.textContent=identity.word;
+ focusNumber.textContent=identity.number??'';
+ focusNumber.hidden=!identity.number;
+ spotlight.classList.add('is-active');
+}
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
 let entries=[],buttons=[],angle=.2,tilt=.12,running=initialAutoRotate(motionQuery?.matches),selected=null,points=[],drag=null;
 let frameId=null,lastFrame=null,inView=true;
@@ -54,6 +70,7 @@ function select(i){
  const related=e.links.map(x=>entries.find(t=>t.id===x.to)?.title).filter(Boolean);
  const coverage=citationCoverage(e);
  const identity=conceptIdentity(e);
+ showSpotlight(identity);
  detail.innerHTML="<p class=\"concept-path\">"+identity.path.map(esc).join(" → ")+"</p><h3>"+esc(e.title)+"</h3><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><p>Editorial references: "+coverage.sourceCount+" attached ("+coverage.reviewedCount+" reviewed). Relations with citations: "+coverage.citedRelationCount+"/"+coverage.relationCount+".</p><small>Source pointers do not establish the truth of a claim. Editorial draft; source texts pending review.</small>";
  selectionStatus.textContent='Selected '+identity.path.join(' → ');
  scheduleDraw();
@@ -153,7 +170,7 @@ canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.g
 canvas.addEventListener('pointercancel',()=>{drag=null;});
 toggle.onclick=()=>{running=!running;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);
-document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a numbered point or concept button to inspect its relationships.';selectionStatus.textContent='View reset; no concept selected.';scheduleDraw();};
+document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a glowing concept or a subject/category/word button to inspect its relationships.';spotlight.classList.remove('is-active');selectionStatus.textContent='View reset; no concept selected.';scheduleDraw();};
 document.querySelector('#edges').addEventListener('change',scheduleDraw);
 // Keep the globe sharp on high-DPI screens, with a capped pixel budget.
 if(typeof ResizeObserver==='function')new ResizeObserver(resizeCanvas).observe(canvas);
