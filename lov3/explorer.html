@@ -19,6 +19,7 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 <p id="globe-help"><small>Drag the globe to rotate, or use Previous/Next concept and the concept buttons. Arrow Up/Down moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
 <script type="module">
 import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
+import { citationCoverage } from './sources.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -44,7 +45,8 @@ function select(i){
  const e=entries[i];if(!e)return;
  selected=i;buttons.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));
  const related=e.links.map(x=>entries.find(t=>t.id===x.to)?.title).filter(Boolean);
- detail.innerHTML="<h3>"+esc(e.title)+"</h3><p>ID: "+esc(e.id)+"</p><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><small>Editorial draft; source texts pending review</small>";
+ const coverage=citationCoverage(e);
+ detail.innerHTML="<h3>"+esc(e.title)+"</h3><p>ID: "+esc(e.id)+"</p><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><p>Editorial references: "+coverage.sourceCount+" attached ("+coverage.reviewedCount+" reviewed). Relations with citations: "+coverage.citedRelationCount+"/"+coverage.relationCount+".</p><small>Source pointers do not establish the truth of a claim. Editorial draft; source texts pending review.</small>";
  selectionStatus.textContent='Selected '+(i+1)+' of '+entries.length+': '+e.title;
 }
 function step(direction){const i=nextEntryIndex(selected,entries.length,direction);if(i!==null)select(i);}
