@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { projectConcepts, hitTestConcept, advanceAngle } from './globe-geometry.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
 
 test('projection spreads nodes within sphere and produces finite coordinates', () => {
   const points = projectConcepts(13, .2, .12, 180);
@@ -30,4 +30,23 @@ test('rotation is time-based, paused when requested, and clamps resume jumps', (
 test('invalid geometry and hit-test inputs are rejected', () => {
   assert.throws(() => projectConcepts(-1, 0, 0, 100), RangeError);
   assert.throws(() => hitTestConcept([], NaN, 0), RangeError);
+});
+
+test('canvas resolution is crisp on standard and high-density displays', () => {
+  assert.deepEqual(canvasPixelSize(320, 240, 1), { width: 320, height: 240 });
+  assert.deepEqual(canvasPixelSize(320, 240, 3), { width: 640, height: 480 });
+});
+
+test('canvas resolution caps the pixel budget on large screens', () => {
+  const size = canvasPixelSize(1200, 900, 3);
+  assert.ok(size.width * size.height <= 1_500_000);
+  assert.ok(size.width > 1200 && size.height > 900);
+  const huge = canvasPixelSize(3000, 2000, 1);
+  assert.ok(huge.width * huge.height <= 1_500_000);
+});
+
+test('canvas resolution rejects invalid dimensions and budgets', () => {
+  assert.throws(() => canvasPixelSize(0, 200, 2), RangeError);
+  assert.throws(() => canvasPixelSize(200, 200, NaN), RangeError);
+  assert.throws(() => canvasPixelSize(200, 200, 2, 0), RangeError);
 });
