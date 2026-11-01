@@ -1,13 +1,20 @@
 import { validateEntrySources } from './sources.mjs';
 export const relationTypes = ["relates-to","explains","supports","extends","questions"];
+const nonempty = value => typeof value === 'string' && value.trim().length > 0;
 export function validate(book) {
-  if (book.schema !== "lov3.v1" || !Array.isArray(book.entries)) throw Error("Invalid book");
+  if (!book || typeof book !== 'object' || book.schema !== "lov3.v1" || !Array.isArray(book.entries)) throw Error("Invalid book");
+  for (const entry of book.entries) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry) ||
+        !nonempty(entry.id) || !nonempty(entry.title) || !Array.isArray(entry.links))
+      throw Error("Invalid entry");
+  }
   const ids = new Set(book.entries.map(e => e.id));
   if (ids.size !== book.entries.length) throw Error("Duplicate IDs");
   for (const entry of book.entries) {
-    if (!entry.id || !entry.title || !Array.isArray(entry.links)) throw Error("Invalid entry");
     for (const link of entry.links) {
-      if (!ids.has(link.to) || !relationTypes.includes(link.type)) throw Error("Invalid link");
+      if (!link || typeof link !== 'object' || Array.isArray(link) ||
+          !nonempty(link.to) || !ids.has(link.to) || !relationTypes.includes(link.type))
+        throw Error("Invalid link");
     }
     validateEntrySources(entry);
   }
