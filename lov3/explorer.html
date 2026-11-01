@@ -5,7 +5,7 @@
 :root{color-scheme:dark}body{margin:0;background:#080e1b;color:#eff5ff;font:16px system-ui,sans-serif}
 main{max-width:1120px;margin:auto;padding:20px}h1{margin-bottom:5px}p{color:#b9c9dd}
 .layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px}
-canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #6d94b8;border-radius:18px;box-shadow:0 0 65px #2379c32e,inset 0 0 50px #2164a422;touch-action:pan-y}
+canvas{display:block;box-sizing:border-box;width:100%;height:auto;aspect-ratio:4/3;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #6d94b8;border-radius:18px;box-shadow:0 0 65px #2379c32e,inset 0 0 50px #2164a422;touch-action:pan-y}
 aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
 button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
 button:focus-visible{outline:3px solid #ffdc85}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
@@ -21,7 +21,7 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
 import { validate } from './graph.mjs';
-import { projectConcepts, hitTestConcept, advanceAngle } from './globe-geometry.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
 const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -64,6 +64,16 @@ list.addEventListener('keydown',e=>{
 function scheduleDraw(){
  if(frameId===null && inView && !document.hidden)
    frameId=requestAnimationFrame(time=>{frameId=null;draw(time);});
+}
+function resizeCanvas(){
+ const box=canvas.getBoundingClientRect();
+ if(box.width<=0 || box.height<=0)return;
+ const {width,height}=canvasPixelSize(box.width,box.height,window.devicePixelRatio||1);
+ if(canvas.width!==width || canvas.height!==height){
+   canvas.width=width;canvas.height=height;
+   lastFrame=null; // Reset animation timing after a backing-store resize.
+   scheduleDraw();
+ }
 }
 function draw(time){
  const elapsed=lastFrame===null?16.67:time-lastFrame;
@@ -139,5 +149,9 @@ toggle.onclick=()=>{running=!running;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);
 document.querySelector("#reset").onclick=()=>{angle=.2;tilt=.12;selected=null;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a numbered point or concept button to inspect its relationships.';selectionStatus.textContent='View reset; no concept selected.';scheduleDraw();};
 document.querySelector('#edges').addEventListener('change',scheduleDraw);
+// Keep the globe sharp on high-DPI screens, with a capped pixel budget.
+if(typeof ResizeObserver==='function')new ResizeObserver(resizeCanvas).observe(canvas);
+window.addEventListener('resize',resizeCanvas,{passive:true});
+resizeCanvas();
 scheduleDraw();
 </script></html>
