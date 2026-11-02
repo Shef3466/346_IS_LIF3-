@@ -46,7 +46,7 @@ import { citationCoverage } from './sources.mjs';
 import { conceptIdentity, globeLabel } from './taxonomy.mjs';
 import { placeGlobeLabels } from './label-layout.mjs';
 import { validate } from './graph.mjs';
-import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize, canvasDrawSpace } from './globe-geometry.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
 const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next");
 const spotlight=document.querySelector('#globe-focus'),focusPath=document.querySelector('#focus-path'),focusWord=document.querySelector('#focus-word'),focusNumber=document.querySelector('#focus-number');
@@ -131,7 +131,12 @@ function draw(time){
  const elapsed=lastFrame===null?16.67:time-lastFrame;
  lastFrame=time;
  angle=advanceAngle(angle,elapsed,running);
- const w=canvas.width,h=canvas.height,r=Math.min(w,h)*.35;
+ const box=canvas.getBoundingClientRect();
+ if(box.width<=0 || box.height<=0)return;
+ const {width:w,height:h,scaleX,scaleY}=canvasDrawSpace(box.width,box.height,canvas.width,canvas.height);
+ const r=Math.min(w,h)*.35;
+ // Render in CSS pixels so labels, glow, nodes and hit areas stay legible on Retina/mobile.
+ cx.setTransform(scaleX,0,0,scaleY,0,0);
  cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
  // Keep the approved luminous layers, but avoid allocating gradients every frame.
  const {aura,sphere}=globeLighting(w,h,r);
@@ -201,7 +206,7 @@ document.addEventListener('visibilitychange',()=>{
 
 canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;angle+=dx*.01;tilt=Math.max(-1.3,Math.min(1.3,tilt+dy*.006));drag.x=e.clientX;drag.y=e.clientY;scheduleDraw();});
-canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=(e.clientX-box.left)*canvas.width/box.width-canvas.width/2,y=(e.clientY-box.top)*canvas.height/box.height-canvas.height/2;const hit=hitTestConcept(points,x,y,18);if(hit!==null)select(hit);}drag=null;});
+canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=e.clientX-box.left-box.width/2,y=e.clientY-box.top-box.height/2;const hit=hitTestConcept(points,x,y,e.pointerType==='touch'?24:18);if(hit!==null)select(hit);}drag=null;});
 canvas.addEventListener('pointercancel',()=>{drag=null;});
 toggle.onclick=()=>{running=!running;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);
