@@ -112,3 +112,10 @@ The Archive Guide's **Where should I explore next?** answer now includes the act
 ## Evidence-boundary audit in the Archive Guide (2026-11-02 draft increment)
 
 The guide now offers **What is verified versus interpreted?** as a local, user-triggered audit of the selected record. It separates (1) what the current unpublished JSON actually records, (2) editorial classification and graph links, (3) source counts and editorial review status, and (4) symbolic-number hypotheses and unsupported AI inferences. **Recorded metadata is not independently verified history.** A reviewed source flag is not proof; an entry-level source does not automatically support a relationship. The accessible audit list is cleared on subsequent questions, and its content is rendered as text rather than HTML. No new sources, claims, model calls, media or stored questions were introduced. Three focused regression tests were added. Real-browser/mobile/screen-reader behavior remains to be checked.
+
+
+## Number-aware archive questions (2026-11-02)
+
+On a knowledge page with an explicitly recorded `number`, the original Archive Guide offers **What does this number represent?**. A visitor can also ask, for example, **What does 72 mean?**. The answer names the number **as draft editorial metadata only**, distinguishes symbolic interpretation from independent historical or mathematical evidence, and suggests what evidence would be needed. If the current record has no number, or the question names an unrelated value, the guide refuses to infer a correlation. No source is fabricated or silently treated as support for a number claim. The prompt is not shown on unnumbered records. Four regression tests cover recorded, missing and mismatched numbers and conditional page wiring.
+
+This is a deterministic prototype; it does not establish historical correspondences or a generative AI model. Verify in hosted CI and then a real browser before describing mobile or screen-reader behavior as tested.
