@@ -33,3 +33,23 @@ test('unknown record fails clearly rather than fabricating an answer',()=>{
 test('all 13 current Genesis entries can be retrieved',()=>{
   for(const entry of book.entries) assert.equal(archiveGuide(book,entry.id).entry.id,entry.id);
 });
+
+test('guide compares only existing pinned editorial relationships',()=>{
+  const r=archiveGuide(book,'lov3:0002',{pins:['lov3:0003','lov3:0011','lov3:0005']});
+  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005']);
+  assert.match(r.pinnedContext[0].relationship,/same recorded subject/);
+  assert.match(r.pinnedContext[0].relationship,/direct editorial graph link/);
+  assert.match(r.pinnedContext[1].relationship,/same recorded subject/);
+  assert.match(r.pinnedContext[2].relationship,/no shared classification or direct graph link recorded/);
+});
+test('guide ignores stale, duplicated, current, and malformed pin IDs',()=>{
+  const r=archiveGuide(book,'lov3:0009',{pins:['lov3:0009','lov3:9999',null,'lov3:0010','lov3:0010']});
+  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0010']);
+  assert.equal(archiveGuide(book,'lov3:0009').pinnedContext.length,0);
+});
+test('knowledge page wires current tab pins to contextual guide and safe links',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/archiveGuide\(book,id,history\)/);
+  assert.match(html,/id="guide-context"/);
+  assert.match(html,/knowledgeHref\(other.id,state\)/);
+});
