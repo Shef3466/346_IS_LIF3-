@@ -24,7 +24,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
 </style></head><body><main>
-<nav><a id="back" href="./explorer.html">← Return to the globe at your saved position</a></nav>
+<nav><a id="back" href="./explorer.html">← Return to the globe at your saved position</a> · <a id="previous-discovery" href="./knowledge.html" hidden>← Previous discovery</a></nav>
 <p class="eyebrow">Book of LOV3 · Knowledge archive</p>
 <h1 id="title">Loading archive record…</h1>
 <p id="path" class="path"></p><p id="number" class="number" hidden></p>
@@ -55,7 +55,7 @@ import {validate} from './graph.mjs';
 import {archiveGuide} from './archive-guide.mjs';
 import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-questions.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
-import {readWorkspace,saveWorkspace,recordVisit} from './discovery-workspace.mjs';
+import {readWorkspace,saveWorkspace,recordVisit,previousDiscoveryId} from './discovery-workspace.mjs';
 const q=selector=>document.querySelector(selector);
 q('#back').href=globeReturnHref(location.search);
 function li(parent,label,href){
@@ -76,6 +76,11 @@ try{
   let storage;try{storage=sessionStorage;}catch{storage=null;}
   const history=recordVisit(readWorkspace(storage,ids),id,ids);
   saveWorkspace(storage,history);
+  const previous=previousDiscoveryId(history,id,ids);
+  if(previous){
+    q('#previous-discovery').href=knowledgeHref(previous,state);
+    q('#previous-discovery').hidden=false;
+  }
   const guide=archiveGuide(book,id,history);
   const params=new URLSearchParams(location.search);
   params.set('pin',id);
