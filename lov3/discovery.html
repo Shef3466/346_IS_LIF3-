@@ -3,9 +3,9 @@
 <title>Book of LOV3 — Discovery Workspace (draft)</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 70%);color:#f1f6ff;font:16px/1.55 system-ui,sans-serif}
-main{max-width:1200px;margin:auto;padding:clamp(14px,3vw,38px)}a{color:#baddff;text-underline-offset:4px}a:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}
+main{max-width:1200px;margin:auto;padding:clamp(14px,3vw,38px)}a{color:#baddff;text-underline-offset:4px}a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}
 h1{font-size:clamp(1.8rem,4vw,3rem)}h2{font-size:1.2rem;color:#ffe4aa}p{max-width:85ch}
-.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:16px 0}
+.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:16px 0}.toolbar input[type=file]{display:block;max-width:100%;font:inherit;font-size:.85rem;margin-top:4px}.import-control{min-width:0;max-width:100%}
 button,select{background:#174573;color:white;border:1px solid #8aaac9;border-radius:9px;padding:9px 12px;cursor:pointer;font:inherit}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
 .card,section{background:#0b1c32e8;border:1px solid #52708d;border-radius:16px;padding:16px;min-width:0}
@@ -15,7 +15,7 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 </style></head><body><main>
 <nav><a id="back" href="./explorer.html">← Return to the globe</a> · <a id="explore-more" href="./explorer.html">Explore more concepts</a> · <a id="resume" href="./knowledge.html" hidden>Resume last discovery</a></nav>
 <h1>Discovery Workspace</h1><p>Pin four to six concepts for side-by-side inspection. These are unpublished editorial records, not verified historical claims. Your pins and navigation trail stay in this browser tab; nothing is sent to a server.</p>
-<div class="toolbar"><label for="capacity">Visible comparison slots</label><select id="capacity" aria-label="Number of comparison slots"><option value="4">4</option><option value="5">5</option><option value="6">6</option></select><button id="clear" type="button">Clear pins and history</button></div>
+<div class="toolbar"><label for="capacity">Visible comparison slots</label><select id="capacity" aria-label="Number of comparison slots"><option value="4">4</option><option value="5">5</option><option value="6">6</option></select><button id="clear" type="button">Clear pins and history</button><button id="export-session" type="button">Download research session</button><label class="import-control" for="import-session">Import research session <input id="import-session" type="file" accept=".json,application/json"></label></div><p class="note">Session files contain only public Genesis IDs, your slot count and exploration trail. Import replaces this tab’s current pins and history; no file is uploaded.</p>
 <p id="status" role="status" aria-live="polite">Loading workspace…</p>
 <div id="cards" class="cards" aria-label="Pinned discoveries"></div>
 <section aria-labelledby="comparison-heading"><h2 id="comparison-heading">Recorded relationships for comparison</h2><ul id="comparisons"></ul><p class="note">Shared classifications and explicit graph links are editorial records, not proof of a factual connection. Source records and review labels do not independently verify claims. No new numerical or historical correlations are inferred.</p></section>
@@ -26,6 +26,7 @@ import {validate} from './graph.mjs';
 import {conceptIdentity} from './taxonomy.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from './portal-state.mjs';
 import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
+import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from './workspace-transfer.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
 q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
@@ -109,6 +110,31 @@ try{
    catch(err){q('#status').textContent=err.message;render();}
  });
  q('#clear').addEventListener('click',()=>{state=emptyWorkspace();persist();q('#status').textContent='Workspace cleared for this tab.';render();});
+ q('#export-session').addEventListener('click',()=>{
+   try{
+     const data=exportDiscoverySession(state,ids,book.edition);
+     const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+     const link=document.createElement('a');
+     link.href=url;link.download='lov3-discovery-session.json';
+     document.body.append(link);link.click();link.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),0);
+     q('#status').textContent='Research session prepared for download. No data was uploaded.';
+   }catch(err){q('#status').textContent='Session download unavailable: '+err.message;}
+ });
+ q('#import-session').addEventListener('change',async event=>{
+   const input=event.currentTarget,file=input.files?.[0];
+   if(!file)return;
+   try{
+     if(file.size>MAX_TRANSFER_BYTES)throw new RangeError('Session file must be no larger than 32 KiB');
+     const text=await file.text();
+     const result=importDiscoverySession(text,ids,book.edition);
+     state=result.workspace;persist();render();
+     q('#status').textContent='Research session imported: '+state.pins.length+' pins, '+state.trail.length+' visits.'+
+       (result.editionMatches?'':' Different Genesis edition; unknown concept IDs were excluded.')+
+       (storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+   }catch(err){q('#status').textContent='Session import rejected; existing discoveries kept. '+err.message;}
+   finally{input.value='';}
+ });
  persist();render();
  q('#status').textContent=(message||state.pins.length+' pinned of '+state.capacity+' slots.')+(storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
  // Consuming ?pin= is a one-time action: refreshing after Clear must not re-pin.
