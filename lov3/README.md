@@ -123,3 +123,11 @@ This is a deterministic prototype; it does not establish historical corresponden
 ## Relation-specific citation inspection in Discovery Workspace (2026-11-02)
 
 Each pinned pair now shows any editorial sources cited by its **directed** Genesis relationship immediately below that comparison. References are resolved from the entry declaring the link, not from its target, so identical source IDs on different entries cannot be conflated. The display retains source kind, review status, and actual HTTPS link where present. Uncited relationships explicitly say no editorial source record is cited; a reviewed label is not independent fact verification. This is a small source-provenance and keyboard-readable UI increment; the 13 draft entries still have no attached sources. Node tests cover forward/reverse attribution, missing links, and page wiring; real-browser and assistive-technology behavior remain unverified.
+
+## Portable, user-controlled Discovery sessions (2026-11-02 draft)
+
+The Discovery Workspace now offers **Download research session** and **Import research session**. This transfers only the selected slot count (4–6), pinned public Genesis concept IDs, and the last 24 public concept visits, with a Genesis edition marker. It does **not** export questions, transcripts, credentials, images or private user information; the browser creates the file locally without uploading it.
+
+Imports require the LOV3 session schema and a file of at most 32 KiB; unknown IDs, duplicate pins, and invalid history entries are removed. A mismatched Genesis edition is disclosed. An invalid file leaves the current session untouched. Import replaces the current tab's pins and trail only after validation; a user can download the current state first. Browser session storage remains tab-scoped and may be unavailable in restrictive/private browser settings.
+
+This is a source-conscious **research state transfer**, not a publication or verification of the concepts. Node tests cover export/import integrity, sanitization, invalid files and UI wiring. Real-browser file picker, mobile behavior and keyboard/screen-reader checks still require hands-on verification.
