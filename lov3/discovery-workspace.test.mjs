@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,recordVisit,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
+import {knowledgeHref,readGlobeState,globeReturnHref,selectedId} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
 test('default four slots and opt-in six slots',()=>{
@@ -64,4 +65,45 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
   assert.match(html,/No source-attributed images/);
   assert.match(knowledge,/id="pin-workspace"/);
   assert.match(knowledge,/recordVisit\(/);
+});
+
+test('full globe → knowledge → pin → workspace → resume preserves the exact saved pose',()=>{
+  const view={angle:5.12345678912345,tilt:-0.543210987654321,edges:false,running:true};
+  const knowledge=knowledgeHref('lov3:0009',view);
+  const search=new URL(knowledge,'https://archive.example/lov3/').search;
+  const params=new URLSearchParams(search);
+  params.set('pin','lov3:0009');
+  const workspaceSearch='?'+params.toString();
+  const storageMap=new Map();
+  const storage={getItem:k=>storageMap.get(k)??null,setItem:(k,v)=>storageMap.set(k,v)};
+  let state=recordVisit(readWorkspace(storage,ids),'lov3:0009',ids);
+  state=pinWorkspace(state,params.get('pin'),ids).state;
+  assert.equal(saveWorkspace(storage,state),true);
+  const restored=readWorkspace(storage,ids);
+  const resume=knowledgeHref(restored.trail.at(-1),readGlobeState(workspaceSearch));
+  assert.equal(selectedId(new URL(resume,'https://archive.example/lov3/').search),'lov3:0009');
+  const back=globeReturnHref(workspaceSearch);
+  const returned=readGlobeState(new URL(back,'https://archive.example/lov3/').search);
+  assert.equal(returned.angle,view.angle);
+  assert.equal(returned.tilt,view.tilt);
+  assert.equal(returned.edges,false);
+  assert.equal(returned.running,false);
+  assert.equal(selectedId(new URL(back,'https://archive.example/lov3/').search,'selected'),'lov3:0009');
+});
+test('workspace resume follows the latest valid history entry and vanishes after clearing',()=>{
+  let state=recordVisit(emptyWorkspace(),'lov3:0001',ids);
+  state=recordVisit(state,'lov3:0010',ids);
+  assert.equal(state.trail.at(-1),'lov3:0010');
+  const normalized=normalizeWorkspace({capacity:4,pins:[],trail:['lov3:0001','lov3:9999','lov3:0010']},ids);
+  assert.equal(normalized.trail.at(-1),'lov3:0010');
+  assert.equal(emptyWorkspace().trail.at(-1),undefined);
+});
+test('workspace page wires both globe links to saved orientation and resume to visit trail',()=>{
+  const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+  assert.match(html,/id="explore-more"/);
+  assert.match(html,/q\('#explore-more'\)\.href=q\('#back'\)\.href/);
+  assert.match(html,/id="resume"[^>]*hidden/);
+  assert.match(html,/const lastVisited=state\.trail\.at\(-1\)/);
+  assert.match(html,/resume\.hidden=!lastVisited/);
+  assert.match(html,/resume\.href=knowledgeHref\(lastVisited,stateView\)/);
 });
