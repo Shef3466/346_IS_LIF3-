@@ -6,9 +6,9 @@ import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-quest
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 
 test('question suggestions route to four bounded archive topics',()=>{
-  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,4);
+  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,5);
   assert.deepEqual(SUGGESTED_ARCHIVE_QUESTIONS.map(q=>answerArchiveQuestion(book,'lov3:0002',null,q).kind),
-    ['evidence','relationships','comparison','record']);
+    ['evidence','relationships','comparison','record','exploration']);
 });
 test('unreferenced Genesis draft cannot invent evidence or media',()=>{
   const result=answerArchiveQuestion(book,'lov3:0009',null,'What evidence is attached?');
@@ -57,6 +57,37 @@ test('unsupported, empty and excessive questions fail conservatively',()=>{
 });
 test('unknown archive record is never silently substituted',()=>{
   assert.throws(()=>answerArchiveQuestion(book,'lov3:9999',null,'sources'),/Unknown archive concept/);
+});
+
+test('exploration recommendations favor unvisited graph neighbors and qualify citation counts',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0009',{trail:['lov3:0009','lov3:0010']},'Where should I explore next?');
+  assert.equal(result.kind,'exploration');
+  assert.deepEqual(result.links.map(x=>x.id),['lov3:0008','lov3:0010']);
+  assert.match(result.answer,/recorded graph link/);
+  assert.match(result.answer,/not proof/i);
+  assert.deepEqual(result.sources,[]);
+});
+test('exploration falls back only to shared recorded classification without graph links',()=>{
+  const copy=structuredClone(book);
+  for(const entry of copy.entries)entry.links=[];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'Recommend another discovery');
+  assert.equal(result.kind,'exploration');
+  assert.deepEqual(result.links.map(x=>x.id),['lov3:0010','lov3:0013']);
+  assert.match(result.answer,/shared recorded subject/);
+  assert.match(result.answer,/not verified historical relationships/);
+});
+test('exploration never invents a next record when no classification or edge matches',()=>{
+  const copy=structuredClone(book);
+  for(const entry of copy.entries)entry.links=[];
+  const result=answerArchiveQuestion(copy,'lov3:0001',null,'Explore next');
+  assert.equal(result.kind,'exploration');
+  assert.deepEqual(result.links,[]);
+  assert.match(result.answer,/will not invent a connection/);
+});
+test('exploration acknowledges when all available neighbors were already visited',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0009',{trail:['lov3:0010','lov3:0008']},'What next?');
+  assert.match(result.answer,/already appeared in your visit trail/);
+  assert.deepEqual(result.links.map(x=>x.id),['lov3:0010','lov3:0008']);
 });
 test('knowledge page exposes keyboard form, local answer and source link rendering',()=>{
   const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');

@@ -6,7 +6,8 @@ export const SUGGESTED_ARCHIVE_QUESTIONS = Object.freeze([
   'What evidence is attached?',
   'What is connected to this concept?',
   'Compare my pinned discoveries',
-  'What does this draft record say?'
+  'What does this draft record say?',
+  'Where should I explore next?'
 ]);
 
 export function answerArchiveQuestion(book,id,workspace,question) {
@@ -32,7 +33,36 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       : 'No other valid discoveries are pinned for comparison in this tab. Pin a second concept in the Discovery Workspace to compare recorded classifications.';
     return {kind:'comparison',answer,links,sources:[]};
   }
-  if(/\b(connect|connected|connections?|links?|related|relationships?|next)\b/.test(q)){
+  if(/\b(next|explore|recommend|suggest|journey)\b/.test(q)){
+    // Explicit graph neighbors first; if none exist, only shared editorial classifications.
+    // Rank unvisited records ahead of entries already in the tab-scoped visit trail.
+    const seen=new Set(Array.isArray(workspace?.trail)?workspace.trail:[]);
+    const neighbors=[...guide.outgoing.map(x=>({...x,basis:'recorded graph link'})),
+      ...guide.incoming.map(x=>({...x,basis:'recorded graph link'}))];
+    const unique=new Map();
+    for(const item of neighbors) if(!unique.has(item.id)) unique.set(item.id,item);
+    if(!unique.size){
+      for(const other of book.entries){
+        if(other.id===id)continue;
+        const sameSubject=!!guide.entry.subject && other.subject===guide.entry.subject;
+        const sameCategory=!!guide.entry.category && other.category===guide.entry.category;
+        if(sameSubject||sameCategory) unique.set(other.id,{
+          id:other.id,title:other.title,basis:sameSubject?'shared recorded subject':'shared recorded category',
+          sourceIds:[]
+        });
+      }
+    }
+    const ranked=[...unique.values()].sort((a,b)=>Number(seen.has(a.id))-Number(seen.has(b.id)));
+    const picks=ranked.slice(0,3);
+    const links=picks.map(({id,title})=>({id,title}));
+    if(!picks.length) return {kind:'exploration',answer:'No linked or same-classification archive records are available as a documented next step. The guide will not invent a connection.',links:[],sources:[]};
+    const names=picks.map(x=>x.title+' ('+x.basis+(x.basis==='recorded graph link'?', '+x.sourceIds.length+' attached relation citation(s)':'')+')');
+    const allVisited=picks.every(x=>seen.has(x.id));
+    const answer=(allVisited?'These recorded options have already appeared in your visit trail. Revisit ':'For your next discovery, consider ')+
+      names.join('; ')+'. Suggestions use draft graph links or shared editorial classifications, not verified historical relationships. A citation count is not proof.';
+    return {kind:'exploration',answer,links,sources:[]};
+  }
+  if(/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q)){
     const linked=[...guide.outgoing.map(x=>({...x,direction:'outgoing'})),...guide.incoming.map(x=>({...x,direction:'incoming'}))];
     const links=linked.map(x=>({id:x.id,title:x.title}));
     const answer=linked.length
