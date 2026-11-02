@@ -25,7 +25,7 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 import {validate} from './graph.mjs';
 import {conceptIdentity} from './taxonomy.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref} from './portal-state.mjs';
-import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,recordVisit,comparePins} from './discovery-workspace.mjs';
+import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins} from './discovery-workspace.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
 q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
@@ -63,7 +63,15 @@ try{
      card.append(list,el('p','No source-attributed images attached.'));
      const link=el('a','Open knowledge page');link.href=knowledgeHref(id,stateView);card.append(link);
      const remove=el('button','Unpin');remove.type='button';remove.setAttribute('aria-label','Unpin '+identity.word);
-     remove.addEventListener('click',()=>{state=unpinWorkspace(state,id);persist();render();});card.append(remove);
+     remove.dataset.unpinId=id;
+     remove.addEventListener('click',()=>{
+       const nextFocus=nextPinFocus(state,id);
+       state=unpinWorkspace(state,id);persist();render();
+       const candidate=[...cards.querySelectorAll('button[data-unpin-id]')].find(button=>button.dataset.unpinId===nextFocus);
+       (candidate??q('#capacity')).focus();
+       q('#status').textContent=identity.word+' unpinned. '+state.pins.length+' of '+state.capacity+' slots occupied.'+
+         (storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+     });card.append(remove);
      cards.append(card);
    });
    for(let i=state.pins.length;i<state.capacity;i++){
