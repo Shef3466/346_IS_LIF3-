@@ -18,14 +18,14 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 <div class="toolbar"><label for="capacity">Visible comparison slots</label><select id="capacity" aria-label="Number of comparison slots"><option value="4">4</option><option value="5">5</option><option value="6">6</option></select><button id="clear" type="button">Clear pins and history</button></div>
 <p id="status" role="status" aria-live="polite">Loading workspace…</p>
 <div id="cards" class="cards" aria-label="Pinned discoveries"></div>
-<section aria-labelledby="comparison-heading"><h2 id="comparison-heading">Recorded relationships for comparison</h2><ul id="comparisons"></ul><p class="note">Shared classifications and explicit graph links are editorial records, not proof of a factual connection. No new numerical or historical correlations are inferred.</p></section>
+<section aria-labelledby="comparison-heading"><h2 id="comparison-heading">Recorded relationships for comparison</h2><ul id="comparisons"></ul><p class="note">Shared classifications and explicit graph links are editorial records, not proof of a factual connection. Source records and review labels do not independently verify claims. No new numerical or historical correlations are inferred.</p></section>
 <section aria-labelledby="history-heading"><h2 id="history-heading">Recent exploration trail</h2><ul id="trail"></ul></section>
 <p class="note">No source-attributed images are attached to the current Genesis draft. Future media must have an identifiable, reviewed source; images are never invented.</p>
 </main><script type="module">
 import {validate} from './graph.mjs';
 import {conceptIdentity} from './taxonomy.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from './portal-state.mjs';
-import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins} from './discovery-workspace.mjs';
+import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
 q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
@@ -86,7 +86,15 @@ try{
        const from=byId.get(relation.from).word,to=byId.get(relation.to).word;
        matches.push(from+' → '+to+' ('+relation.type+'; '+relation.citationCount+' relation citation(s))');
      }
-     item(comparisons,a.word+' ↔ '+b.word+': '+(matches.join('; ')||'no shared classification or explicit link recorded'));
+     const comparison=el('li',a.word+' ↔ '+b.word+': '+(matches.join('; ')||'no shared classification or explicit link recorded'));
+     for(const relation of pair.recordedRelations){
+       const cited=relationCitationDetails(book,relation);
+       const sourceList=el('ul','');
+       if(!cited.length)item(sourceList,'No editorial source records cited for this relationship.');
+       for(const source of cited)item(sourceList,source.title+' ('+source.kind+'; '+source.reviewStatus+')',source.url);
+       comparison.append(sourceList);
+     }
+     comparisons.append(comparison);
    }
    if(!pairs.length)item(comparisons,'Pin at least two discoveries to compare their recorded relationships.');
    for(const id of [...state.trail].reverse())item(trail,byId.get(id).title,knowledgeHref(id,stateView));
