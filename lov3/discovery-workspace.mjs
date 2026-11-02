@@ -58,6 +58,18 @@ export function previousDiscoveryId(state,currentId,validIds) {
   }
   return null;
 }
+// A deliberate Previous discovery action walks backward instead of appending a
+// new visit that would create an A → B → A → B loop. Ignore forged/stale back
+// requests unless the target is the actual immediately preceding valid visit.
+export function navigateKnowledgeTrail(state,id,validIds,back=false) {
+  if (back && Array.isArray(state?.trail)) {
+    const current=state.trail.at(-1);
+    if (current!==id && previousDiscoveryId(state,current,validIds)===id)
+      return {...state,trail:state.trail.slice(0,-1)};
+  }
+  return recordVisit(state,id,validIds);
+}
+
 export function comparePins(book,state) {
   const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
   const pins=state.pins.map(id=>byId.get(id)).filter(Boolean);
