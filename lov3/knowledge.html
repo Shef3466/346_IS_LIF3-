@@ -32,6 +32,8 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading">LOV3 Archive Guide</h2>
 <p class="note">Original retrieval preview · Not a live conversational AI</p>
 <p id="guide-intro"></p><p id="guide-next"></p>
+<h3 id="guide-context-heading">Compare with your pinned discoveries</h3><ul id="guide-context" aria-labelledby="guide-context-heading"></ul>
+<p class="note">These comparisons show recorded editorial classifications and links only—not verified historical or numerical connections.</p>
 <p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
 </section>
 </div></div>
@@ -57,12 +59,12 @@ try{
   if(!response.ok) throw new Error('Genesis retrieval failed (HTTP '+response.status+').');
   const book=await response.json();
   validate(book);
-  const guide=archiveGuide(book,id);
   const state=readGlobeState(location.search);
   const ids=new Set(book.entries.map(e=>e.id));
   let storage;try{storage=sessionStorage;}catch{storage=null;}
   const history=recordVisit(readWorkspace(storage,ids),id,ids);
   saveWorkspace(storage,history);
+  const guide=archiveGuide(book,id,history);
   const params=new URLSearchParams(location.search);
   params.set('pin',id);
   q('#pin-workspace').href='./discovery.html?'+params.toString();
@@ -88,6 +90,11 @@ try{
   q('#media').textContent='No source-attributed images or historical scenes have been attached to this record.';
   q('#guide-intro').textContent=guide.introduction;
   q('#guide-next').textContent=guide.next;
+  const pinned=q('#guide-context');
+  for(const other of guide.pinnedContext)
+    li(pinned,other.title+' — '+other.relationship,knowledgeHref(other.id,state));
+  if(!guide.pinnedContext.length)
+    li(pinned,'No other pinned discoveries in this tab yet. Pin concepts to compare them here.');
 }catch(error){
   q('#title').textContent='Archive record unavailable';
   q('#status').textContent=error.message;
