@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,previousDiscoveryId,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
-import {knowledgeHref,readGlobeState,globeReturnHref,selectedId} from './portal-state.mjs';
+import {knowledgeHref,readGlobeState,globeReturnHref,selectedId,withoutWorkspacePin} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
 test('default four slots and opt-in six slots',()=>{
@@ -182,4 +182,19 @@ test('workspace consumes one-shot pin after saving, so Clear is not undone on re
   assert.match(html,/if\(requested!==null\)/);
   assert.ok(html.indexOf('persist();render();') < html.indexOf('window.history.replaceState('));
   assert.match(html,/refreshing may reapply its pin request/);
+});
+
+test('cleared workspace remains empty after reloading a consumed pin URL',()=>{
+  const url='?pin=lov3%3A0009&angle=1.234&tilt=0.12';
+  const memory=new Map(),storage={getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v)};
+  let state=pinWorkspace(readWorkspace(storage,ids),'lov3:0009',ids).state;
+  state=recordVisit(state,'lov3:0009',ids);
+  assert.equal(saveWorkspace(storage,state),true);
+  const cleaned=withoutWorkspacePin(url);
+  assert.equal(new URLSearchParams(cleaned).has('pin'),false);
+  assert.deepEqual(readGlobeState(cleaned),readGlobeState(url));
+  assert.equal(saveWorkspace(storage,emptyWorkspace()),true);
+  const reloaded=readWorkspace(storage,ids);
+  assert.deepEqual(reloaded,emptyWorkspace());
+  assert.equal(new URLSearchParams(cleaned).get('pin'),null);
 });
