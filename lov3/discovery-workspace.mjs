@@ -28,6 +28,14 @@ export function pinWorkspace(state,id,validIds) {
 export function unpinWorkspace(state,id) {
   return {...state,pins:state.pins.filter(x=>x!==id)};
 }
+// After an Unpin action, keep keyboard focus on a surviving neighbor.
+// If the final pin is removed, the UI focuses the capacity control instead.
+export function nextPinFocus(state,id) {
+  const index=state.pins.indexOf(id);
+  if(index<0) return null;
+  const remaining=state.pins.filter(pin=>pin!==id);
+  return remaining[Math.min(index,remaining.length-1)]??null;
+}
 export function setWorkspaceCapacity(state,capacity) {
   if (!Number.isInteger(capacity)||capacity<4||capacity>6) throw new RangeError('Capacity must be 4–6');
   if (capacity<state.pins.length) throw new RangeError('Unpin discoveries before reducing slots');
