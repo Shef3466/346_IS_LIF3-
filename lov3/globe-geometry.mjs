@@ -51,3 +51,16 @@ export function canvasPixelSize(cssWidth, cssHeight, devicePixelRatio = 1, maxPi
     height: Math.max(1, Math.floor(cssHeight * scale))
   };
 }
+
+// Keep visual elements and hit testing in CSS pixels while the backing store scales for high DPI.
+export function canvasDrawSpace(cssWidth, cssHeight, pixelWidth, pixelHeight) {
+  if (![cssWidth, cssHeight, pixelWidth, pixelHeight].every(Number.isFinite) ||
+      cssWidth <= 0 || cssHeight <= 0 || pixelWidth < 1 || pixelHeight < 1)
+    throw new RangeError('Invalid canvas drawing dimensions');
+  return {
+    width: cssWidth,
+    height: cssHeight,
+    scaleX: pixelWidth / cssWidth,
+    scaleY: pixelHeight / cssHeight
+  };
+}
