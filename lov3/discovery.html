@@ -24,7 +24,7 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 </main><script type="module">
 import {validate} from './graph.mjs';
 import {conceptIdentity} from './taxonomy.mjs';
-import {readGlobeState,knowledgeHref,globeReturnHref} from './portal-state.mjs';
+import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from './portal-state.mjs';
 import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins} from './discovery-workspace.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
@@ -103,5 +103,14 @@ try{
  q('#clear').addEventListener('click',()=>{state=emptyWorkspace();persist();q('#status').textContent='Workspace cleared for this tab.';render();});
  persist();render();
  q('#status').textContent=(message||state.pins.length+' pinned of '+state.capacity+' slots.')+(storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+ // Consuming ?pin= is a one-time action: refreshing after Clear must not re-pin.
+ // Keep angle, tilt, selected discovery and all other navigation parameters.
+ if(requested!==null){
+   try{
+     window.history.replaceState(window.history.state,'',location.pathname+withoutWorkspacePin(location.search)+location.hash);
+   }catch{
+     q('#status').textContent+=' The URL could not be updated; refreshing may reapply its pin request.';
+   }
+ }
 }catch(err){q('#status').textContent='Workspace unavailable: '+err.message;}
 </script></body></html>
