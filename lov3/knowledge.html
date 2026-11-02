@@ -55,7 +55,7 @@ import {validate} from './graph.mjs';
 import {archiveGuide} from './archive-guide.mjs';
 import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-questions.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
-import {readWorkspace,saveWorkspace,recordVisit,previousDiscoveryId} from './discovery-workspace.mjs';
+import {readWorkspace,saveWorkspace,navigateKnowledgeTrail,previousDiscoveryId} from './discovery-workspace.mjs';
 const q=selector=>document.querySelector(selector);
 q('#back').href=globeReturnHref(location.search);
 function li(parent,label,href){
@@ -74,11 +74,11 @@ try{
   const state=readGlobeState(location.search);
   const ids=new Set(book.entries.map(e=>e.id));
   let storage;try{storage=sessionStorage;}catch{storage=null;}
-  const history=recordVisit(readWorkspace(storage,ids),id,ids);
+  const history=navigateKnowledgeTrail(readWorkspace(storage,ids),id,ids,new URLSearchParams(location.search).get('trail')==='back');
   saveWorkspace(storage,history);
   const previous=previousDiscoveryId(history,id,ids);
   if(previous){
-    q('#previous-discovery').href=knowledgeHref(previous,state);
+    q('#previous-discovery').href=knowledgeHref(previous,state)+'&trail=back';
     q('#previous-discovery').hidden=false;
   }
   const guide=archiveGuide(book,id,history);
