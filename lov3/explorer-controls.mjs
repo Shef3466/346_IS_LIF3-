@@ -12,3 +12,12 @@ export function nextEntryIndex(current, total, direction) {
 export function initialAutoRotate(prefersReducedMotion) {
   return !Boolean(prefersReducedMotion);
 }
+
+// Returning from a knowledge page should restore a useful keyboard target
+// without scrolling the carefully preserved globe pose out of view.
+export function focusRestoredKnowledgeControl(button, restoredIndex) {
+  if (!Number.isInteger(restoredIndex) || restoredIndex < 0 ||
+      !button || typeof button.focus !== 'function') return false;
+  button.focus({preventScroll:true});
+  return true;
+}
