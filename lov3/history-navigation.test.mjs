@@ -42,7 +42,7 @@ test('stale, unrelated, or invalid back requests never discard the trail',()=>{
 
 test('knowledge page wires explicit back intent and keeps the original globe pose',()=>{
   const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
-  assert.match(html,/navigateKnowledgeTrail\\(readWorkspace\\(storage,ids\\),id,ids,/);
-  assert.match(html,/knowledgeHref\\(previous,state\\)\\+'\\&trail=back'/);
-  assert.match(html,/globeReturnHref\\(location\\.search\\)/);
+  assert.ok(html.includes("navigateKnowledgeTrail(readWorkspace(storage,ids),id,ids,"));
+  assert.ok(html.includes("knowledgeHref(previous,state)+'&trail=back'"));
+  assert.ok(html.includes("globeReturnHref(location.search)"));
 });
