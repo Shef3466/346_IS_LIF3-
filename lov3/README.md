@@ -47,7 +47,7 @@ The globe is a discovery **portal**, not a full definition screen. Tapping a glo
 
 The same-origin link preserves the globe's angle, tilt, and relationship visibility through URL query parameters. **Return to globe** restores the selected concept and exact saved orientation, with automatic rotation paused so the returned pose is visible. The `lov3/portal-state.mjs` helper validates concept IDs and bounds numeric query values; it never follows an arbitrary return URL. The knowledge page uses DOM text nodes rather than untrusted HTML for record content, supports narrow/mobile layouts, keyboard links, and reduced-motion navigation.
 
-Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` to check the portal-state round trip, source-aware guide, and page wiring. **Not implemented yet:** four-to-six-slot Discovery Workspace, interactive conversational model, source-attributed historical media, persistent multi-page research history, or VR. These remain future increments and must not be represented as deployed.
+Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` to check the portal-state round trip, source-aware guide, and page wiring. **Not implemented in this initial portal increment:** interactive conversational model, source-attributed historical media, or VR. The later Discovery Workspace increment below provides tab-scoped pins and a bounded history trail. These remain future increments and must not be represented as deployed.
 
 ### Continuity experiment record
 
@@ -62,3 +62,9 @@ The browser uses `sessionStorage` for pins and trail. When storage is blocked, t
 ## Pinned-context Archive Guide (2026-11-01 increment)
 
 The Knowledge Archive now passes the tab-scoped Discovery Workspace pins into the original deterministic Archive Guide. A visitor inspecting one concept sees links to their other pinned discoveries with only **recorded** shared subject, category, or direct graph links. When no recorded relationship exists, the guide says so explicitly. Duplicate, invalid, and self-referential pins are ignored; the page uses safe same-origin knowledge links and text nodes. This is contextual navigation, **not** historical proof or generative conversation. No external request or user profile is created. Tests cover the comparison, sanitization, and page wiring.
+
+## Archive Guide questions (2026-11-02 draft increment)
+
+The knowledge page now offers an accessible **Ask guide** form and four suggested questions. The local deterministic router in `lov3/archive-questions.mjs` can summarize the current draft record, attached editorial sources with their actual review status, recorded incoming/outgoing links, and comparisons against the visitor's existing tab-scoped pins. Answers link to only real Genesis entries or attached HTTPS editorial sources; no citations, definitions, historical events, images, or inferred correlations are fabricated. Unsupported questions receive a clear scope limitation. Questions are processed locally and are not saved to session storage, transmitted to an AI provider, or treated as a chat transcript.
+
+This is a bounded **question-and-answer prototype**, not a generative or fully conversational AI. Browser keyboard and screen-reader behavior still needs real-device testing. Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` and review the PR checks before accepting the increment.
