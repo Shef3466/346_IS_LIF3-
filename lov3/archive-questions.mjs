@@ -15,7 +15,11 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   const empty={kind:'unsupported',answer:'Ask about evidence, recorded connections, pinned comparisons, or the draft record. I cannot answer open-ended historical questions from this limited archive yet.',links:[],sources:[]};
   if(typeof question!=='string' || question.length>240 || !question.trim()) return empty;
   const q=question.toLowerCase().trim();
-  if(/\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
+  // A question about evidence FOR a relationship needs edge citations, not
+  // every source attached to the current entry. Preserve this intent even
+  // when the question includes words like "sources" or "proof".
+  const relationshipIntent=/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q);
+  if(!relationshipIntent && /\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
     const sources=guide.sources.map(source=>({
       title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
       ...(source.url?{url:source.url}:{})
