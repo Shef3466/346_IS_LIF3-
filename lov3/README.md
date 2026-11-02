@@ -39,3 +39,16 @@ Example (illustrative only; **not** a verified source or publication claim):
 The explorer displays **Subject → Category → Word → Number**, with the final number only when an editor explicitly records a relevant numerical relationship. Technical IDs such as `lov3:0011` remain stable graph identifiers, **not** visible knowledge labels or inferred numerical meaning. The rotating chain-link globe uses short word labels; the concept list and selected detail show the full hierarchy.
 
 Genesis entries now include editorial `subject`, `category` and `word` strings and may include `number` as a string (for example `3–4–6–9`). These draft classifications are navigational interpretations, not verified historical or mathematical correspondences. The `lov3/taxonomy.mjs` helper keeps older entries readable with explicit unclassified fallbacks. This change alters the unpublished Genesis JSON and its future provenance digest; regenerate any manifest before publication.
+
+
+## Knowledge portal and archive guide (2026-11-01 draft increment)
+
+The globe is a discovery **portal**, not a full definition screen. Tapping a glowing concept, or activating a concept button, opens a **separate** `lov3/knowledge.html` page. Previous/Next previews a selection, then **Open selected knowledge page** enters it. The knowledge page displays Subject → Category → Word → Number only when the editorial record has a meaningful number, and offers links to incoming and outgoing relationships. It uses `lov3/archive-guide.mjs` to produce a contextual, deterministic **retrieval preview**, not a live generative AI or an imitation of a film character. Historical claims, citations, images and explanations are never invented: the existing Genesis entries remain unpublished drafts with no reviewed sources.
+
+The same-origin link preserves the globe's angle, tilt, and relationship visibility through URL query parameters. **Return to globe** restores the selected concept and exact saved orientation, with automatic rotation paused so the returned pose is visible. The `lov3/portal-state.mjs` helper validates concept IDs and bounds numeric query values; it never follows an arbitrary return URL. The knowledge page uses DOM text nodes rather than untrusted HTML for record content, supports narrow/mobile layouts, keyboard links, and reduced-motion navigation.
+
+Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` to check the portal-state round trip, source-aware guide, and page wiring. **Not implemented yet:** four-to-six-slot Discovery Workspace, interactive conversational model, source-attributed historical media, persistent multi-page research history, or VR. These remain future increments and must not be represented as deployed.
+
+### Continuity experiment record
+
+The MUSTARD SEED kernel is explicitly loaded at the start of each development run; the public seed and project-memory files are not private conversation transcripts or model-weight memory. During the November 1–14 evaluation window, record kernel recovery, tests, useful changes, observed drift, errors, and limitations. Begin an evidence-based interim assessment on November 11. Passing startup tests alone is not proof of flawless cross-session understanding.
