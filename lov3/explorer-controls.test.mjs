@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
+import { nextEntryIndex, initialAutoRotate, focusRestoredKnowledgeControl } from './explorer-controls.mjs';
 
 const html = readFileSync(new URL('./explorer.html', import.meta.url), 'utf8');
 
@@ -31,4 +31,17 @@ test('explorer exposes keyboard-friendly navigation and selected state', () => {
   assert.match(html, /ArrowDown/);
   assert.match(html, /prefers-reduced-motion/);
   assert.match(html, /nextEntryIndex/);
+});
+
+test('returning to a selected globe concept restores keyboard focus without scrolling', () => {
+  let options;
+  const control={focus(value){options=value;}};
+  assert.equal(focusRestoredKnowledgeControl(control,3),true);
+  assert.deepEqual(options,{preventScroll:true});
+  assert.equal(focusRestoredKnowledgeControl(control,-1),false);
+  assert.equal(focusRestoredKnowledgeControl(null,3),false);
+});
+test('explorer focuses its open-knowledge control only after a valid restored selection', () => {
+  assert.match(html,/if\(restoredIndex>=0\)\{select\(restoredIndex\);focusRestoredKnowledgeControl\(open,restoredIndex\);\}/);
+  assert.match(html,/selectionStatus\.textContent='Selected '/);
 });
