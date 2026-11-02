@@ -2,6 +2,24 @@
 // No model calls, transcript storage, external requests, or invented citations.
 import {archiveGuide} from './archive-guide.mjs';
 
+// Resolve a directed edge's source pointers against the entry declaring it.
+// A source attached to a concept is not automatically evidence for an edge.
+function relationSourcesFor(book,currentId,links) {
+  const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
+  return links.flatMap(link=>{
+    if(link.direction!=='outgoing' && link.direction!=='incoming') return [];
+    const owner=byId.get(link.direction==='outgoing'?currentId:link.id);
+    const target=byId.get(link.direction==='outgoing'?link.id:currentId);
+    const attached=new Map((owner.sources??[]).map(source=>[source.id,source]));
+    return (link.sourceIds??[]).map(sourceId=>{
+      const source=attached.get(sourceId); // validated by archiveGuide()
+      return {title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
+        ...(source.url?{url:source.url}:{}),
+        relation:owner.title+' → '+target.title+' ('+link.type+')'};
+    });
+  });
+}
+
 export const SUGGESTED_ARCHIVE_QUESTIONS = Object.freeze([
   'What evidence is attached?',
   'What is connected to this concept?',
@@ -41,8 +59,8 @@ export function answerArchiveQuestion(book,id,workspace,question) {
     // Explicit graph neighbors first; if none exist, only shared editorial classifications.
     // Rank unvisited records ahead of entries already in the tab-scoped visit trail.
     const seen=new Set(Array.isArray(workspace?.trail)?workspace.trail:[]);
-    const neighbors=[...guide.outgoing.map(x=>({...x,basis:'recorded graph link'})),
-      ...guide.incoming.map(x=>({...x,basis:'recorded graph link'}))];
+    const neighbors=[...guide.outgoing.map(x=>({...x,direction:'outgoing',basis:'recorded graph link'})),
+      ...guide.incoming.map(x=>({...x,direction:'incoming',basis:'recorded graph link'}))];
     const unique=new Map();
     for(const item of neighbors) if(!unique.has(item.id)) unique.set(item.id,item);
     if(!unique.size){
@@ -59,30 +77,18 @@ export function answerArchiveQuestion(book,id,workspace,question) {
     const ranked=[...unique.values()].sort((a,b)=>Number(seen.has(a.id))-Number(seen.has(b.id)));
     const picks=ranked.slice(0,3);
     const links=picks.map(({id,title})=>({id,title}));
+    const sources=relationSourcesFor(book,id,picks);
     if(!picks.length) return {kind:'exploration',answer:'No linked or same-classification archive records are available as a documented next step. The guide will not invent a connection.',links:[],sources:[]};
     const names=picks.map(x=>x.title+' ('+x.basis+(x.basis==='recorded graph link'?', '+x.sourceIds.length+' attached relation citation(s)':'')+')');
     const allVisited=picks.every(x=>seen.has(x.id));
     const answer=(allVisited?'These recorded options have already appeared in your visit trail. Revisit ':'For your next discovery, consider ')+
       names.join('; ')+'. Suggestions use draft graph links or shared editorial classifications, not verified historical relationships. A citation count is not proof.';
-    return {kind:'exploration',answer,links,sources:[]};
+    return {kind:'exploration',answer,links,sources};
   }
   if(/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q)){
     const linked=[...guide.outgoing.map(x=>({...x,direction:'outgoing'})),...guide.incoming.map(x=>({...x,direction:'incoming'}))];
     const links=linked.map(x=>({id:x.id,title:x.title}));
-    // A relation's source IDs belong to the entry that declares that directed edge.
-    // Incoming edges must resolve citations against the OTHER entry, not this page.
-    const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
-    const sources=linked.flatMap(link=>{
-      const owner=byId.get(link.direction==='outgoing'?id:link.id);
-      const target=byId.get(link.direction==='outgoing'?link.id:id);
-      const attached=new Map((owner.sources??[]).map(source=>[source.id,source]));
-      return link.sourceIds.map(sourceId=>{
-        const source=attached.get(sourceId); // validated by archiveGuide()
-        return {title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
-          ...(source.url?{url:source.url}:{}),
-          relation:owner.title+' → '+target.title+' ('+link.type+')'};
-      });
-    });
+    const sources=relationSourcesFor(book,id,linked);
     const answer=linked.length
       ? 'The draft records '+linked.length+' directed relationship(s): '+linked.map(x=>x.title+' ('+x.direction+', '+x.type+', '+x.sourceIds.length+' relation citation(s))').join('; ')+
         '. '+(sources.length
