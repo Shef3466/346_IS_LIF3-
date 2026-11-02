@@ -103,11 +103,11 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
 
 test('workspace unpin handler restores keyboard focus and announces the result',()=>{
   const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
-  assert.match(html,/remove\\.dataset\\.unpinId=id/);
-  assert.match(html,/nextPinFocus\\(state,id\\)/);
-  assert.match(html,/querySelectorAll\\('button\\[data-unpin-id\\]'\\)/);
-  assert.match(html,/\\(candidate\\?\\?q\\('#capacity'\\)\\)\\.focus\\(\\)/);
-  assert.match(html,/q\\('#status'\\)\\.textContent=identity\\.word\\+' unpinned/);
+  assert.ok(html.includes('remove.dataset.unpinId=id'));
+  assert.ok(html.includes('nextPinFocus(state,id)'));
+  assert.ok(html.includes("querySelectorAll('button[data-unpin-id]')"));
+  assert.ok(html.includes("(candidate??q('#capacity')).focus()"));
+  assert.ok(html.includes("q('#status').textContent=identity.word+' unpinned"));
 });
 test('full globe → knowledge → pin → workspace → resume preserves the exact saved pose',()=>{
   const view={angle:5.12345678912345,tilt:-0.543210987654321,edges:false,running:true};
