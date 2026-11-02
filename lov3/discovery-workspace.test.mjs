@@ -174,3 +174,12 @@ test('workspace page wires both globe links to saved orientation and resume to v
   assert.match(html,/resume\.hidden=!lastVisited/);
   assert.match(html,/resume\.href=knowledgeHref\(lastVisited,stateView\)/);
 });
+
+test('workspace consumes one-shot pin after saving, so Clear is not undone on refresh',()=>{
+  const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+  assert.match(html,/withoutWorkspacePin\(location\.search\)/);
+  assert.match(html,/window\.history\.replaceState\(window\.history\.state/);
+  assert.match(html,/if\(requested!==null\)/);
+  assert.ok(html.indexOf('persist();render();') < html.indexOf('window.history.replaceState('));
+  assert.match(html,/refreshing may reapply its pin request/);
+});
