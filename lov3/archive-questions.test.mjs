@@ -167,3 +167,44 @@ test('relationship evidence question does not mistake uncited entry sources for 
   assert.equal(entry.kind,'evidence');
   assert.equal(entry.sources.length,1);
 });
+
+test('exploration recommendations show only citations for recommended outgoing and incoming edges',()=>{
+  const copy=structuredClone(book);
+  const current=copy.entries.find(x=>x.id==='lov3:0009');
+  const incoming=copy.entries.find(x=>x.id==='lov3:0008');
+  current.sources=[
+    {id:'note:out',title:'Outgoing citation',kind:'primary',reviewStatus:'reviewed',url:'https://example.org/outgoing'},
+    {id:'note:unrelated',title:'Unrelated entry note',kind:'project-note',reviewStatus:'reviewed'}
+  ];
+  incoming.sources=[
+    {id:'note:in',title:'Incoming citation',kind:'secondary',reviewStatus:'unreviewed',url:'https://example.org/incoming'}
+  ];
+  current.links[0].sourceIds=['note:out'];
+  incoming.links[0].sourceIds=['note:in'];
+  const result=answerArchiveQuestion(copy,'lov3:0009',{trail:['lov3:0010']},'Where should I explore next?');
+  assert.equal(result.kind,'exploration');
+  assert.deepEqual(result.links.map(x=>x.id),['lov3:0008','lov3:0010']);
+  assert.deepEqual(result.sources.map(x=>x.title),['Incoming citation','Outgoing citation']);
+  assert.deepEqual(result.sources.map(x=>x.reviewStatus),['unreviewed','reviewed']);
+  assert.match(result.sources[0].relation,/Creation Story → The Egg of Life/);
+  assert.match(result.sources[1].relation,/Egg of Life → The Flower of Life/);
+  assert.ok(!result.sources.some(x=>x.title==='Unrelated entry note'));
+  assert.match(result.answer,/not proof/i);
+});
+
+test('exploration does not turn an uncited entry source into relationship evidence',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'note:uncited',title:'Concept-only source',kind:'primary',reviewStatus:'reviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'Recommend a next discovery');
+  assert.deepEqual(result.sources,[]);
+  assert.equal(result.links.length,2);
+});
+
+test('shared-classification exploration never borrows a source from the suggested concept',()=>{
+  const copy=structuredClone(book);
+  for(const entry of copy.entries) entry.links=[];
+  copy.entries[9].sources=[{id:'note:classification',title:'Concept source',kind:'secondary',reviewStatus:'reviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'Where should I explore next?');
+  assert.match(result.answer,/shared recorded subject/);
+  assert.deepEqual(result.sources,[]);
+});
