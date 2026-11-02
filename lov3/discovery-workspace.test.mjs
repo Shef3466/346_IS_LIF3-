@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,previousDiscoveryId,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
+import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,previousDiscoveryId,comparePins,relationCitationDetails,WORKSPACE_KEY} from './discovery-workspace.mjs';
 import {knowledgeHref,readGlobeState,globeReturnHref,selectedId,withoutWorkspacePin} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
@@ -197,4 +197,34 @@ test('cleared workspace remains empty after reloading a consumed pin URL',()=>{
   const reloaded=readWorkspace(storage,ids);
   assert.deepEqual(reloaded,emptyWorkspace());
   assert.equal(new URLSearchParams(cleaned).get('pin'),null);
+});
+
+test('comparison citation details use only the directed edge owner and its exact source pointers',()=>{
+  const example={entries:[
+    {id:'lov3:0001',links:[{to:'lov3:0002',type:'supports',sourceIds:['shared','note']}],
+      sources:[{id:'shared',title:'Origin record',kind:'primary',reviewStatus:'reviewed',url:'https://example.org/origin'},
+        {id:'note',title:'Unlinked editorial note',kind:'project-note',reviewStatus:'unreviewed'}]},
+    {id:'lov3:0002',links:[{to:'lov3:0001',type:'questions',sourceIds:['shared']}],
+      sources:[{id:'shared',title:'Target record',kind:'secondary',reviewStatus:'unreviewed',url:'https://example.org/target'}]}
+  ]};
+  const forward={from:'lov3:0001',to:'lov3:0002',type:'supports'};
+  assert.deepEqual(relationCitationDetails(example,forward),[
+    {title:'Origin record',kind:'primary',reviewStatus:'reviewed',url:'https://example.org/origin'},
+    {title:'Unlinked editorial note',kind:'project-note',reviewStatus:'unreviewed'}
+  ]);
+  assert.deepEqual(relationCitationDetails(example,{from:'lov3:0002',to:'lov3:0001',type:'questions'}),[
+    {title:'Target record',kind:'secondary',reviewStatus:'unreviewed',url:'https://example.org/target'}
+  ]);
+  assert.deepEqual(relationCitationDetails(example,{...forward,type:'not-recorded'}),[]);
+  assert.deepEqual(relationCitationDetails(example,{from:'lov3:9999',to:'lov3:0001',type:'supports'}),[]);
+  assert.deepEqual(relationCitationDetails(book,{from:'lov3:0009',to:'lov3:0010',type:'relates-to'}),[]);
+});
+test('workspace renders relation-specific source links and explicit uncited status',()=>{
+  const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+  assert.match(html,/relationCitationDetails\(book,relation\)/);
+  assert.match(html,/source\.title\+' \('/);
+  assert.match(html,/source\.reviewStatus/);
+  assert.match(html,/source\.url/);
+  assert.match(html,/No editorial source records cited for this relationship/);
+  assert.match(html,/Source records and review labels do not independently verify claims/);
 });
