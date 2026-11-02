@@ -5,10 +5,10 @@ import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-quest
 
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 
-test('question suggestions route to four bounded archive topics',()=>{
-  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,5);
+test('question suggestions route to bounded archive topics',()=>{
+  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,6);
   assert.deepEqual(SUGGESTED_ARCHIVE_QUESTIONS.map(q=>answerArchiveQuestion(book,'lov3:0002',null,q).kind),
-    ['evidence','relationships','comparison','record','exploration']);
+    ['evidence','relationships','comparison','record','exploration','inquiry']);
 });
 test('unreferenced Genesis draft cannot invent evidence or media',()=>{
   const result=answerArchiveQuestion(book,'lov3:0009',null,'What evidence is attached?');
@@ -207,4 +207,36 @@ test('shared-classification exploration never borrows a source from the suggeste
   const result=answerArchiveQuestion(copy,'lov3:0009',null,'Where should I explore next?');
   assert.match(result.answer,/shared recorded subject/);
   assert.deepEqual(result.sources,[]);
+});
+
+test('investigation prompts identify evidence gaps without inventing sources or claims',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0009',null,'What should I investigate?');
+  assert.equal(result.kind,'inquiry');
+  assert.deepEqual(result.sources,[]);
+  assert.equal(result.links[0].id,'lov3:0010');
+  assert.match(result.answer,/No editorial source records are attached/i);
+  assert.match(result.questions[0],/independent evidence/i);
+  assert.match(result.questions[1],/Egg of Life → The Flower of Life/);
+  assert.ok(result.questions.every(q=>!q.includes('verified historical fact')));
+});
+test('investigation questions distinguish symbolic numbers from documented correlations',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0011',null,'Research questions');
+  assert.equal(result.kind,'inquiry');
+  assert.ok(result.questions.some(q=>q.includes('3–4–6–9')&&q.includes('symbolic editorial')));
+  const withoutNumber=answerArchiveQuestion(book,'lov3:0009',null,'Investigate');
+  assert.ok(withoutNumber.questions.every(q=>!q.includes('mathematical property')));
+});
+test('investigation uses only current tab pins and does not borrow unrelated sources',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'note:one',title:'Unreviewed entry note',kind:'project-note',reviewStatus:'unreviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',{pins:['lov3:0010','lov3:9999']},'Investigate this');
+  assert.ok(result.questions.some(q=>q.includes('Flower of Life')&&q.includes('documented similarities')));
+  assert.deepEqual(result.sources,[]);
+  assert.match(result.answer,/1 editorial source record/);
+});
+test('knowledge page renders research prompts in an accessible list and clears old prompts',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/id="guide-answer-questions" aria-label="Suggested research questions"/);
+  assert.match(html,/questions\.replaceChildren\(\)/);
+  assert.match(html,/for\(const prompt of result\.questions\?\?\[\]\) li\(questions,prompt\)/);
 });
