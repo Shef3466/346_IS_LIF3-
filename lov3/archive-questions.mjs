@@ -37,8 +37,11 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   // A question about evidence FOR a relationship needs edge citations, not
   // every source attached to the current entry. Preserve this intent even
   // when the question includes words like "sources" or "proof".
-  const relationshipIntent=/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q);
-  if(!relationshipIntent && /\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
+  const relationshipIntent=/\b(connect|connected|connections?|links?|related|relationships?|relations?|edges?)\b/.test(q);
+  // Research intent takes precedence over generic evidence lookup: a visitor
+  // asking what evidence to investigate wants questions, not a source dump.
+  const inquiryIntent=/\b(investigate|investigation|research|evidence gaps)\b/.test(q);
+  if(!relationshipIntent && !inquiryIntent && /\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
     const sources=guide.sources.map(source=>({
       title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
       ...(source.url?{url:source.url}:{})
