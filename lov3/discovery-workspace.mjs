@@ -93,3 +93,17 @@ export function comparePins(book,state) {
   }
   return pairs;
 }
+
+// Resolve comparison citations against the entry that DECLARES the directed
+// relationship. A source on the target entry is not evidence for this edge.
+// Only return actual editorial records; review status never implies proof.
+export function relationCitationDetails(book,relation) {
+  const owner=book.entries.find(entry=>entry.id===relation?.from);
+  const edge=owner?.links.find(link=>link.to===relation?.to && link.type===relation?.type);
+  if(!edge) return [];
+  const byId=new Map((owner.sources??[]).map(source=>[source.id,source]));
+  return (edge.sourceIds??[]).map(id=>byId.get(id)).filter(Boolean).map(source=>({
+    title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
+    ...(source.url?{url:source.url}:{})
+  }));
+}
