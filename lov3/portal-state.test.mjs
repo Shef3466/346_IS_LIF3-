@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {globeStateParams,readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
+import {globeStateParams,readGlobeState,knowledgeHref,globeReturnHref,selectedId,withoutWorkspacePin} from './portal-state.mjs';
 
 test('orientation survives a knowledge-page round trip with exact precision',()=>{
   const state={angle:6.283185307179586,tilt:-0.673123456789,edges:false,running:true};
@@ -29,4 +29,19 @@ test('orientation rejects invalid programmatic input',()=>{
 });
 test('default view remains compatible with first visit',()=>{
   assert.deepEqual(readGlobeState(),{angle:0.2,tilt:0.12,edges:true,running:true});
+});
+
+test('one-shot workspace pin is removed without changing globe pose or selected discovery',()=>{
+  const original='?angle=5.12345678912345&tilt=-0.543210987654321&edges=0&spin=1&id=lov3%3A0009&pin=lov3%3A0009';
+  const cleaned=withoutWorkspacePin(original);
+  assert.equal(new URLSearchParams(cleaned).has('pin'),false);
+  assert.equal(selectedId(cleaned),'lov3:0009');
+  assert.deepEqual(readGlobeState(cleaned),readGlobeState(original));
+  assert.equal(withoutWorkspacePin(cleaned),cleaned);
+});
+test('one-shot cleanup removes repeated or empty pin values and retains other parameters',()=>{
+  const cleaned=withoutWorkspacePin('?pin=lov3%3A0001&trail=back&pin=lov3%3A0002&angle=2.4');
+  assert.equal(cleaned,'?trail=back&angle=2.4');
+  assert.equal(withoutWorkspacePin('?pin='),'');
+  assert.equal(withoutWorkspacePin(''),'');
 });
