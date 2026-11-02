@@ -55,6 +55,29 @@ test('comparison uses only recorded classifications and explicit graph edges',()
   assert.equal(p.sameSubject,true);
   assert.equal(p.recordedLink,true);
   assert.equal(p.sameCategory,false);
+  assert.deepEqual(p.recordedRelations,[{from:'lov3:0002',to:'lov3:0003',type:'relates-to',citationCount:0}]);
+});
+test('comparison preserves reverse direction and does not invent links',()=>{
+  const state={capacity:4,pins:['lov3:0002','lov3:0011','lov3:0003'],trail:[]};
+  const pairs=comparePins(book,state);
+  const reverse=pairs.find(pair=>pair.a==='lov3:0002'&&pair.b==='lov3:0011');
+  assert.deepEqual(reverse.recordedRelations,[{from:'lov3:0011',to:'lov3:0002',type:'relates-to',citationCount:0}]);
+  const unrelated=pairs.find(pair=>pair.a==='lov3:0011'&&pair.b==='lov3:0003');
+  assert.equal(unrelated.recordedLink,false);
+  assert.deepEqual(unrelated.recordedRelations,[]);
+});
+test('comparison keeps both directions, relation types, and exact citation counts',()=>{
+  const example={entries:[
+    {id:'lov3:0001',subject:'Shared',category:'A',links:[{to:'lov3:0002',type:'supports',sourceIds:['a','b']}]},
+    {id:'lov3:0002',subject:'Shared',category:'B',links:[{to:'lov3:0001',type:'questions'}]}
+  ]};
+  const [pair]=comparePins(example,{pins:['lov3:0001','lov3:0002']});
+  assert.equal(pair.sameSubject,true);
+  assert.equal(pair.sameCategory,false);
+  assert.deepEqual(pair.recordedRelations,[
+    {from:'lov3:0001',to:'lov3:0002',type:'supports',citationCount:2},
+    {from:'lov3:0002',to:'lov3:0001',type:'questions',citationCount:0}
+  ]);
 });
 test('workspace and knowledge page expose pinning and accessible navigation',()=>{
   const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
@@ -62,6 +85,8 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
   assert.match(html,/aria-live="polite"/);
   assert.match(html,/id="capacity"/);
   assert.match(html,/comparePins\(book,state\)/);
+  assert.match(html,/for\(const relation of pair\.recordedRelations\)/);
+  assert.match(html,/relation\.citationCount/);
   assert.match(html,/No source-attributed images/);
   assert.match(knowledge,/id="pin-workspace"/);
   assert.match(knowledge,/recordVisit\(/);

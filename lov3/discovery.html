@@ -74,7 +74,10 @@ try{
      const a=byId.get(pair.a),b=byId.get(pair.b),matches=[];
      if(pair.sameSubject)matches.push('same recorded subject');
      if(pair.sameCategory)matches.push('same recorded category');
-     if(pair.recordedLink)matches.push('explicit graph link');
+     for(const relation of pair.recordedRelations){
+       const from=byId.get(relation.from).word,to=byId.get(relation.to).word;
+       matches.push(from+' → '+to+' ('+relation.type+'; '+relation.citationCount+' relation citation(s))');
+     }
      item(comparisons,a.word+' ↔ '+b.word+': '+(matches.join('; ')||'no shared classification or explicit link recorded'));
    }
    if(!pairs.length)item(comparisons,'Pin at least two discoveries to compare their recorded relationships.');

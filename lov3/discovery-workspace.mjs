@@ -44,10 +44,20 @@ export function comparePins(book,state) {
   const pairs=[];
   for(let i=0;i<pins.length;i++) for(let j=i+1;j<pins.length;j++){
     const a=pins[i],b=pins[j];
+    // Preserve direction, relation type, and source-pointer count. A pointer is not proof.
+    const recordedRelations=[
+      ...a.links.filter(link=>link.to===b.id).map(link=>({
+        from:a.id,to:b.id,type:link.type,citationCount:(link.sourceIds??[]).length
+      })),
+      ...b.links.filter(link=>link.to===a.id).map(link=>({
+        from:b.id,to:a.id,type:link.type,citationCount:(link.sourceIds??[]).length
+      }))
+    ];
     pairs.push({a:a.id,b:b.id,
       sameSubject:!!a.subject&&a.subject===b.subject,
       sameCategory:!!a.category&&a.category===b.category,
-      recordedLink:a.links.some(x=>x.to===b.id)||b.links.some(x=>x.to===a.id)});
+      recordedLink:recordedRelations.length>0,
+      recordedRelations});
   }
   return pairs;
 }
