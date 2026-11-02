@@ -27,6 +27,7 @@ test('invalid, oversized and non-session files are rejected without fallback to 
   assert.throws(()=>importDiscoverySession('{broken',ids,edition),/Invalid JSON/);
   assert.throws(()=>importDiscoverySession(JSON.stringify({schema:'wrong',workspace:emptyWorkspace()}),ids,edition),/Not a LOV3/);
   assert.throws(()=>importDiscoverySession(JSON.stringify({schema:'lov3.discovery.session.v1',genesisEdition:edition,workspace:[]}),ids,edition),/Not a LOV3/);
+  assert.throws(()=>importDiscoverySession(JSON.stringify({schema:'lov3.discovery.session.v1',genesisEdition:edition,workspace:{}}),ids,edition),/Malformed LOV3/);
   assert.throws(()=>importDiscoverySession('x'.repeat(MAX_TRANSFER_BYTES+1),ids,edition),RangeError);
   assert.throws(()=>exportDiscoverySession(emptyWorkspace(),ids,''),/Missing Genesis/);
 });
