@@ -44,6 +44,7 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
 import { conceptIdentity, globeLabel } from './taxonomy.mjs';
+import { placeGlobeLabels } from './label-layout.mjs';
 import { validate } from './graph.mjs';
 import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
 const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
@@ -61,6 +62,7 @@ let entries=[],buttons=[],angle=.2,tilt=.12,running=initialAutoRotate(motionQuer
 let frameId=null,lastFrame=null,inView=true;
 // Reuse expensive gradient stops across animation frames; rebuild only on canvas resize.
 let lightingCache=null;
+const labelWidths=new Map(); // Cache measured word widths across animation frames.
 function globeLighting(w,h,r){
  if(lightingCache?.w===w && lightingCache?.h===h)return lightingCache;
  const aura=cx.createRadialGradient(0,0,r*.2,0,0,r*1.38);
@@ -156,6 +158,16 @@ function draw(time){
      cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
    }
  }
+ const labels=placeGlobeLabels(points,selected,(i,active)=>{
+   const word=globeLabel(entries[i],14);
+   const font=active?'bold 13px system-ui':'11px system-ui';
+   const key=font+'|'+word;
+   if(!labelWidths.has(key)){
+     cx.font=font;
+     labelWidths.set(key,cx.measureText(word).width);
+   }
+   return labelWidths.get(key);
+ },w,h);
  for(const p of points.slice().sort((a,b)=>a.depth-b.depth)){
    const active=p.i===selected,front=p.depth>=-.15;
    cx.beginPath();cx.arc(p.x,p.y,active?10:front?6:4,0,Math.PI*2);
@@ -163,10 +175,11 @@ function draw(time){
    cx.shadowBlur=active?23:front?10:0;
    cx.fillStyle=active?'#ffe3a5':front?'#8ce5ff':'#537491';cx.fill();
    cx.shadowBlur=0;
-   if(front || active){
+   const label=labels.get(p.i);
+   if(label){
      cx.font=active?'bold 13px system-ui':'11px system-ui';
      cx.fillStyle=active?'#ffe3a5':'#e0efff';
-     cx.fillText(globeLabel(entries[p.i],14),p.x+11,p.y+4);
+     cx.fillText(globeLabel(entries[p.i],14),label.x,label.y);
    }
  }
  cx.restore();
