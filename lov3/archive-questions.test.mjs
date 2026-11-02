@@ -133,3 +133,37 @@ test('knowledge page labels the specific directed relation for each cited source
   const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
   assert.match(html,/source\.relation\?' · cited for '/);
 });
+
+test('relationship evidence question retrieves only sources cited by directed edges',()=>{
+  const copy=structuredClone(book);
+  const current=copy.entries.find(x=>x.id==='lov3:0009');
+  const incoming=copy.entries.find(x=>x.id==='lov3:0008');
+  current.sources=[
+    {id:'note:cited',title:'Edge citation',kind:'project-note',reviewStatus:'unreviewed',url:'https://example.org/edge'},
+    {id:'note:uncited',title:'Unrelated entry note',kind:'project-note',reviewStatus:'reviewed'}
+  ];
+  incoming.sources=[{id:'note:incoming',title:'Incoming edge citation',kind:'secondary',reviewStatus:'unreviewed'}];
+  current.links[0].sourceIds=['note:cited'];
+  incoming.links[0].sourceIds=['note:incoming'];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'Which sources support the recorded relationships?');
+  assert.equal(result.kind,'relationships');
+  assert.deepEqual(result.sources.map(x=>x.title),['Edge citation','Incoming edge citation']);
+  assert.deepEqual(result.sources.map(x=>x.relation),[
+    'The Egg of Life → The Flower of Life (relates-to)',
+    'The Creation Story → The Egg of Life (relates-to)'
+  ]);
+  assert.ok(!result.answer.includes('verified historical'));
+  assert.match(result.answer,/do not independently verify/);
+});
+
+test('relationship evidence question does not mistake uncited entry sources for edge evidence',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'note:unrelated',title:'Uncited source',kind:'primary',reviewStatus:'reviewed'}];
+  const edge=answerArchiveQuestion(copy,'lov3:0009',null,'Is there proof for the links?');
+  assert.equal(edge.kind,'relationships');
+  assert.deepEqual(edge.sources,[]);
+  assert.match(edge.answer,/No editorial source records are cited/);
+  const entry=answerArchiveQuestion(copy,'lov3:0009',null,'What sources are attached to this record?');
+  assert.equal(entry.kind,'evidence');
+  assert.equal(entry.sources.length,1);
+});
