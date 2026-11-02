@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize } from './globe-geometry.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize, canvasDrawSpace } from './globe-geometry.mjs';
 
 test('projection spreads nodes within sphere and produces finite coordinates', () => {
   const points = projectConcepts(13, .2, .12, 180);
@@ -49,4 +49,14 @@ test('canvas resolution rejects invalid dimensions and budgets', () => {
   assert.throws(() => canvasPixelSize(0, 200, 2), RangeError);
   assert.throws(() => canvasPixelSize(200, 200, NaN), RangeError);
   assert.throws(() => canvasPixelSize(200, 200, 2, 0), RangeError);
+});
+
+test('globe drawing and hit-test coordinates remain in CSS pixels on high-density screens', () => {
+  assert.deepEqual(canvasDrawSpace(320, 240, 320, 240),
+    { width: 320, height: 240, scaleX: 1, scaleY: 1 });
+  assert.deepEqual(canvasDrawSpace(320, 240, 640, 480),
+    { width: 320, height: 240, scaleX: 2, scaleY: 2 });
+  assert.deepEqual(canvasDrawSpace(320, 240, 480, 360),
+    { width: 320, height: 240, scaleX: 1.5, scaleY: 1.5 });
+  assert.throws(() => canvasDrawSpace(0, 240, 640, 480), RangeError);
 });
