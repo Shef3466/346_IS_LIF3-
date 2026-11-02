@@ -60,6 +60,28 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       answer:'Here is the evidence boundary for this draft. I can confirm recorded metadata, but I cannot certify historical facts or infer undocumented connections from these fields.',
       distinctions,links:[],sources:[]};
   }
+  // A number question is about a number actually recorded on this page, not
+  // permission to invent numerology, mathematical properties or citations.
+  // Numeric questions about a different value must not be silently attributed
+  // to the current record.
+  const numberIntent=/\b(numbers?|numerical|numeric|digits?|symbolic value)\b/.test(q) ||
+    (/\b\d+\b/.test(q) && /\b(mean|means|meaning|represent|represents|significant|significance|symbolic|correlation|correlate|why)\b/.test(q));
+  if(numberIntent && !relationshipIntent && !inquiryIntent){
+    const identity=guide.identity;
+    const mentioned=q.match(/\b\d+\b/g)??[];
+    const recordedDigits=(identity.number??'').match(/\d+/g)??[];
+    if(mentioned.length && mentioned.some(value=>!recordedDigits.includes(value)))
+      return {kind:'number',answer:'This record does not establish a meaning for the number(s) in your question. Its only recorded number is '+(identity.number??'none')+'. I will not substitute an unrelated numerical association.',links:[],sources:[]};
+    if(!identity.number)
+      return {kind:'number',answer:'No number is recorded for '+identity.word+'. The archive does not infer a numerical correlation from its title or graph neighbors.',links:[],sources:[]};
+    return {kind:'number',
+      answer:'The unpublished record associates '+identity.word+' with Number '+identity.number+' under '+identity.subject+' / '+identity.category+'. This is an editorial association, not independent proof of a historical, mathematical or causal relationship. No attached entry source automatically supports a number claim.',
+      questions:[
+        'What independent primary or secondary evidence supports this specific association with '+identity.number+'?',
+        'Is the proposed meaning symbolic, a mathematical property, or a separately documented historical relationship?'
+      ],
+      links:[],sources:[]};
+  }
   if(!relationshipIntent && !inquiryIntent && /\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
     const sources=guide.sources.map(source=>({
       title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
