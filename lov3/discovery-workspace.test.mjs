@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,recordVisit,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
+import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
 import {knowledgeHref,readGlobeState,globeReturnHref,selectedId} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
@@ -18,6 +18,15 @@ test('pin valid unique concepts; reject invalid and overflow',()=>{
   assert.equal(pinWorkspace(s,'lov3:0005',ids).reason,'full');
   assert.equal(pinWorkspace(s,'lov3:9999',ids).reason,'invalid');
   assert.equal(unpinWorkspace(s,'lov3:0002').pins.length,3);
+});
+test('unpin keeps keyboard focus on next or previous surviving discovery',()=>{
+  const state={capacity:4,pins:['lov3:0001','lov3:0002','lov3:0003'],trail:[]};
+  assert.equal(nextPinFocus(state,'lov3:0001'),'lov3:0002');
+  assert.equal(nextPinFocus(state,'lov3:0002'),'lov3:0003');
+  assert.equal(nextPinFocus(state,'lov3:0003'),'lov3:0002');
+  assert.equal(nextPinFocus({...state,pins:['lov3:0001']},'lov3:0001'),null);
+  assert.equal(nextPinFocus(state,'lov3:9999'),null);
+  assert.deepEqual(state.pins,['lov3:0001','lov3:0002','lov3:0003']);
 });
 test('reducing capacity never silently discards pins',()=>{
   let s=setWorkspaceCapacity(emptyWorkspace(),6);
@@ -92,6 +101,14 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
   assert.match(knowledge,/recordVisit\(/);
 });
 
+test('workspace unpin handler restores keyboard focus and announces the result',()=>{
+  const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+  assert.match(html,/remove\\.dataset\\.unpinId=id/);
+  assert.match(html,/nextPinFocus\\(state,id\\)/);
+  assert.match(html,/querySelectorAll\\('button\\[data-unpin-id\\]'\\)/);
+  assert.match(html,/\\(candidate\\?\\?q\\('#capacity'\\)\\)\\.focus\\(\\)/);
+  assert.match(html,/q\\('#status'\\)\\.textContent=identity\\.word\\+' unpinned/);
+});
 test('full globe → knowledge → pin → workspace → resume preserves the exact saved pose',()=>{
   const view={angle:5.12345678912345,tilt:-0.543210987654321,edges:false,running:true};
   const knowledge=knowledgeHref('lov3:0009',view);
