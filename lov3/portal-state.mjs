@@ -43,3 +43,12 @@ export function selectedId(search,key='id') {
   const id = new URLSearchParams(search).get(key);
   return conceptId(id) ? id : null;
 }
+
+// Pin requests are one-shot navigation actions. Remove them from the address
+// after the workspace consumes the request, without losing the saved globe pose.
+export function withoutWorkspacePin(search='') {
+  const params=new URLSearchParams(search);
+  params.delete('pin');
+  const rest=params.toString();
+  return rest?'?'+rest:'';
+}
