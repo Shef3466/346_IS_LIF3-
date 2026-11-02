@@ -98,3 +98,38 @@ test('knowledge page exposes keyboard form, local answer and source link renderi
   assert.match(html,/source\.url/);
   assert.match(html,/knowledgeHref\(link\.id,state\)/);
 });
+
+
+test('relationship answers resolve actual outgoing and incoming source pointers against the declaring entry',()=>{
+  const copy=structuredClone(book);
+  const outgoing=copy.entries.find(x=>x.id==='lov3:0009');
+  const incoming=copy.entries.find(x=>x.id==='lov3:0008');
+  outgoing.sources=[{id:'source:shared',title:'Outgoing archive note',kind:'project-note',reviewStatus:'unreviewed',url:'https://example.org/out'}];
+  incoming.sources=[{id:'source:shared',title:'Incoming archive record',kind:'primary',reviewStatus:'reviewed',url:'https://example.org/in'}];
+  outgoing.links[0].sourceIds=['source:shared'];
+  incoming.links[0].sourceIds=['source:shared'];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'What relationships are recorded?');
+  assert.equal(result.kind,'relationships');
+  assert.deepEqual(result.sources.map(x=>x.title),['Outgoing archive note','Incoming archive record']);
+  assert.deepEqual(result.sources.map(x=>x.url),['https://example.org/out','https://example.org/in']);
+  assert.deepEqual(result.sources.map(x=>x.reviewStatus),['unreviewed','reviewed']);
+  assert.match(result.sources[0].relation,/Egg of Life → The Flower of Life/);
+  assert.match(result.sources[1].relation,/Creation Story → The Egg of Life/);
+  assert.match(result.answer,/2 editorial relation source pointer/);
+  assert.match(result.answer,/1 marked reviewed/);
+  assert.match(result.answer,/do not independently verify/);
+});
+
+test('relationship answers never imply an uncited entry source supports a graph edge',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'source:uncited',title:'Uncited note',kind:'project-note',reviewStatus:'reviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'What is connected?');
+  assert.deepEqual(result.sources,[]);
+  assert.match(result.answer,/No editorial source records are cited/);
+  assert.equal(result.links.length,2);
+});
+
+test('knowledge page labels the specific directed relation for each cited source',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/source\.relation\?' · cited for '/);
+});
