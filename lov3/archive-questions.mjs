@@ -116,7 +116,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       names.join('; ')+'. Suggestions use draft graph links or shared editorial classifications, not verified historical relationships. A citation count is not proof.';
     return {kind:'exploration',answer,links,sources};
   }
-  if(/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q)){
+  if(relationshipIntent){
     const linked=[...guide.outgoing.map(x=>({...x,direction:'outgoing'})),...guide.incoming.map(x=>({...x,direction:'incoming'}))];
     const links=linked.map(x=>({id:x.id,title:x.title}));
     const sources=relationSourcesFor(book,id,linked);
