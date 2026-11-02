@@ -84,3 +84,8 @@ The Discovery Workspace now identifies **which pinned concept points to which**,
 ## Keyboard focus after unpinning (2026-11-02 draft increment)
 
 Unpinning a discovery previously rebuilt its card list and removed the focused button, leaving keyboard focus without a stable target. The workspace now moves focus to the next surviving Unpin button (or the preceding one when removing the last card), and to the comparison-slot selector when no pins remain. An `aria-live` status announces which concept was removed and the updated slot count. When browser session storage is unavailable, the warning remains visible after unpinning. The selection and history trail remain user-controlled; no new data is sent to a server. Focus-target and HTML wiring tests cover the behavior, but real keyboard/screen-reader browser testing is still required.
+
+
+## Previous-discovery navigation (2026-11-02 draft increment)
+
+The separate knowledge page now offers **Previous discovery** when a prior valid concept exists in the current tab's visit trail. It links to the immediately preceding recorded discovery (not the browser's potentially unrelated Back destination), preserving the exact globe angle, tilt and relationship visibility through the existing same-origin link helper. The link stays hidden for the first discovery or when tab storage cannot recover a prior visit. A bounded history prevents infinite trails; no questions, personal data or external navigation destinations are stored. Node tests cover first visit, A → B → A, stale/invalid IDs, duplicate entries, and exact orientation round trips. Real-browser focus and screen-reader verification remains outstanding.
