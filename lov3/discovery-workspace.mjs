@@ -46,6 +46,18 @@ export function recordVisit(state,id,validIds) {
   const trail = state.trail.at(-1)===id ? state.trail : [...state.trail,id].slice(-24);
   return {...state,trail};
 }
+// Return only a real prior visit; never manufacture a browser-history destination.
+// Works with tab-scoped trail data and preserves the caller's globe orientation.
+export function previousDiscoveryId(state,currentId,validIds) {
+  const ids=validIds instanceof Set ? validIds : new Set(validIds);
+  if (!allow(currentId,ids)) return null;
+  const trail=Array.isArray(state?.trail) ? state.trail : [];
+  if (trail.at(-1)!==currentId) return null;
+  for(let i=trail.length-2;i>=0;i--){
+    if(trail[i]!==currentId && allow(trail[i],ids)) return trail[i];
+  }
+  return null;
+}
 export function comparePins(book,state) {
   const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
   const pins=state.pins.map(id=>byId.get(id)).filter(Boolean);
