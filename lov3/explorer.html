@@ -41,7 +41,7 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 <aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
 <p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). Arrow Up/Down moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
 <script type="module">
-import { nextEntryIndex, initialAutoRotate } from './explorer-controls.mjs';
+import { nextEntryIndex, initialAutoRotate, focusRestoredKnowledgeControl } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
 import { conceptIdentity, globeLabel } from './taxonomy.mjs';
 import { placeGlobeLabels } from './label-layout.mjs';
@@ -97,7 +97,7 @@ try{
  status.textContent=entries.length+" draft concepts loaded";
  const restored=selectedId(location.search,'selected');
  const restoredIndex=entries.findIndex(e=>e.id===restored);
- if(restoredIndex>=0)select(restoredIndex);
+ if(restoredIndex>=0){select(restoredIndex);focusRestoredKnowledgeControl(open,restoredIndex);}
  scheduleDraw();
 }catch(err){status.textContent="Cannot load genesis.json: "+err.message;}
 function select(i){
