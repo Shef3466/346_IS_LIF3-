@@ -52,3 +52,9 @@ Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` to check the portal-sta
 ### Continuity experiment record
 
 The MUSTARD SEED kernel is explicitly loaded at the start of each development run; the public seed and project-memory files are not private conversation transcripts or model-weight memory. During the November 1–14 evaluation window, record kernel recovery, tests, useful changes, observed drift, errors, and limitations. Begin an evidence-based interim assessment on November 11. Passing startup tests alone is not proof of flawless cross-session understanding.
+
+## Discovery Workspace (2026-11-01 increment)
+
+From any knowledge page choose **Pin to Discovery Workspace** to add that concept to a tab-scoped, user-controlled comparison view at `lov3/discovery.html`. Four slots appear by default; expand to five or six without losing pins. Each card shows the recorded subject/category/word/optional number, source review status, and a link back to the original knowledge page. Pairwise comparison only reports shared editorial classifications or explicit Genesis graph links; it does not invent definitions, numbers, images, or historical connections. The exploration trail keeps the 24 most recent knowledge-page visits. Remove individual pins or clear the tab's workspace; invalid or stale IDs are discarded. No network storage is used.
+
+The browser uses `sessionStorage` for pins and trail. When storage is blocked, the page still renders, but continuity across navigation cannot be guaranteed. The workspace is a draft, not a multiuser collaboration system; actual browser/mobile/assistive-tech checks remain pending. Verify with `node --test lov3/*.test.mjs lov3/memory/*.test.mjs`.

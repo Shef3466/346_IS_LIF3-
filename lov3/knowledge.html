@@ -22,7 +22,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="eyebrow">Book of LOV3 · Knowledge archive</p>
 <h1 id="title">Loading archive record…</h1>
 <p id="path" class="path"></p><p id="number" class="number" hidden></p>
-<p id="status" role="status" class="status">Retrieving Genesis draft.</p>
+<p id="status" role="status" class="status">Retrieving Genesis draft.</p><p><a id="pin-workspace" href="./discovery.html">Pin to Discovery Workspace</a> · <a id="open-workspace" href="./discovery.html">Open workspace</a></p>
 <div class="grid"><div>
 <section aria-labelledby="record-heading"><h2 id="record-heading">Record and relationships</h2>
 <p id="record"></p><ul id="related"></ul></section>
@@ -35,12 +35,13 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
 </section>
 </div></div>
-<p class="note">This archive is a developing research environment. It does not yet provide an editable comparison workspace or generative AI dialogue.</p>
+<p class="note">This archive is a developing research environment. The Discovery Workspace provides tab-scoped pinned comparisons; a generative AI dialogue is not yet implemented.</p>
 </main>
 <script type="module">
 import {validate} from './graph.mjs';
 import {archiveGuide} from './archive-guide.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
+import {readWorkspace,saveWorkspace,recordVisit} from './discovery-workspace.mjs';
 const q=selector=>document.querySelector(selector);
 q('#back').href=globeReturnHref(location.search);
 function li(parent,label,href){
@@ -58,6 +59,14 @@ try{
   validate(book);
   const guide=archiveGuide(book,id);
   const state=readGlobeState(location.search);
+  const ids=new Set(book.entries.map(e=>e.id));
+  let storage;try{storage=sessionStorage;}catch{storage=null;}
+  const history=recordVisit(readWorkspace(storage,ids),id,ids);
+  saveWorkspace(storage,history);
+  const params=new URLSearchParams(location.search);
+  params.set('pin',id);
+  q('#pin-workspace').href='./discovery.html?'+params.toString();
+  q('#open-workspace').href='./discovery.html'+location.search;
   q('#title').textContent=guide.identity.word;
   document.title=guide.identity.word+' — Book of LOV3';
   q('#path').textContent=guide.identity.path.slice(0,3).join(' → ');
