@@ -5,7 +5,13 @@
 :root{color-scheme:dark}*{box-sizing:border-box}
 body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 65%);color:#f1f6ff;font:16px/1.6 system-ui,sans-serif}
 main{max-width:920px;margin:auto;padding:clamp(16px,4vw,44px)}
-a{color:#baddff;text-underline-offset:4px}a:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+a{color:#baddff;text-underline-offset:4px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+.question-form{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.question-form label{flex-basis:100%}.question-form input{flex:1 1 220px;min-width:0}
+.question-form input,.question-form button,.question-prompts button{background:#173b60;color:#f1f6ff;border:1px solid #8ba7c5;border-radius:9px;padding:9px 12px;font:inherit}
+.question-form button,.question-prompts button{cursor:pointer}
+.question-prompts{display:flex;gap:8px;flex-wrap:wrap}.question-prompts button{font-size:.88rem}
+#guide-answer{min-height:1.5em}
 nav{margin-bottom:24px}h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.2;margin:8px 0}
 h2{font-size:1.25rem;margin-top:0;color:#ffe4aa}p{margin:8px 0 14px}
 .eyebrow{color:#9fd7f6;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
@@ -34,6 +40,11 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p id="guide-intro"></p><p id="guide-next"></p>
 <h3 id="guide-context-heading">Compare with your pinned discoveries</h3><ul id="guide-context" aria-labelledby="guide-context-heading"></ul>
 <p class="note">These comparisons show recorded editorial classifications and links only—not verified historical or numerical connections.</p>
+<h3>Ask about this archive record</h3>
+<p class="note">Local question routing over draft metadata. Not a live AI model; questions are not stored or sent to a server.</p>
+<form id="guide-form" class="question-form"><label for="guide-question">Your question</label><input id="guide-question" name="question" type="search" maxlength="240" required placeholder="What evidence is attached?"><button type="submit">Ask guide</button></form>
+<div id="guide-prompts" class="question-prompts" aria-label="Suggested archive questions"></div>
+<p id="guide-answer" role="status" aria-live="polite"></p><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul>
 <p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
 </section>
 </div></div>
@@ -42,6 +53,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <script type="module">
 import {validate} from './graph.mjs';
 import {archiveGuide} from './archive-guide.mjs';
+import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-questions.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
 import {readWorkspace,saveWorkspace,recordVisit} from './discovery-workspace.mjs';
 const q=selector=>document.querySelector(selector);
@@ -95,6 +107,28 @@ try{
     li(pinned,other.title+' — '+other.relationship,knowledgeHref(other.id,state));
   if(!guide.pinnedContext.length)
     li(pinned,'No other pinned discoveries in this tab yet. Pin concepts to compare them here.');
+  function askGuide(question){
+    const result=answerArchiveQuestion(book,id,history,question);
+    q('#guide-answer').textContent=result.answer;
+    const linked=q('#guide-answer-links'),cited=q('#guide-answer-sources');
+    linked.replaceChildren();cited.replaceChildren();
+    for(const link of result.links) li(linked,link.title,knowledgeHref(link.id,state));
+    for(const source of result.sources)
+      li(cited,source.title+' — '+source.kind+'; '+source.reviewStatus,source.url);
+  }
+  q('#guide-form').addEventListener('submit',event=>{
+    event.preventDefault();
+    askGuide(q('#guide-question').value);
+  });
+  for(const question of SUGGESTED_ARCHIVE_QUESTIONS){
+    const button=document.createElement('button');
+    button.type='button';button.textContent=question;
+    button.addEventListener('click',()=>{
+      q('#guide-question').value=question;
+      askGuide(question);
+    });
+    q('#guide-prompts').append(button);
+  }
 }catch(error){
   q('#title').textContent='Archive record unavailable';
   q('#status').textContent=error.message;
