@@ -44,7 +44,8 @@ try{
    message=result.reason==='pinned'?'Discovery pinned.':result.reason==='already-pinned'?'Discovery already pinned.':result.reason==='full'?'All visible slots are occupied. Increase to five or six, or unpin an item.':'Invalid discovery ID.';
    state=recordVisit(state,requested,ids);
  }
- function persist(){if(!saveWorkspace(storage,state))q('#status').textContent='Browser session storage is unavailable; changes will not survive navigation.';}
+ let storageAvailable=true;
+ function persist(){storageAvailable=saveWorkspace(storage,state);}
  function render(){
    cards.replaceChildren();trail.replaceChildren();comparisons.replaceChildren();
    q('#capacity').value=String(state.capacity);
@@ -85,7 +86,6 @@ try{
  });
  q('#clear').addEventListener('click',()=>{state=emptyWorkspace();persist();q('#status').textContent='Workspace cleared for this tab.';render();});
  persist();render();
- if(message)q('#status').textContent=message;
- else q('#status').textContent=state.pins.length+' pinned of '+state.capacity+' slots.';
+ q('#status').textContent=(message||state.pins.length+' pinned of '+state.capacity+' slots.')+(storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
 }catch(err){q('#status').textContent='Workspace unavailable: '+err.message;}
 </script></body></html>
