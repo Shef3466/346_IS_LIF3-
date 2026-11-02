@@ -26,7 +26,8 @@ export const SUGGESTED_ARCHIVE_QUESTIONS = Object.freeze([
   'Compare my pinned discoveries',
   'What does this draft record say?',
   'Where should I explore next?',
-  'What should I investigate?'
+  'What should I investigate?',
+  'What is verified versus interpreted?'
 ]);
 
 export function answerArchiveQuestion(book,id,workspace,question) {
@@ -41,6 +42,24 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   // Research intent takes precedence over generic evidence lookup: a visitor
   // asking what evidence to investigate wants questions, not a source dump.
   const inquiryIntent=/\b(investigate|investigation|research|evidence gaps)\b/.test(q);
+  // An epistemic audit separates what the JSON records from what the world
+  // independently establishes. Even a reviewed source is not a verified claim.
+  const boundaryIntent=/\b(verified (?:versus|vs\.?|or) interpret|fact(?:s)? (?:versus|vs\.?|or) interpret|what is (?:actually )?verified|how confident|hypothes(?:is|es)|inferred correlations?)\b/.test(q);
+  if(boundaryIntent){
+    const identity=guide.identity;
+    const attached=guide.coverage.sourceCount,reviewed=guide.coverage.reviewedCount;
+    const distinctions=[
+      {label:'Recorded metadata',detail:'This unpublished Genesis JSON contains the title "'+guide.entry.title+'", Subject '+identity.subject+', Category '+identity.category+', Word '+identity.word+(identity.number?', Number '+identity.number:'')+'. This confirms only the contents of the project record.'},
+      {label:'Editorial interpretation',detail:'The classifications and '+(guide.outgoing.length+guide.incoming.length)+' directed graph relationship(s) are draft editorial choices, not independently established historical or causal connections.'},
+      {label:'Source review status',detail:attached+' source record(s) attached to this entry; '+reviewed+' marked reviewed. A review flag is not external fact-checking, and entry sources do not automatically support graph edges.'},
+      {label:'Hypothesis and AI inference',detail:identity.number
+        ? 'The meaning of '+identity.number+' is a symbolic editorial association unless independently supported. No AI-inferred numerical or historical correlation is asserted.'
+        : 'No number is recorded for this entry. No AI-inferred numerical or historical correlation is asserted.'}
+    ];
+    return {kind:'boundaries',
+      answer:'Here is the evidence boundary for this draft. I can confirm recorded metadata, but I cannot certify historical facts or infer undocumented connections from these fields.',
+      distinctions,links:[],sources:[]};
+  }
   if(!relationshipIntent && !inquiryIntent && /\b(evidence|sources?|citations?|references?|verified|proof)\b/.test(q)){
     const sources=guide.sources.map(source=>({
       title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
