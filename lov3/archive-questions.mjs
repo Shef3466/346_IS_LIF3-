@@ -65,10 +65,28 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   if(/\b(connect|connected|connections?|links?|related|relationships?)\b/.test(q)){
     const linked=[...guide.outgoing.map(x=>({...x,direction:'outgoing'})),...guide.incoming.map(x=>({...x,direction:'incoming'}))];
     const links=linked.map(x=>({id:x.id,title:x.title}));
+    // A relation's source IDs belong to the entry that declares that directed edge.
+    // Incoming edges must resolve citations against the OTHER entry, not this page.
+    const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
+    const sources=linked.flatMap(link=>{
+      const owner=byId.get(link.direction==='outgoing'?id:link.id);
+      const target=byId.get(link.direction==='outgoing'?link.id:id);
+      const attached=new Map((owner.sources??[]).map(source=>[source.id,source]));
+      return link.sourceIds.map(sourceId=>{
+        const source=attached.get(sourceId); // validated by archiveGuide()
+        return {title:source.title,kind:source.kind,reviewStatus:source.reviewStatus,
+          ...(source.url?{url:source.url}:{}),
+          relation:owner.title+' → '+target.title+' ('+link.type+')'};
+      });
+    });
     const answer=linked.length
-      ? 'The draft records '+linked.length+' directed relationship(s): '+linked.map(x=>x.title+' ('+x.direction+', '+x.type+', '+x.sourceIds.length+' relation citation(s))').join('; ')+'. A graph link is not independent historical evidence.'
+      ? 'The draft records '+linked.length+' directed relationship(s): '+linked.map(x=>x.title+' ('+x.direction+', '+x.type+', '+x.sourceIds.length+' relation citation(s))').join('; ')+
+        '. '+(sources.length
+          ? sources.length+' editorial relation source pointer(s) are listed below; '+sources.filter(x=>x.reviewStatus==='reviewed').length+' marked reviewed.'
+          : 'No editorial source records are cited by these relationships.')+
+        ' Source pointers and review labels do not independently verify a historical claim.'
       : 'No incoming or outgoing relationships are recorded for this concept. I cannot infer an undocumented connection.';
-    return {kind:'relationships',answer,links,sources:[]};
+    return {kind:'relationships',answer,links,sources};
   }
   if(/\b(meaning|define|definition|what is|explain|describe|record)\b/.test(q)){
     const identity=guide.identity;
