@@ -307,3 +307,31 @@ test('knowledge page renders and clears evidence distinctions as safe text',()=>
   assert.match(html,/boundaries\.replaceChildren\(\)/);
   assert.match(html,/for\(const item of result\.distinctions\?\?\[\]\) li\(boundaries,item\.label\+': '\+item\.detail\)/);
 });
+
+test('number inquiry explains the recorded 72 association without inventing evidence',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0013',null,'What does 72 mean?');
+  assert.equal(result.kind,'number');
+  assert.match(result.answer,/Number 72/);
+  assert.match(result.answer,/editorial association, not independent proof/);
+  assert.ok(result.questions.some(q=>q.includes('primary or secondary evidence')));
+  assert.deepEqual(result.sources,[]);
+  assert.deepEqual(result.links,[]);
+});
+test('number inquiry on an unnumbered entry refuses to infer a number',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0009',null,'What does this number represent?');
+  assert.equal(result.kind,'number');
+  assert.match(result.answer,/No number is recorded/);
+  assert.deepEqual(result.sources,[]);
+});
+test('number inquiry does not silently attach an unrelated number to a record',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0013',null,'Why is 7 significant?');
+  assert.equal(result.kind,'number');
+  assert.match(result.answer,/only recorded number is 72/);
+  assert.deepEqual(result.sources,[]);
+});
+test('knowledge page offers a number question only when the record contains a number',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/if\(guide\.identity\.number\)\{/);
+  assert.match(html,/What does this number represent\?/);
+  assert.match(html,/askGuide\(numberButton\.textContent\)/);
+});
