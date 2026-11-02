@@ -138,6 +138,17 @@ try{
     });
     q('#guide-prompts').append(button);
   }
+  // Offer number interpretation only where a number is explicitly recorded.
+  if(guide.identity.number){
+    const numberButton=document.createElement('button');
+    numberButton.type='button';
+    numberButton.textContent='What does this number represent?';
+    numberButton.addEventListener('click',()=>{
+      q('#guide-question').value=numberButton.textContent;
+      askGuide(numberButton.textContent);
+    });
+    q('#guide-prompts').append(numberButton);
+  }
 }catch(error){
   q('#title').textContent='Archive record unavailable';
   q('#status').textContent=error.message;
