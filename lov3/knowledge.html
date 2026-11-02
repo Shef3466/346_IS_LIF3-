@@ -44,7 +44,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="note">Local question routing over draft metadata. Not a live AI model; questions are not stored or sent to a server.</p>
 <form id="guide-form" class="question-form"><label for="guide-question">Your question</label><input id="guide-question" name="question" type="search" maxlength="240" required placeholder="What evidence is attached?"><button type="submit">Ask guide</button></form>
 <div id="guide-prompts" class="question-prompts" aria-label="Suggested archive questions"></div>
-<p id="guide-answer" role="status" aria-live="polite"></p><ul id="guide-answer-questions" aria-label="Suggested research questions"></ul><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul>
+<p id="guide-answer" role="status" aria-live="polite"></p><ul id="guide-answer-boundaries" aria-label="Evidence and interpretation distinctions"></ul><ul id="guide-answer-questions" aria-label="Suggested research questions"></ul><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul>
 <p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
 </section>
 </div></div>
@@ -117,6 +117,8 @@ try{
     q('#guide-answer').textContent=result.answer;
     const linked=q('#guide-answer-links'),cited=q('#guide-answer-sources');
     linked.replaceChildren();cited.replaceChildren();
+    const boundaries=q('#guide-answer-boundaries');boundaries.replaceChildren();
+    for(const item of result.distinctions??[]) li(boundaries,item.label+': '+item.detail);
     const questions=q('#guide-answer-questions');questions.replaceChildren();
     for(const prompt of result.questions??[]) li(questions,prompt);
     for(const link of result.links) li(linked,link.title,knowledgeHref(link.id,state));
