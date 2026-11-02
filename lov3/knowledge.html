@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Knowledge Archive (draft)</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 65%);color:#f1f6ff;font:16px/1.6 system-ui,sans-serif}
+main{max-width:920px;margin:auto;padding:clamp(16px,4vw,44px)}
+a{color:#baddff;text-underline-offset:4px}a:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+nav{margin-bottom:24px}h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.2;margin:8px 0}
+h2{font-size:1.25rem;margin-top:0;color:#ffe4aa}p{margin:8px 0 14px}
+.eyebrow{color:#9fd7f6;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
+.path{color:#d7c58f;overflow-wrap:anywhere}.number{display:inline-block;border:1px solid #9cbed9;border-radius:16px;padding:2px 12px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:18px}
+section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding:clamp(16px,3vw,26px);margin:18px 0;min-width:0}
+.guide{border-color:#a8905a;background:linear-gradient(140deg,#18324e,#0c1829)}
+.note{color:#bdcfe0;font-size:.91rem}ul{padding-left:22px}li{margin:10px 0}
+.status{color:#ffd99c} .pill{font-size:.8rem;border:1px solid #667f95;border-radius:20px;padding:3px 10px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style></head><body><main>
+<nav><a id="back" href="./explorer.html">← Return to the globe at your saved position</a></nav>
+<p class="eyebrow">Book of LOV3 · Knowledge archive</p>
+<h1 id="title">Loading archive record…</h1>
+<p id="path" class="path"></p><p id="number" class="number" hidden></p>
+<p id="status" role="status" class="status">Retrieving Genesis draft.</p>
+<div class="grid"><div>
+<section aria-labelledby="record-heading"><h2 id="record-heading">Record and relationships</h2>
+<p id="record"></p><ul id="related"></ul></section>
+<section aria-labelledby="sources-heading"><h2 id="sources-heading">Evidence and media</h2>
+<p id="evidence"></p><ul id="sources"></ul><p id="media" class="note"></p></section>
+</div><div>
+<section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading">LOV3 Archive Guide</h2>
+<p class="note">Original retrieval preview · Not a live conversational AI</p>
+<p id="guide-intro"></p><p id="guide-next"></p>
+<p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
+</section>
+</div></div>
+<p class="note">This archive is a developing research environment. It does not yet provide an editable comparison workspace or generative AI dialogue.</p>
+</main>
+<script type="module">
+import {validate} from './graph.mjs';
+import {archiveGuide} from './archive-guide.mjs';
+import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
+const q=selector=>document.querySelector(selector);
+q('#back').href=globeReturnHref(location.search);
+function li(parent,label,href){
+  const item=document.createElement('li');
+  if(href){const a=document.createElement('a');a.href=href;a.textContent=label;item.append(a);}
+  else item.textContent=label;
+  parent.append(item);
+}
+try{
+  const id=selectedId(location.search);
+  if(!id) throw new Error('No valid concept selected. Return to the globe to choose one.');
+  const response=await fetch('./genesis.json');
+  if(!response.ok) throw new Error('Genesis retrieval failed (HTTP '+response.status+').');
+  const book=await response.json();
+  validate(book);
+  const guide=archiveGuide(book,id);
+  const state=readGlobeState(location.search);
+  q('#title').textContent=guide.identity.word;
+  document.title=guide.identity.word+' — Book of LOV3';
+  q('#path').textContent=guide.identity.path.slice(0,3).join(' → ');
+  if(guide.identity.number){q('#number').hidden=false;q('#number').textContent='Recorded number: '+guide.identity.number;}
+  q('#status').textContent='Unpublished editorial draft · '+guide.coverage.reviewedCount+' reviewed source(s)';
+  q('#record').textContent='Archive title: '+guide.entry.title+'. Relationships are recorded editorial links, not independently verified claims.';
+  const related=q('#related');
+  for(const link of guide.outgoing)
+    li(related,'Related to: '+link.title+' ('+link.type+', '+link.sourceIds.length+' relation citation(s))',knowledgeHref(link.id,state));
+  for(const link of guide.incoming)
+    li(related,'Linked from: '+link.title+' ('+link.type+', '+link.sourceIds.length+' relation citation(s))',knowledgeHref(link.id,state));
+  if(!guide.outgoing.length&&!guide.incoming.length)li(related,'No relationships recorded yet.');
+  q('#evidence').textContent=guide.evidence;
+  const sources=q('#sources');
+  for(const source of guide.sources){
+    li(sources,source.title+' — '+source.kind+'; '+source.reviewStatus,source.url);
+  }
+  if(!guide.sources.length)li(sources,'No source records attached to this draft.');
+  q('#media').textContent='No source-attributed images or historical scenes have been attached to this record.';
+  q('#guide-intro').textContent=guide.introduction;
+  q('#guide-next').textContent=guide.next;
+}catch(error){
+  q('#title').textContent='Archive record unavailable';
+  q('#status').textContent=error.message;
+}
+</script></body></html>
