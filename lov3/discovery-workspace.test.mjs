@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
+import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,previousDiscoveryId,comparePins,WORKSPACE_KEY} from './discovery-workspace.mjs';
 import {knowledgeHref,readGlobeState,globeReturnHref,selectedId} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
@@ -88,6 +88,31 @@ test('comparison keeps both directions, relation types, and exact citation count
     {from:'lov3:0002',to:'lov3:0001',type:'questions',citationCount:0}
   ]);
 });
+test('previous discovery uses only valid tab visits and preserves navigation intent',()=>{
+  let state=emptyWorkspace();
+  state=recordVisit(state,'lov3:0001',ids);
+  assert.equal(previousDiscoveryId(state,'lov3:0001',ids),null);
+  state=recordVisit(state,'lov3:0002',ids);
+  assert.equal(previousDiscoveryId(state,'lov3:0002',ids),'lov3:0001');
+  state=recordVisit(state,'lov3:0001',ids);
+  assert.equal(previousDiscoveryId(state,'lov3:0001',ids),'lov3:0002');
+  assert.equal(previousDiscoveryId(state,'lov3:0002',ids),null);
+  assert.equal(previousDiscoveryId(state,'lov3:9999',ids),null);
+  assert.equal(previousDiscoveryId({trail:['lov3:0002','lov3:9999','lov3:0001']},'lov3:0001',ids),'lov3:0002');
+  assert.equal(previousDiscoveryId({trail:['lov3:0001','lov3:0001']},'lov3:0001',ids),null);
+  const pose={angle:2.314159265358979,tilt:-.31,edges:false,running:false};
+  const href=knowledgeHref(previousDiscoveryId(state,'lov3:0001',ids),pose);
+  const parsed=new URL(href,'https://archive.example/lov3/');
+  assert.equal(selectedId(parsed.search),'lov3:0002');
+  assert.deepEqual(readGlobeState(parsed.search),pose);
+});
+test('knowledge page exposes accessible previous-discovery navigation',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/id="previous-discovery"[^>]*hidden/);
+  assert.match(html,/previousDiscoveryId\(history,id,ids\)/);
+  assert.match(html,/knowledgeHref\(previous,state\)/);
+});
+
 test('workspace and knowledge page expose pinning and accessible navigation',()=>{
   const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
   const knowledge=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
