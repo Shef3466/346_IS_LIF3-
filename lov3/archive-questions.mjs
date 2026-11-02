@@ -25,7 +25,8 @@ export const SUGGESTED_ARCHIVE_QUESTIONS = Object.freeze([
   'What is connected to this concept?',
   'Compare my pinned discoveries',
   'What does this draft record say?',
-  'Where should I explore next?'
+  'Where should I explore next?',
+  'What should I investigate?'
 ]);
 
 export function answerArchiveQuestion(book,id,workspace,question) {
@@ -54,6 +55,33 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       ? 'Among your other pinned discoveries: '+guide.pinnedContext.map(x=>x.title+' — '+x.relationship).join('; ')+'. These are editorial comparisons, not independently verified correlations.'
       : 'No other valid discoveries are pinned for comparison in this tab. Pin a second concept in the Discovery Workspace to compare recorded classifications.';
     return {kind:'comparison',answer,links,sources:[]};
+  }
+  // Offer testable research questions without manufacturing historical answers.
+  // Only cite a neighbor as an editorial route, never as verified evidence.
+  if(/\b(investigate|investigation|research|evidence gaps)\b/.test(q)){
+    const identity=guide.identity;
+    const questions=[
+      'What independent evidence could support or challenge the draft classification of '+identity.word+' under '+identity.subject+' / '+identity.category+'?'
+    ];
+    const outgoing=guide.outgoing[0],incoming=guide.incoming[0];
+    const neighbor=outgoing??incoming;
+    if(neighbor){
+      const from=outgoing?guide.entry.title:neighbor.title;
+      const to=outgoing?neighbor.title:guide.entry.title;
+      questions.push('What primary or secondary source, if any, supports the recorded '+from+' → '+to+' ('+neighbor.type+') relationship?');
+    }
+    if(identity.number)
+      questions.push('Is '+identity.number+' a symbolic editorial association, a mathematical property, or an independently documented connection?');
+    if(guide.pinnedContext.length)
+      questions.push('Which documented similarities and differences exist between '+identity.word+' and '+guide.pinnedContext[0].title+' beyond their editorial labels?');
+    if(questions.length===1)
+      questions.push('What evidence would contradict the current draft interpretation?');
+    const answer='These are investigation prompts based on this unpublished record, not historical conclusions. '+
+      (guide.coverage.sourceCount
+        ? guide.coverage.sourceCount+' editorial source record(s) are attached; inspect their content and review status before relying on them.'
+        : 'No editorial source records are attached yet; independent verification is still needed.');
+    return {kind:'inquiry',answer,questions,
+      links:neighbor?[{id:neighbor.id,title:neighbor.title}]:[],sources:[]};
   }
   if(/\b(next|explore|recommend|suggest|journey)\b/.test(q)){
     // Explicit graph neighbors first; if none exist, only shared editorial classifications.
