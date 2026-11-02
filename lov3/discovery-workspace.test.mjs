@@ -123,7 +123,7 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
   assert.match(html,/relation\.citationCount/);
   assert.match(html,/No source-attributed images/);
   assert.match(knowledge,/id="pin-workspace"/);
-  assert.match(knowledge,/recordVisit\(/);
+  assert.match(knowledge,/navigateKnowledgeTrail\(/);
 });
 
 test('workspace unpin handler restores keyboard focus and announces the result',()=>{
