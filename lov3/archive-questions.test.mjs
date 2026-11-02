@@ -240,3 +240,37 @@ test('knowledge page renders research prompts in an accessible list and clears o
   assert.match(html,/questions\.replaceChildren\(\)/);
   assert.match(html,/for\(const prompt of result\.questions\?\?\[\]\) li\(questions,prompt\)/);
 });
+
+test('singular relation and edge evidence questions return only cited directed-edge sources',()=>{
+  const copy=structuredClone(book);
+  const entry=copy.entries.find(x=>x.id==='lov3:0009');
+  entry.sources=[
+    {id:'note:edge',title:'Edge-specific editorial note',kind:'project-note',reviewStatus:'unreviewed'},
+    {id:'note:general',title:'Unrelated source',kind:'secondary',reviewStatus:'reviewed'}
+  ];
+  entry.links[0].sourceIds=['note:edge'];
+  for(const question of ['Which citations support this relation?','What proof exists for this edge?']){
+    const result=answerArchiveQuestion(copy,'lov3:0009',null,question);
+    assert.equal(result.kind,'relationships');
+    assert.deepEqual(result.sources.map(x=>x.title),['Edge-specific editorial note']);
+    assert.match(result.answer,/do not independently verify/);
+  }
+});
+
+test('mixed evidence-and-investigation request produces questions, not an unrelated source listing',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'note:one',title:'Editorial placeholder',kind:'project-note',reviewStatus:'unreviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'What evidence should I investigate?');
+  assert.equal(result.kind,'inquiry');
+  assert.ok(result.questions.some(q=>q.includes('independent evidence')));
+  assert.deepEqual(result.sources,[]);
+  assert.match(result.answer,/review status/);
+});
+
+test('ordinary attached-source question still returns entry evidence, not graph-edge citations',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'note:general',title:'Entry-level note',kind:'project-note',reviewStatus:'unreviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'Which sources are attached to this record?');
+  assert.equal(result.kind,'evidence');
+  assert.deepEqual(result.sources.map(x=>x.title),['Entry-level note']);
+});
