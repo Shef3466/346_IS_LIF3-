@@ -13,7 +13,7 @@ button,select{background:#174573;color:white;border:1px solid #8aaac9;border-rad
 ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3;min-height:1.4em}
 @media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
 </style></head><body><main>
-<nav><a id="back" href="./explorer.html">← Return to the globe</a> · <a href="./explorer.html">Explore more concepts</a></nav>
+<nav><a id="back" href="./explorer.html">← Return to the globe</a> · <a id="explore-more" href="./explorer.html">Explore more concepts</a> · <a id="resume" href="./knowledge.html" hidden>Resume last discovery</a></nav>
 <h1>Discovery Workspace</h1><p>Pin four to six concepts for side-by-side inspection. These are unpublished editorial records, not verified historical claims. Your pins and navigation trail stay in this browser tab; nothing is sent to a server.</p>
 <div class="toolbar"><label for="capacity">Visible comparison slots</label><select id="capacity" aria-label="Number of comparison slots"><option value="4">4</option><option value="5">5</option><option value="6">6</option></select><button id="clear" type="button">Clear pins and history</button></div>
 <p id="status" role="status" aria-live="polite">Loading workspace…</p>
@@ -28,6 +28,7 @@ import {readGlobeState,knowledgeHref,globeReturnHref} from './portal-state.mjs';
 import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,recordVisit,comparePins} from './discovery-workspace.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
+q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
 const stateView=readGlobeState(location.search);
 function item(parent,text,href){const li=document.createElement('li');if(href){const a=document.createElement('a');a.href=href;a.textContent=text;li.append(a);}else li.textContent=text;parent.append(li);}
 function el(tag,text){const e=document.createElement(tag);e.textContent=text;return e;}
@@ -79,6 +80,10 @@ try{
    if(!pairs.length)item(comparisons,'Pin at least two discoveries to compare their recorded relationships.');
    for(const id of [...state.trail].reverse())item(trail,byId.get(id).title,knowledgeHref(id,stateView));
    if(!state.trail.length)item(trail,'No exploration history in this tab yet.');
+   const lastVisited=state.trail.at(-1);
+   const resume=q('#resume');
+   resume.hidden=!lastVisited;
+   if(lastVisited)resume.href=knowledgeHref(lastVisited,stateView);
  }
  q('#capacity').addEventListener('change',e=>{
    try{state=setWorkspaceCapacity(state,Number(e.target.value));persist();render();}
