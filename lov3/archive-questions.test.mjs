@@ -6,9 +6,9 @@ import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-quest
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 
 test('question suggestions route to bounded archive topics',()=>{
-  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,6);
+  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,7);
   assert.deepEqual(SUGGESTED_ARCHIVE_QUESTIONS.map(q=>answerArchiveQuestion(book,'lov3:0002',null,q).kind),
-    ['evidence','relationships','comparison','record','exploration','inquiry']);
+    ['evidence','relationships','comparison','record','exploration','inquiry','boundaries']);
 });
 test('unreferenced Genesis draft cannot invent evidence or media',()=>{
   const result=answerArchiveQuestion(book,'lov3:0009',null,'What evidence is attached?');
@@ -273,4 +273,37 @@ test('ordinary attached-source question still returns entry evidence, not graph-
   const result=answerArchiveQuestion(copy,'lov3:0009',null,'Which sources are attached to this record?');
   assert.equal(result.kind,'evidence');
   assert.deepEqual(result.sources.map(x=>x.title),['Entry-level note']);
+});
+
+test('evidence-boundary audit separates recorded metadata, editorial interpretations and unsupported claims',()=>{
+  const result=answerArchiveQuestion(book,'lov3:0011',null,'What is verified versus interpreted?');
+  assert.equal(result.kind,'boundaries');
+  assert.deepEqual(result.distinctions.map(x=>x.label),[
+    'Recorded metadata','Editorial interpretation','Source review status','Hypothesis and AI inference'
+  ]);
+  assert.match(result.distinctions[0].detail,/Number 3–4–6–9/);
+  assert.match(result.distinctions[1].detail,/draft editorial choices/);
+  assert.match(result.distinctions[3].detail,/symbolic editorial association/);
+  assert.deepEqual(result.sources,[]);
+  assert.deepEqual(result.links,[]);
+  assert.match(result.answer,/cannot certify historical facts/);
+});
+
+test('reviewed source status is never converted into verified history in an audit',()=>{
+  const copy=structuredClone(book);
+  copy.entries[8].sources=[{id:'source:reviewed',title:'Illustrative record',kind:'primary',reviewStatus:'reviewed'}];
+  const result=answerArchiveQuestion(copy,'lov3:0009',null,'How confident are we?');
+  assert.equal(result.kind,'boundaries');
+  assert.match(result.distinctions[2].detail,/1 marked reviewed/);
+  assert.match(result.distinctions[2].detail,/not external fact-checking/);
+  assert.match(result.distinctions[3].detail,/No number is recorded/);
+  assert.deepEqual(result.sources,[]);
+  assert.ok(!result.answer.includes('historically verified'));
+});
+
+test('knowledge page renders and clears evidence distinctions as safe text',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/id="guide-answer-boundaries" aria-label="Evidence and interpretation distinctions"/);
+  assert.match(html,/boundaries\.replaceChildren\(\)/);
+  assert.match(html,/for\(const item of result\.distinctions\?\?\[\]\) li\(boundaries,item\.label\+': '\+item\.detail\)/);
 });
