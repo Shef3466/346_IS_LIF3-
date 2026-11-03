@@ -31,3 +31,12 @@ Scope: public project decisions and rationale, not conversation transcripts.
 3. Comparison and export include source pointers and distinctions between verified records and interpretations; no fabricated citations.
 4. Keyboard, mobile and reduced-motion behavior remain usable; globe stays portal-only.
 5. Tests and preview must be verified before describing features as completed.
+
+
+## First hands-on preview feedback — responsive layout and conversational guide
+- User opened the mobile development preview and found the full-screen navigation/selection experience useful. This is user feedback, not independently verified browser testing.
+- Desktop layout is an open design choice: split-screen globe plus separate knowledge reading pane is a candidate, versus a floating detail window. Do not treat either as approved or implemented yet.
+- LOV3 should support a back-and-forth conversational exchange after reading an archive record, allowing questions, comparisons and reasoned exploration. The guide should retain user-controlled navigation context.
+- **Priority order:** make the program and end-to-end globe → knowledge → guide → discovery trail → three-pin comparison flow actually work first; polish responsive dimensions and scaling afterward. Do not confuse screen-size responsiveness with infrastructure scalability.
+- Preserve the portal-only globe and stable separate knowledge reading context on mobile. Desktop may adapt layout without mixing definition text into globe geometry.
+- Design iteration follows Think → Talk → See → Think: a usable preview is necessary to reveal further user insights; do not replace hands-on validation with repeated planning conversations.
