@@ -146,7 +146,7 @@ try{
     for(const prompt of result.questions??[]) li(questions,prompt);
     for(const link of result.links) li(linked,link.title,knowledgeHref(link.id,state));
     for(const source of result.sources)
-      li(cited,source.title+' — '+source.kind+'; '+source.reviewStatus+(source.relation?' · cited for '+source.relation:''),source.url);
+      li(cited,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established'+(source.relation?' · cited for '+source.relation:''),source.url);
   }
   q('#guide-form').addEventListener('submit',event=>{
     event.preventDefault();
