@@ -335,3 +335,13 @@ test('knowledge page offers a number question only when the record contains a nu
   assert.match(html,/What does this number represent\?/);
   assert.match(html,/askGuide\(numberButton\.textContent\)/);
 });
+
+test('natural-language trust questions receive evidence boundaries, not a fabricated yes/no verdict',()=>{
+  for(const question of ['Is this true?','Can I trust this?','How do you know?','Is this verified?','What supports this claim?']){
+    const result=answerArchiveQuestion(book,'lov3:0009',null,question);
+    assert.equal(result.kind,'boundaries',question);
+    assert.match(result.answer,/cannot certify historical facts/i);
+    assert.deepEqual(result.sources,[]);
+    assert.deepEqual(result.links,[]);
+  }
+});
