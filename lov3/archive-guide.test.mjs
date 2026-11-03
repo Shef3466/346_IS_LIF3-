@@ -83,3 +83,24 @@ test('knowledge page renders comparison provenance without treating source IDs a
   assert.match(html,/not independently verified/);
   assert.match(html,/document\.createElement\('p'\)/);
 });
+
+test('comparison source attribution respects owning entry on incoming links',()=>{
+ const copy=structuredClone(book);
+ const current=copy.entries.find(e=>e.id==='lov3:0002');
+ const other=copy.entries.find(e=>e.id==='lov3:0003');
+ current.sources=[{id:'shared:note',title:'Current note',kind:'project-note',reviewStatus:'unreviewed'}];
+ other.sources=[{id:'shared:note',title:'Other note',kind:'primary',reviewStatus:'reviewed',url:'https://example.org/source'}];
+ current.links.find(link=>link.to==='lov3:0003').sourceIds=['shared:note'];
+ const forward=archiveGuide(copy,'lov3:0002',{pins:['lov3:0003']}).pinnedContext[0];
+ const reverse=archiveGuide(copy,'lov3:0003',{pins:['lov3:0002']}).pinnedContext[0];
+ assert.equal(forward.directLinkSources[0].title,'Current note');
+ assert.equal(reverse.directLinkSources[0].title,'Current note');
+ assert.equal(reverse.directLinkSources[0].ownerId,'lov3:0002');
+ assert.equal(reverse.directLinkSources[0].reviewStatus,'unreviewed');
+});
+test('knowledge page renders attributed source details',()=>{
+ const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+ assert.match(html,/other\.directLinkSources/);
+ assert.match(html,/Source records for this comparison/);
+ assert.match(html,/source\.reviewStatus/);
+});
