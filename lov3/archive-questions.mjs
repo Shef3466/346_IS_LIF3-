@@ -44,7 +44,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   const inquiryIntent=/\b(investigate|investigation|research|evidence gaps|disprove|falsify|refute|contradict|counterevidence)\b/.test(q);
   // An epistemic audit separates what the JSON records from what the world
   // independently establishes. Even a reviewed source is not a verified claim.
-  const boundaryIntent=/\b(verified (?:versus|vs\.?|or) interpret|fact(?:s)? (?:versus|vs\.?|or) interpret|what is (?:actually )?verified|how confident|hypothes(?:is|es)|inferred correlations?|is (?:this|that|it) (?:true|verified|proven|reliable)|can i trust (?:this|that|it)|how do (?:you|we) know|what supports this claim)\b/.test(q);
+  const boundaryIntent=/\b(verified (?:versus|vs\.?|or) interpret|fact(?:s)? (?:versus|vs\.?|or) interpret|what is (?:actually )?verified|how confident|hypothes(?:is|es)|inferred correlations?|is (?:this|that|it) (?:true|verified|proven|reliable)|can i trust (?:this|that|it)|how do (?:you|we) know|what supports this claim|are (?:these|the) claims? verified|what (?:is|has been) (?:actually )?established)\b/.test(q);
   if(boundaryIntent){
     const identity=guide.identity;
     const attached=guide.coverage.sourceCount,reviewed=guide.coverage.reviewedCount;
