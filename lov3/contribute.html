@@ -34,8 +34,10 @@ textarea{min-height:130px;resize:vertical}button{width:auto;cursor:pointer;backg
 <label for="source-title">Source title (optional, required with URL)</label><input id="source-title" name="sourceTitle" maxlength="200">
 <label for="source-url">Source HTTPS URL (optional, required with title)</label><input id="source-url" name="sourceUrl" type="url" maxlength="2048" placeholder="https://">
 <label for="credit">Contributor display credit (optional, not authenticated)</label><input id="credit" name="credit" maxlength="80" autocomplete="off">
+<button id="preview-proposal" type="button">Preview unreviewed proposal</button>
 <button id="download-proposal" type="submit">Download unreviewed proposal</button>
 </form>
+<section id="proposal-preview" aria-labelledby="preview-title" hidden><h2 id="preview-title">Unreviewed proposal preview</h2><dl id="preview-fields"></dl><p class="note">Preview is local only. Sources and contributor names are not authenticated.</p></section>
 <p class="note">Downloading does not publish, submit, review, or merge a relationship into Genesis. A future contributor review process will need identity verification, moderation, evidence assessment, contributor consent, and credit preservation.</p>
 </main>
 <script type="module">
@@ -76,15 +78,31 @@ try{
   }
   form.hidden=false;
   status.textContent='Ready to prepare a local, unreviewed proposal.';
+  const prepare=()=>createRelationshipProposal({
+    from:q('#from').value,to:q('#to').value,type:q('#relation').value,
+    classification:q('#classification').value,explanation:q('#explanation').value,
+    sourceTitle:q('#source-title').value,sourceUrl:q('#source-url').value,
+    credit:q('#credit').value
+  },book);
+  q('#preview-proposal').addEventListener('click',()=>{
+    try{
+      const proposal=prepare(),fields=q('#preview-fields');fields.replaceChildren();
+      const labels=[['From',book.entries.find(e=>e.id===proposal.from)?.title],
+        ['To',book.entries.find(e=>e.id===proposal.to)?.title],['Relationship',proposal.type],
+        ['Classification',proposal.classification],['Explanation',proposal.explanation],
+        ['Source',proposal.source?proposal.source.title+' — '+proposal.source.url:'No source supplied'],
+        ['Contributor credit',proposal.credit||'Anonymous'],['Review status','Unreviewed']];
+      for(const [label,value] of labels){const dt=document.createElement('dt'),dd=document.createElement('dd');
+        dt.textContent=label;dd.textContent=value;fields.append(dt,dd);}
+      q('#proposal-preview').hidden=false;status.textContent='Local preview ready. Nothing was submitted.';
+    }catch(error){q('#proposal-preview').hidden=true;status.textContent=error.message;}
+  });
+  form.addEventListener('input',()=>{q('#proposal-preview').hidden=true;});
+  form.addEventListener('change',()=>{q('#proposal-preview').hidden=true;});
   form.addEventListener('submit',event=>{
     event.preventDefault();
     try{
-      const proposal=createRelationshipProposal({
-        from:q('#from').value,to:q('#to').value,type:q('#relation').value,
-        classification:q('#classification').value,explanation:q('#explanation').value,
-        sourceTitle:q('#source-title').value,sourceUrl:q('#source-url').value,
-        credit:q('#credit').value
-      },book);
+      const proposal=prepare();
       const blob=new Blob([exportRelationshipProposal(proposal)],{type:'application/json'});
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
