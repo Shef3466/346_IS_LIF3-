@@ -59,3 +59,9 @@ test('local preview displays proposal fields as text and clears stale preview on
   assert.match(html,/const proposal=prepare\(\)/);
   assert.doesNotMatch(html,/\.innerHTML\s*=/);
 });
+
+test('preview moves keyboard focus to the newly displayed review panel',()=>{
+  const html=readFileSync(new URL('./contribute.html',import.meta.url),'utf8');
+  assert.match(html,/id="proposal-preview"[^>]*tabindex="-1"/);
+  assert.match(html,/q\('#proposal-preview'\)\.hidden=false;q\('#proposal-preview'\)\.focus\(\)/);
+});
