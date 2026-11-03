@@ -74,3 +74,15 @@ test('changing starting concept automatically avoids a self-relationship',()=>{
   assert.match(html,/q\('#to'\)\.value=alternative\.id;status\.textContent='Related concept adjusted/);
   assert.match(html,/updateReturn\(\);/);
 });
+
+test('clear local draft control removes entered content and stale preview with keyboard focus',()=>{
+  const html=readFileSync(new URL('./contribute.html',import.meta.url),'utf8');
+  assert.match(html,/id="clear-proposal" type="button"/);
+  assert.match(html,/q\('#clear-proposal'\)\.addEventListener\('click'/);
+  for(const field of ['explanation','source-title','source-url','credit']){
+    assert.ok(html.includes("q('#"+field+"').value='';"));
+  }
+  assert.match(html,/q\('#classification'\)\.value='hypothesis';q\('#proposal-preview'\)\.hidden=true/);
+  assert.match(html,/q\('#explanation'\)\.focus\(\)/);
+  assert.match(html,/No proposal was submitted/);
+});
