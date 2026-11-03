@@ -112,7 +112,26 @@ test('structured proposals require meaningful answers to every question',()=>{
   const full=labels.map((label,index)=>label+' '+responses[index]).join('\n\n');
   assert.equal(createRelationshipProposal({...input,explanation:full},book).reviewStatus,'unreviewed');
   const blankMiddle=labels.map((label,index)=>label+' '+(index===1?'':responses[index])).join('\n\n');
-  assert.throws(()=>createRelationshipProposal({...input,explanation:blankMiddle},book),/substantive answer/);
+  assert.throws(()=>createRelationshipProposal({...input,explanation:blankMiddle},book),/Reasoning question 2 needs a substantive answer/);
   assert.throws(()=>createRelationshipProposal({...input,explanation:labels.slice(0,2).join(' ')+' '+responses.join(' ')},book),/all four reasoning prompts/);
   assert.throws(()=>createRelationshipProposal({...input,explanation:labels.slice().reverse().map((label,index)=>label+' '+responses[index]).join('\n')},book),/original order/);
+});
+
+test('reasoning validation identifies each incomplete section without claiming verification',()=>{
+  const labels=['What I am connecting:','Why this connection makes sense (evidence or mechanism):',
+    'Alternative explanations or limitations:','What this connection establishes (and what remains uncertain):'];
+  const responses=[
+    'Two geometric forms in an archive.',
+    'Both forms use overlapping circles in their construction.',
+    'Visual resemblance alone does not prove shared historical origin.',
+    'This supports a geometric comparison, not a historical conclusion.'
+  ];
+  for(let missing=0;missing<labels.length;missing++){
+    const explanation=labels.map((label,index)=>label+' '+(index===missing?'':responses[index])).join('\n\n');
+    assert.throws(()=>createRelationshipProposal({...input,explanation},book),
+      error=>error instanceof TypeError && error.message.includes('Reasoning question '+(missing+1)) &&
+        error.message.includes(labels[missing]));
+  }
+  const valid=labels.map((label,index)=>label+' '+responses[index]).join('\n\n');
+  assert.equal(createRelationshipProposal({...input,explanation:valid},book).reviewStatus,'unreviewed');
 });
