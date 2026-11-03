@@ -47,3 +47,15 @@ test('contributor form is local-only, keyboard reachable, and linked from knowle
   assert.match(knowledge,/id="propose-relationship"/);
   assert.match(knowledge,/\.\/contribute\.html\?/);
 });
+
+test('local preview displays proposal fields as text and clears stale preview on edits',()=>{
+  const html=readFileSync(new URL('./contribute.html',import.meta.url),'utf8');
+  assert.match(html,/id="preview-proposal" type="button"/);
+  assert.match(html,/id="proposal-preview" aria-labelledby="preview-title" hidden/);
+  assert.match(html,/fields\.replaceChildren\(\)/);
+  assert.match(html,/dt\.textContent=label;dd\.textContent=value/);
+  assert.match(html,/form\.addEventListener\('input',\(\)=>\{q\('#proposal-preview'\)\.hidden=true/);
+  assert.match(html,/form\.addEventListener\('change',\(\)=>\{q\('#proposal-preview'\)\.hidden=true/);
+  assert.match(html,/const proposal=prepare\(\)/);
+  assert.doesNotMatch(html,/\.innerHTML\s*=/);
+});
