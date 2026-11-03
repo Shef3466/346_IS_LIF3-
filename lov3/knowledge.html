@@ -127,7 +127,7 @@ try{
       const sourceList=document.createElement('ul');
       sourceList.setAttribute('aria-label','Source records for this comparison');
       for(const source of other.directLinkSources){
-        li(sourceList,source.title+' — '+source.reviewStatus+' (record '+source.ownerId+')',source.url);
+        li(sourceList,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established (record '+source.ownerId+')',source.url);
       }
       item.append(sourceList);
     }
