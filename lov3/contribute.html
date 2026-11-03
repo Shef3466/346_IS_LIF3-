@@ -34,6 +34,7 @@ textarea{min-height:130px;resize:vertical}button{width:auto;cursor:pointer;backg
 <label for="source-title">Source title (optional, required with URL)</label><input id="source-title" name="sourceTitle" maxlength="200">
 <label for="source-url">Source HTTPS URL (optional, required with title)</label><input id="source-url" name="sourceUrl" type="url" maxlength="2048" placeholder="https://">
 <label for="credit">Contributor display credit (optional, not authenticated)</label><input id="credit" name="credit" maxlength="80" autocomplete="off">
+<button id="clear-proposal" type="button">Clear local draft</button>
 <button id="preview-proposal" type="button">Preview unreviewed proposal</button>
 <button id="download-proposal" type="submit">Download unreviewed proposal</button>
 </form>
@@ -91,6 +92,12 @@ try{
     sourceTitle:q('#source-title').value,sourceUrl:q('#source-url').value,
     credit:q('#credit').value
   },book);
+  q('#clear-proposal').addEventListener('click',()=>{
+    q('#explanation').value='';q('#source-title').value='';q('#source-url').value='';q('#credit').value='';
+    q('#classification').value='hypothesis';q('#proposal-preview').hidden=true;
+    status.textContent='Local draft fields cleared. No proposal was submitted.';
+    q('#explanation').focus();
+  });
   q('#preview-proposal').addEventListener('click',()=>{
     try{
       const proposal=prepare(),fields=q('#preview-fields');fields.replaceChildren();
