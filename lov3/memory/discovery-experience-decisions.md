@@ -40,3 +40,10 @@ Scope: public project decisions and rationale, not conversation transcripts.
 - **Priority order:** make the program and end-to-end globe → knowledge → guide → discovery trail → three-pin comparison flow actually work first; polish responsive dimensions and scaling afterward. Do not confuse screen-size responsiveness with infrastructure scalability.
 - Preserve the portal-only globe and stable separate knowledge reading context on mobile. Desktop may adapt layout without mixing definition text into globe geometry.
 - Design iteration follows Think → Talk → See → Think: a usable preview is necessary to reveal further user insights; do not replace hands-on validation with repeated planning conversations.
+
+
+## Heartstrings — globe route visualization concept
+- New user concept: the chain-link globe is LOV3's heart; its connections are **heartstrings**. Following a knowledge relationship visually pulls/illuminates the corresponding string, expressing the route through the heart.
+- When a visitor selects a point and follows actual relationships, highlight the traversed route on the globe so they can visually retrace how they reached a discovery. Preserve exact orientation when returning from a knowledge page.
+- Highlight only relevant links and the user's real trail to avoid visual clutter; do not invent graph edges or claim a path where no relationship is recorded.
+- This is a proposed experience direction, **not yet implemented or browser-tested**. Keep the globe a subject/category discovery portal; definition reading remains on a separate page.
