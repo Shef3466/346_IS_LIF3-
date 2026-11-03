@@ -49,8 +49,10 @@ Scope: public project decisions and rationale, not conversation transcripts.
 - This is a proposed experience direction, **not yet implemented or browser-tested**. Keep the globe a subject/category discovery portal; definition reading remains on a separate page.
 
 
-## LOV3 Connection — discovery celebration concept
-- When a visitor identifies and saves a meaningful new discovery, celebrate it as **“You made a LOV3 Connection!”**. This is a user-acknowledged discovery, not an automatic award for filling three comparison slots or a claim that an unverified relationship is factual.
-- Presentation direction: playful, warm, nostalgic television game-show reveal energy, loosely recalling the emotional payoff of the classic Love Connection show. Create **original** animation, graphic identity, spoken wording and musical sting; do not copy the show's theme song, protected audiovisual expression, logos or trade dress.
-- A heartstring/path illumination and subtle globe pulse can accompany the reveal. Respect reduced-motion settings, muted audio by default unless explicitly enabled, and accessible text announcements. Keep it brief and optional, not an interruption to reading.
-- The celebration can link to a saved discovery and its traceable route and sources. This is approved concept direction; not yet implemented or tested.
+## LOV3 Connection — contributor discovery incentive (corrected decision)
+- A **LOV3 Connection** is a new relationship/discovery a visitor develops and **contributes to expand the Book of LOV3 knowledge framework**. It is NOT a reward for clicking, browsing, following existing paths, comparing entries, or merely saving personal research.
+- The user investigates, develops an original relationship with explanation and supporting context/sources when available, then submits it as a proposed contribution. Keep contributor attribution and traceable reasoning where consented.
+- Distinguish proposed, reviewed and accepted connections. A contribution is not automatically established fact; reviewers distinguish sourced factual relations, interpretive relations and hypotheses. Acceptance into the framework requires an appropriate review step; do not invent automatic verification.
+- The incentive/celebration **“You made a LOV3 Connection!”** should correspond to an actual contribution milestone, not routine navigation. Specify in the UI whether the connection was submitted or accepted, so the celebration never implies unearned approval. The intended signature reward is recognition for a genuinely new contribution added to the framework.
+- Creative presentation can evoke a warm retro game-show reveal while using original music, visuals and wording; no copying of television theme music, logos or trade dress. Respect accessible text, reduced motion and user-controlled sound.
+- The previous description of celebrating a visitor merely recognizing/saving a discovery was incorrect and is superseded by this section. This is a design decision; functionality has not yet been implemented or tested.
