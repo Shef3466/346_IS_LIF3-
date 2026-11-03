@@ -42,8 +42,9 @@ export function createRelationshipProposal(input,book){
     const answers=scaffoldLabels.map((label,index)=>
       explanation.slice(positions[index]+label.length,
         index+1<positions.length?positions[index+1]:undefined).trim());
-    if(answers.some(answer=>answer.length<12))
-      throw new TypeError('Give a substantive answer to each reasoning prompt');
+    const incomplete=answers.findIndex(answer=>answer.length<12);
+    if(incomplete>=0)
+      throw new TypeError('Reasoning question '+(incomplete+1)+' needs a substantive answer: '+scaffoldLabels[incomplete]);
   }
 
   const credit=input.credit?.trim()?field(input.credit,'contributor credit',80,2):null;
