@@ -19,6 +19,19 @@ export function createRelationshipProposal(input,book){
   if(!proposalClassifications.includes(input.classification))
     throw new TypeError('Invalid classification');
   const explanation=field(input.explanation,'relationship explanation',2000,25);
+  // A pasted or untouched prompt scaffold is not a demonstrated connection.
+  // Keep free-form reasoning valid; only reject scaffolds without substantive answers.
+  const scaffoldLabels=[
+    'What I am connecting:',
+    'Why this connection makes sense (evidence or mechanism):',
+    'Alternative explanations or limitations:',
+    'What this connection establishes (and what remains uncertain):'
+  ];
+  let substantive=explanation;
+  for(const label of scaffoldLabels)substantive=substantive.replaceAll(label,'');
+  if(substantive.trim().length<25)
+    throw new TypeError('Explain the connection in your own words; reasoning prompts alone are not a proposal');
+
   const credit=input.credit?.trim()?field(input.credit,'contributor credit',80,2):null;
   const sourceTitle=input.sourceTitle?.trim()||'';
   const sourceUrl=input.sourceUrl?.trim()||'';
