@@ -73,3 +73,13 @@ test('pinned guide comparisons disclose missing provenance and actual source poi
   assert.deepEqual(sourced.pinnedContext[0].directLinkSourceIds,['test:note']);
   assert.match(sourced.pinnedContext[0].provenance,/review status not established here/);
 });
+
+
+test('knowledge page renders comparison provenance without treating source IDs as verified evidence',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/Evidence status: /);
+  assert.match(html,/other\\.provenance/);
+  assert.match(html,/other\\.directLinkSourceIds\\.join/);
+  assert.match(html,/not independently verified/);
+  assert.match(html,/document\\.createElement\\('p'\\)/);
+});
