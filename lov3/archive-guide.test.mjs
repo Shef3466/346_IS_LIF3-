@@ -104,3 +104,12 @@ test('knowledge page renders attributed source details',()=>{
  assert.match(html,/Source records for this comparison/);
  assert.match(html,/source\.reviewStatus/);
 });
+
+
+test('public workspace guidance matches the current three-route UI',()=>{
+ const readme=readFileSync(new URL('./README.md',import.meta.url),'utf8');
+ const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+ assert.match(readme,/three active comparison routes maximum/i);
+ assert.match(html,/Three routes maximum/);
+ assert.doesNotMatch(readme,/Four slots appear by default; expand to five or six/);
+});
