@@ -21,7 +21,7 @@ export function importDiscoverySession(text,validIds,currentEdition) {
      typeof data.genesisEdition!=='string'||!data.genesisEdition.trim()||
      !data.workspace||typeof data.workspace!=='object'||Array.isArray(data.workspace))
     throw new TypeError('Not a LOV3 discovery session');
-  if(!Number.isInteger(data.workspace.capacity)||data.workspace.capacity<4||data.workspace.capacity>6||
+  if(!Number.isInteger(data.workspace.capacity)||data.workspace.capacity<3||data.workspace.capacity>6||
      !Array.isArray(data.workspace.pins)||!Array.isArray(data.workspace.trail))
     throw new TypeError('Malformed LOV3 workspace');
   const workspace=normalizeWorkspace(data.workspace,validIds);
