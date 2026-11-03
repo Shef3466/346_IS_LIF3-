@@ -60,7 +60,7 @@ try{
      const sources=e.sources??[];
      card.append(el('p',sources.length? sources.length+' attached editorial source(s); review status below.':'No editorial sources attached.'));
      const list=el('ul','');
-     for(const source of sources)item(list,source.title+' ('+source.reviewStatus+')',source.url);
+     for(const source of sources)item(list,source.title+' ('+source.kind+'; '+source.reviewStatus+'; factual verification not established)',source.url);
      card.append(list,el('p','No source-attributed images attached.'));
      const link=el('a','Open knowledge page');link.href=knowledgeHref(id,stateView);card.append(link);
      const remove=el('button','Unpin');remove.type='button';remove.setAttribute('aria-label','Unpin '+identity.word);
@@ -92,7 +92,7 @@ try{
        const cited=relationCitationDetails(book,relation);
        const sourceList=el('ul','');
        if(!cited.length)item(sourceList,'No editorial source records cited for this relationship.');
-       for(const source of cited)item(sourceList,source.title+' ('+source.kind+'; '+source.reviewStatus+')',source.url);
+       for(const source of cited)item(sourceList,source.title+' ('+source.kind+'; '+source.reviewStatus+'; factual verification not established)',source.url);
        comparison.append(sourceList);
      }
      comparisons.append(comparison);
