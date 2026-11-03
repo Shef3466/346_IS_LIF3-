@@ -1,12 +1,12 @@
 // User-controlled, tab-scoped Discovery Workspace. Only public Genesis IDs are stored.
 export const WORKSPACE_KEY = 'lov3.discovery.workspace.v1';
-export const emptyWorkspace = () => ({capacity:4,pins:[],trail:[]});
+export const emptyWorkspace = () => ({capacity:3,pins:[],trail:[]});
 const isId = id => typeof id === 'string' && /^lov3:[0-9]{4,}$/.test(id);
 const allow = (id, validIds) => isId(id) && validIds.has(id);
 export function normalizeWorkspace(value, validIds) {
   const ids = validIds instanceof Set ? validIds : new Set(validIds);
   if (!value || typeof value !== 'object' || Array.isArray(value)) return emptyWorkspace();
-  const capacity = Number.isInteger(value.capacity) && value.capacity>=4 && value.capacity<=6 ? value.capacity : 4;
+  const capacity = 3; // Legacy four-to-six-slot sessions are safely reduced to three.
   const pins = [...new Set((Array.isArray(value.pins) ? value.pins : []).filter(id=>allow(id,ids)))].slice(0,capacity);
   const trail = (Array.isArray(value.trail) ? value.trail : []).filter(id=>allow(id,ids)).slice(-24);
   return {capacity,pins,trail};
@@ -37,7 +37,7 @@ export function nextPinFocus(state,id) {
   return remaining[Math.min(index,remaining.length-1)]??null;
 }
 export function setWorkspaceCapacity(state,capacity) {
-  if (!Number.isInteger(capacity)||capacity<4||capacity>6) throw new RangeError('Capacity must be 4–6');
+  if (capacity!==3) throw new RangeError('Discovery supports at most three routes');
   if (capacity<state.pins.length) throw new RangeError('Unpin discoveries before reducing slots');
   return {...state,capacity};
 }
