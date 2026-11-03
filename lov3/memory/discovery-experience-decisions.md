@@ -56,3 +56,13 @@ Scope: public project decisions and rationale, not conversation transcripts.
 - The incentive/celebration **“You made a LOV3 Connection!”** should correspond to an actual contribution milestone, not routine navigation. Specify in the UI whether the connection was submitted or accepted, so the celebration never implies unearned approval. The intended signature reward is recognition for a genuinely new contribution added to the framework.
 - Creative presentation can evoke a warm retro game-show reveal while using original music, visuals and wording; no copying of television theme music, logos or trade dress. Respect accessible text, reduced motion and user-controlled sound.
 - The previous description of celebrating a visitor merely recognizing/saving a discovery was incorrect and is superseded by this section. This is a design decision; functionality has not yet been implemented or tested.
+
+
+## Logical Connection protocol — contributor dialogue and review
+- A LOV3 Connection must be **demonstrated, not declared**. Model the contributor experience on constructive back-and-forth inquiry: propose → question → clarify → revise → evaluate → submit. This is a process model, not a transcript.
+- Use three concise prompts: (1) **What are you connecting?** Identify specific entities/observations. (2) **Why are they connected?** State the relation type, reasoning, supporting sources or observations and alternative explanations. (3) **What does it establish?** State a bounded conclusion, significance, uncertainty and classification as sourced fact, interpretation or hypothesis.
+- LOV3 should identify missing logical steps, ask targeted follow-up questions, distinguish analogy/correlation from causation or shared historical origin, and help refine a claim without automatically agreeing or dismissing novel perspectives.
+- Require a traceable explanation that another person can independently inspect. A connection can be an original interpretation without being represented as an independently verified historical/scientific fact.
+- Preserve the candidate relationship, revisions, source pointers, contributor attribution and consented research trail for review; never treat a fluent AI answer as evidence by itself.
+- Acceptance and the signature **LOV3 Connection** recognition are for a meaningful new contribution that passes the appropriate review, not ordinary browsing, pinning, or an unreviewed assertion. Status and feedback must be transparent.
+- Design requirement recorded; implementation and tests pending.
