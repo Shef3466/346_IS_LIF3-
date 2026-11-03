@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Propose a relationship (local draft)</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 0,#18375a,#080e1b 70%);color:#f1f6ff;font:16px/1.6 system-ui,sans-serif}
+main{max-width:820px;margin:auto;padding:clamp(16px,4vw,42px)}
+a{color:#baddff}a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}
+h1{font-size:clamp(1.7rem,5vw,2.8rem);line-height:1.2}p{max-width:75ch}
+form{background:#0b1c32e8;border:1px solid #52708d;border-radius:18px;padding:clamp(16px,3vw,28px)}
+label{display:block;font-weight:600;margin:18px 0 6px}
+input,select,textarea,button{font:inherit;color:#f1f6ff;background:#142f4d;border:1px solid #86a3bf;border-radius:9px;padding:10px;width:100%;max-width:100%}
+textarea{min-height:130px;resize:vertical}button{width:auto;cursor:pointer;background:#1b5682;margin-top:18px}
+.note{color:#c3d2e3;font-size:.93rem}.status{color:#ffe0a3;min-height:1.5em}
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style></head><body><main>
+<nav><a id="return-record" href="./explorer.html">← Return to knowledge record</a></nav>
+<h1>Propose a relationship</h1>
+<p>LOV3 is built for contributors. Show how two existing concepts relate, describe your reasoning, and attach a source when available. This is a <strong>local proposal builder</strong>, not a public submission or a verified finding.</p>
+<p class="note">Nothing is submitted to a server. Only the Genesis draft is fetched. Your explanation and optional contributor credit remain in this page until you download the JSON file. Do not include private or sensitive information. A display credit is not authenticated.</p>
+<p id="proposal-status" role="status" aria-live="polite">Loading Genesis concepts…</p>
+<form id="proposal-form">
+<label for="from">Starting concept</label><select id="from" name="from" required></select>
+<label for="to">Related concept</label><select id="to" name="to" required></select>
+<label for="relation">Proposed relationship type</label><select id="relation" name="relation" required></select>
+<label for="classification">How should this proposal be classified?</label>
+<select id="classification" name="classification" required>
+<option value="hypothesis">Hypothesis — needs testing</option>
+<option value="interpretation">Interpretation — reasoned perspective</option>
+<option value="source-submitted">Source-submitted — external reference supplied, not yet reviewed</option>
+</select>
+<label for="explanation">Demonstrate the relationship (25–2000 characters)</label>
+<textarea id="explanation" name="explanation" minlength="25" maxlength="2000" required placeholder="Explain the connection, what could confirm it, and what remains uncertain."></textarea>
+<label for="source-title">Source title (optional, required with URL)</label><input id="source-title" name="sourceTitle" maxlength="200">
+<label for="source-url">Source HTTPS URL (optional, required with title)</label><input id="source-url" name="sourceUrl" type="url" maxlength="2048" placeholder="https://">
+<label for="credit">Contributor display credit (optional, not authenticated)</label><input id="credit" name="credit" maxlength="80" autocomplete="off">
+<button id="download-proposal" type="submit">Download unreviewed proposal</button>
+</form>
+<p class="note">Downloading does not publish, submit, review, or merge a relationship into Genesis. A future contributor review process will need identity verification, moderation, evidence assessment, contributor consent, and credit preservation.</p>
+</main>
+<script type="module">
+import {validate,relationTypes} from './graph.mjs';
+import {conceptIdentity} from './taxonomy.mjs';
+import {readGlobeState,knowledgeHref,selectedId} from './portal-state.mjs';
+import {createRelationshipProposal,exportRelationshipProposal} from './contribution-draft.mjs';
+const q=s=>document.querySelector(s);
+const status=q('#proposal-status'),form=q('#proposal-form');
+form.hidden=true;
+try{
+  const response=await fetch('./genesis.json');
+  if(!response.ok)throw Error('Genesis retrieval failed (HTTP '+response.status+')');
+  const book=await response.json();validate(book);
+  const initial=selectedId(location.search);
+  const pose=readGlobeState(location.search);
+  const known=new Set(book.entries.map(entry=>entry.id));
+  for(const entry of book.entries){
+    const identity=conceptIdentity(entry);
+    for(const select of [q('#from'),q('#to')]){
+      const option=document.createElement('option');
+      option.value=entry.id;
+      option.textContent=identity.word+' — '+identity.subject+' / '+identity.category;
+      select.append(option);
+    }
+  }
+  for(const type of relationTypes){
+    const option=document.createElement('option');option.value=type;option.textContent=type;
+    q('#relation').append(option);
+  }
+  if(initial&&known.has(initial))q('#from').value=initial;
+  const updateReturn=()=>{q('#return-record').href=knowledgeHref(q('#from').value,pose);};
+  q('#from').addEventListener('change',updateReturn);
+  updateReturn();
+  if(q('#to').value===q('#from').value){
+    const alternative=book.entries.find(entry=>entry.id!==q('#from').value);
+    if(alternative)q('#to').value=alternative.id;
+  }
+  form.hidden=false;
+  status.textContent='Ready to prepare a local, unreviewed proposal.';
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    try{
+      const proposal=createRelationshipProposal({
+        from:q('#from').value,to:q('#to').value,type:q('#relation').value,
+        classification:q('#classification').value,explanation:q('#explanation').value,
+        sourceTitle:q('#source-title').value,sourceUrl:q('#source-url').value,
+        credit:q('#credit').value
+      },book);
+      const blob=new Blob([exportRelationshipProposal(proposal)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='lov3-relationship-proposal.json';
+      document.body.append(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      status.textContent='Unreviewed proposal prepared for local download. Nothing was submitted.';
+    }catch(error){status.textContent=error.message;}
+  });
+}catch(error){status.textContent='Proposal builder unavailable: '+error.message;}
+</script></body></html>
