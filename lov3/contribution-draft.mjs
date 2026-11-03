@@ -31,6 +31,20 @@ export function createRelationshipProposal(input,book){
   for(const label of scaffoldLabels)substantive=substantive.replaceAll(label,'');
   if(substantive.trim().length<25)
     throw new TypeError('Explain the connection in your own words; reasoning prompts alone are not a proposal');
+  // When using the optional structured template, require an actual answer to
+  // every question. Free-form explanations remain welcome and unaffected.
+  if(scaffoldLabels.some(label=>explanation.includes(label))){
+    if(!scaffoldLabels.every(label=>explanation.includes(label)))
+      throw new TypeError('Complete all four reasoning prompts or use a free-form explanation');
+    const positions=scaffoldLabels.map(label=>explanation.indexOf(label));
+    if(positions.some((position,index)=>position<0||(index>0&&position<=positions[index-1])))
+      throw new TypeError('Keep the reasoning prompts in their original order');
+    const answers=scaffoldLabels.map((label,index)=>
+      explanation.slice(positions[index]+label.length,
+        index+1<positions.length?positions[index+1]:undefined).trim());
+    if(answers.some(answer=>answer.length<12))
+      throw new TypeError('Give a substantive answer to each reasoning prompt');
+  }
 
   const credit=input.credit?.trim()?field(input.credit,'contributor credit',80,2):null;
   const sourceTitle=input.sourceTitle?.trim()||'';
