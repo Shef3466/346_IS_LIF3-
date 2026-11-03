@@ -59,3 +59,17 @@ test('archive guide limits legacy or malformed workspace pin arrays to three dis
   assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005']);
   assert.equal(r.pinnedContext.length,3);
 });
+
+
+test('pinned guide comparisons disclose missing provenance and actual source pointers',()=>{
+  const plain=archiveGuide(book,'lov3:0002',{pins:['lov3:0003','lov3:0005']});
+  assert.deepEqual(plain.pinnedContext[0].directLinkSourceIds,[]);
+  assert.match(plain.pinnedContext[0].provenance,/no attached source pointers/);
+  assert.match(plain.pinnedContext[1].provenance,/no direct editorial link/);
+  const copy=structuredClone(book);
+  copy.entries[1].sources=[{id:'test:note',title:'Editorial draft note',kind:'project-note',reviewStatus:'unreviewed'}];
+  copy.entries[1].links[0].sourceIds=['test:note'];
+  const sourced=archiveGuide(copy,'lov3:0002',{pins:['lov3:0003']});
+  assert.deepEqual(sourced.pinnedContext[0].directLinkSourceIds,['test:note']);
+  assert.match(sourced.pinnedContext[0].provenance,/review status not established here/);
+});
