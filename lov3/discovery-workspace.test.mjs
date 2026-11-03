@@ -5,19 +5,19 @@ import {emptyWorkspace,normalizeWorkspace,readWorkspace,saveWorkspace,pinWorkspa
 import {knowledgeHref,readGlobeState,globeReturnHref,selectedId,withoutWorkspacePin} from './portal-state.mjs';
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 const ids=new Set(book.entries.map(x=>x.id));
-test('default four slots and opt-in six slots',()=>{
-  let s=emptyWorkspace();assert.equal(s.capacity,4);
-  s=setWorkspaceCapacity(s,6);assert.equal(s.capacity,6);
-  assert.throws(()=>setWorkspaceCapacity(s,7),RangeError);
+test('three optional discovery routes, never more',()=>{
+  const s=emptyWorkspace();assert.equal(s.capacity,3);
+  assert.equal(setWorkspaceCapacity(s,3).capacity,3);
+  assert.throws(()=>setWorkspaceCapacity(s,4),RangeError);
 });
 test('pin valid unique concepts; reject invalid and overflow',()=>{
   let s=emptyWorkspace();
-  for(let i=1;i<=4;i++)s=pinWorkspace(s,'lov3:000'+i,ids).state;
-  assert.equal(s.pins.length,4);
+  for(let i=1;i<=3;i++)s=pinWorkspace(s,'lov3:000'+i,ids).state;
+  assert.equal(s.pins.length,3);
   assert.equal(pinWorkspace(s,'lov3:0001',ids).reason,'already-pinned');
-  assert.equal(pinWorkspace(s,'lov3:0005',ids).reason,'full');
+  assert.equal(pinWorkspace(s,'lov3:0004',ids).reason,'full');
   assert.equal(pinWorkspace(s,'lov3:9999',ids).reason,'invalid');
-  assert.equal(unpinWorkspace(s,'lov3:0002').pins.length,3);
+  assert.equal(unpinWorkspace(s,'lov3:0002').pins.length,2);
 });
 test('unpin keeps keyboard focus on next or previous surviving discovery',()=>{
   const state={capacity:4,pins:['lov3:0001','lov3:0002','lov3:0003'],trail:[]};
@@ -28,11 +28,10 @@ test('unpin keeps keyboard focus on next or previous surviving discovery',()=>{
   assert.equal(nextPinFocus(state,'lov3:9999'),null);
   assert.deepEqual(state.pins,['lov3:0001','lov3:0002','lov3:0003']);
 });
-test('reducing capacity never silently discards pins',()=>{
-  let s=setWorkspaceCapacity(emptyWorkspace(),6);
-  for(let i=1;i<=5;i++)s=pinWorkspace(s,'lov3:000'+i,ids).state;
-  assert.throws(()=>setWorkspaceCapacity(s,4),RangeError);
-  assert.equal(s.pins.length,5);
+test('legacy sessions retain the first three valid pins',()=>{
+  const s=normalizeWorkspace({capacity:6,pins:['lov3:0001','lov3:0002','lov3:0003','lov3:0004'],trail:[]},ids);
+  assert.equal(s.capacity,3);
+  assert.deepEqual(s.pins,['lov3:0001','lov3:0002','lov3:0003']);
 });
 test('session storage round trip and corrupted storage recovery',()=>{
   const mem=new Map(),storage={getItem:k=>mem.get(k)??null,setItem:(k,v)=>mem.set(k,v)};
@@ -117,7 +116,7 @@ test('workspace and knowledge page expose pinning and accessible navigation',()=
   const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
   const knowledge=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
   assert.match(html,/aria-live="polite"/);
-  assert.match(html,/id="capacity"/);
+  assert.match(html,/Three routes maximum/);
   assert.match(html,/comparePins\(book,state\)/);
   assert.match(html,/for\(const relation of pair\.recordedRelations\)/);
   assert.match(html,/relation\.citationCount/);
@@ -131,7 +130,7 @@ test('workspace unpin handler restores keyboard focus and announces the result',
   assert.ok(html.includes('remove.dataset.unpinId=id'));
   assert.ok(html.includes('nextPinFocus(state,id)'));
   assert.ok(html.includes("querySelectorAll('button[data-unpin-id]')"));
-  assert.ok(html.includes("(candidate??q('#capacity')).focus()"));
+  assert.ok(html.includes("(candidate??q('#clear')).focus()"));
   assert.ok(html.includes("q('#status').textContent=identity.word+' unpinned"));
 });
 test('full globe → knowledge → pin → workspace → resume preserves the exact saved pose',()=>{
