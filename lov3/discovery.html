@@ -14,8 +14,8 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 @media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
 </style></head><body><main>
 <nav><a id="back" href="./explorer.html">← Return to the globe</a> · <a id="explore-more" href="./explorer.html">Explore more concepts</a> · <a id="resume" href="./knowledge.html" hidden>Resume last discovery</a></nav>
-<h1>Discovery Workspace</h1><p>Pin four to six concepts for side-by-side inspection. These are unpublished editorial records, not verified historical claims. Your pins and navigation trail stay in this browser tab; nothing is sent to a server.</p>
-<div class="toolbar"><label for="capacity">Visible comparison slots</label><select id="capacity" aria-label="Number of comparison slots"><option value="4">4</option><option value="5">5</option><option value="6">6</option></select><button id="clear" type="button">Clear pins and history</button><button id="export-session" type="button">Download research session</button><label class="import-control" for="import-session">Import research session <input id="import-session" type="file" accept=".json,application/json"></label></div><p class="note">Session files contain only public Genesis IDs, your slot count and exploration trail. Import replaces this tab’s current pins and history; no file is uploaded.</p>
+<h1>Discovery Workspace</h1><p>Pin up to three concepts for side-by-side inspection. These are unpublished editorial records, not verified historical claims. Your pins and navigation trail stay in this browser tab; nothing is sent to a server.</p>
+<div class="toolbar"><span>Three routes maximum; empty routes are optional.</span><button id="clear" type="button">Clear pins and history</button><button id="export-session" type="button">Download research session</button><label class="import-control" for="import-session">Import research session <input id="import-session" type="file" accept=".json,application/json"></label></div><p class="note">Session files contain only public Genesis IDs, your three-route limit and exploration trail. Import replaces this tab’s current pins and history; no file is uploaded.</p>
 <p id="status" role="status" aria-live="polite">Loading workspace…</p>
 <div id="cards" class="cards" aria-label="Pinned discoveries"></div>
 <section aria-labelledby="comparison-heading"><h2 id="comparison-heading">Recorded relationships for comparison</h2><ul id="comparisons"></ul><p class="note">Shared classifications and explicit graph links are editorial records, not proof of a factual connection. Source records and review labels do not independently verify claims. No new numerical or historical correlations are inferred.</p></section>
@@ -25,7 +25,7 @@ ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3
 import {validate} from './graph.mjs';
 import {conceptIdentity} from './taxonomy.mjs';
 import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from './portal-state.mjs';
-import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,setWorkspaceCapacity,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
+import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
 import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from './workspace-transfer.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
 q('#back').href=globeReturnHref(location.search);
@@ -43,14 +43,14 @@ try{
  let message='';
  if(requested){
    const result=pinWorkspace(state,requested,ids);state=result.state;
-   message=result.reason==='pinned'?'Discovery pinned.':result.reason==='already-pinned'?'Discovery already pinned.':result.reason==='full'?'All visible slots are occupied. Increase to five or six, or unpin an item.':'Invalid discovery ID.';
+   message=result.reason==='pinned'?'Discovery pinned.':result.reason==='already-pinned'?'Discovery already pinned.':result.reason==='full'?'All visible slots are occupied. Unpin an item to choose another.':'Invalid discovery ID.';
    state=recordVisit(state,requested,ids);
  }
  let storageAvailable=true;
  function persist(){storageAvailable=saveWorkspace(storage,state);}
  function render(){
    cards.replaceChildren();trail.replaceChildren();comparisons.replaceChildren();
-   q('#capacity').value=String(state.capacity);
+
    state.pins.forEach((id,i)=>{
      const e=byId.get(id),identity=conceptIdentity(e);
      const card=el('article','');card.className='card';
@@ -69,7 +69,7 @@ try{
        const nextFocus=nextPinFocus(state,id);
        state=unpinWorkspace(state,id);persist();render();
        const candidate=[...cards.querySelectorAll('button[data-unpin-id]')].find(button=>button.dataset.unpinId===nextFocus);
-       (candidate??q('#capacity')).focus();
+       (candidate??q('#clear')).focus();
        q('#status').textContent=identity.word+' unpinned. '+state.pins.length+' of '+state.capacity+' slots occupied.'+
          (storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
      });card.append(remove);
@@ -105,10 +105,6 @@ try{
    resume.hidden=!lastVisited;
    if(lastVisited)resume.href=knowledgeHref(lastVisited,stateView);
  }
- q('#capacity').addEventListener('change',e=>{
-   try{state=setWorkspaceCapacity(state,Number(e.target.value));persist();render();}
-   catch(err){q('#status').textContent=err.message;render();}
- });
  q('#clear').addEventListener('click',()=>{state=emptyWorkspace();persist();q('#status').textContent='Workspace cleared for this tab.';render();});
  q('#export-session').addEventListener('click',()=>{
    try{
