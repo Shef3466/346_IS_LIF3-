@@ -41,7 +41,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   const relationshipIntent=/\b(connect|connected|connections?|links?|related|relationships?|relations?|edges?)\b/.test(q);
   // Research intent takes precedence over generic evidence lookup: a visitor
   // asking what evidence to investigate wants questions, not a source dump.
-  const inquiryIntent=/\b(investigate|investigation|research|evidence gaps)\b/.test(q);
+  const inquiryIntent=/\b(investigate|investigation|research|evidence gaps|disprove|falsify|refute|contradict|counterevidence)\b/.test(q);
   // An epistemic audit separates what the JSON records from what the world
   // independently establishes. Even a reviewed source is not a verified claim.
   const boundaryIntent=/\b(verified (?:versus|vs\.?|or) interpret|fact(?:s)? (?:versus|vs\.?|or) interpret|what is (?:actually )?verified|how confident|hypothes(?:is|es)|inferred correlations?|is (?:this|that|it) (?:true|verified|proven|reliable)|can i trust (?:this|that|it)|how do (?:you|we) know|what supports this claim)\b/.test(q);
@@ -111,7 +111,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   }
   // Offer testable research questions without manufacturing historical answers.
   // Only cite a neighbor as an editorial route, never as verified evidence.
-  if(/\b(investigate|investigation|research|evidence gaps)\b/.test(q)){
+  if(inquiryIntent){
     const identity=guide.identity;
     const questions=[
       'What independent evidence could support or challenge the draft classification of '+identity.word+' under '+identity.subject+' / '+identity.category+'?'
@@ -127,8 +127,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       questions.push('Is '+identity.number+' a symbolic editorial association, a mathematical property, or an independently documented connection?');
     if(guide.pinnedContext.length)
       questions.push('Which documented similarities and differences exist between '+identity.word+' and '+guide.pinnedContext[0].title+' beyond their editorial labels?');
-    if(questions.length===1)
-      questions.push('What evidence would contradict the current draft interpretation?');
+    questions.push('What observation or independent source would contradict this proposed relationship or classification?');
     const answer='These are investigation prompts based on this unpublished record, not historical conclusions. '+
       (guide.coverage.sourceCount
         ? guide.coverage.sourceCount+' editorial source record(s) are attached; inspect their content and review status before relying on them.'
