@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+const caveat="source.title+' ('+source.kind+'; '+source.reviewStatus+'; factual verification not established)'";
 
-test('workspace cards label reviewed sources as not factually verified',()=>{
-  assert.match(html,/source\.title\+' \\('\+source\.kind\+'; '\+source\.reviewStatus\+'; factual verification not established\\)'/);
+test('workspace cards show editorial status without implying factual verification',()=>{
+  assert.ok(html.includes('for(const source of sources)item(list,'+caveat));
 });
 
-test('directed comparison source links carry the same factual-verification boundary',()=>{
-  assert.match(html,/for\(const source of cited\)item\(sourceList,source\.title\+' \\('\+source\.kind\+'; '\+source\.reviewStatus\+'; factual verification not established\\)'/);
+test('directed comparison sources display the same verification boundary',()=>{
+  assert.ok(html.includes('for(const source of cited)item(sourceList,'+caveat));
 });
