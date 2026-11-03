@@ -86,3 +86,16 @@ test('clear local draft control removes entered content and stale preview with k
   assert.match(html,/q\('#explanation'\)\.focus\(\)/);
   assert.match(html,/No proposal was submitted/);
 });
+
+
+test('untouched reasoning template is rejected but answered prompts and freeform reasoning work',()=>{
+  const labels=['What I am connecting:','Why this connection makes sense (evidence or mechanism):',
+    'Alternative explanations or limitations:','What this connection establishes (and what remains uncertain):'];
+  assert.throws(()=>createRelationshipProposal({...input,explanation:labels.join('\\n\\n')},book),/reasoning prompts alone/);
+  const answered=labels.map((label,i)=>label+' '+[
+    'Two geometric forms.','Their construction uses overlapping circles.',
+    'Shared geometry does not prove shared origin.','A structural comparison worth investigating.'
+  ][i]).join('\\n');
+  assert.equal(createRelationshipProposal({...input,explanation:answered},book).reviewStatus,'unreviewed');
+  assert.equal(createRelationshipProposal(input,book).reviewStatus,'unreviewed');
+});
