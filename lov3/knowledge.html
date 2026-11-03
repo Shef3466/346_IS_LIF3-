@@ -28,7 +28,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="eyebrow">Book of LOV3 · Knowledge archive</p>
 <h1 id="title">Loading archive record…</h1>
 <p id="path" class="path"></p><p id="number" class="number" hidden></p>
-<p id="status" role="status" class="status">Retrieving Genesis draft.</p><p><a id="pin-workspace" href="./discovery.html">Pin to Discovery Workspace</a> · <a id="open-workspace" href="./discovery.html">Open workspace</a></p>
+<p id="status" role="status" class="status">Retrieving Genesis draft.</p><p><a id="pin-workspace" href="./discovery.html">Pin to Discovery Workspace</a> · <a id="open-workspace" href="./discovery.html">Open workspace</a> · <a id="propose-relationship" href="./contribute.html">Propose a relationship</a></p>
 <div class="grid"><div>
 <section aria-labelledby="record-heading"><h2 id="record-heading">Record and relationships</h2>
 <p id="record"></p><ul id="related"></ul></section>
@@ -86,6 +86,7 @@ try{
   params.set('pin',id);
   q('#pin-workspace').href='./discovery.html?'+params.toString();
   q('#open-workspace').href='./discovery.html'+location.search;
+  q('#propose-relationship').href='./contribute.html?'+new URLSearchParams(location.search).toString();
   q('#title').textContent=guide.identity.word;
   document.title=guide.identity.word+' — Book of LOV3';
   q('#path').textContent=guide.identity.path.slice(0,3).join(' → ');
