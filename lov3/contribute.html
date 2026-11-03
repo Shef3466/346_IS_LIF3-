@@ -70,7 +70,14 @@ try{
   }
   if(initial&&known.has(initial))q('#from').value=initial;
   const updateReturn=()=>{q('#return-record').href=knowledgeHref(q('#from').value,pose);};
-  q('#from').addEventListener('change',updateReturn);
+  q('#from').addEventListener('change',()=>{
+    updateReturn();
+    // Keep the two concepts distinct when changing the starting concept.
+    if(q('#to').value===q('#from').value){
+      const alternative=book.entries.find(entry=>entry.id!==q('#from').value);
+      if(alternative){q('#to').value=alternative.id;status.textContent='Related concept adjusted to avoid a self-relationship.';}
+    }
+  });
   updateReturn();
   if(q('#to').value===q('#from').value){
     const alternative=book.entries.find(entry=>entry.id!==q('#from').value);
