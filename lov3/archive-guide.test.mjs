@@ -78,8 +78,8 @@ test('pinned guide comparisons disclose missing provenance and actual source poi
 test('knowledge page renders comparison provenance without treating source IDs as verified evidence',()=>{
   const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
   assert.match(html,/Evidence status: /);
-  assert.match(html,/other\\.provenance/);
-  assert.match(html,/other\\.directLinkSourceIds\\.join/);
+  assert.match(html,/other\.provenance/);
+  assert.match(html,/other\.directLinkSourceIds\.join/);
   assert.match(html,/not independently verified/);
-  assert.match(html,/document\\.createElement\\('p'\\)/);
+  assert.match(html,/document\.createElement\('p'\)/);
 });
