@@ -53,3 +53,9 @@ test('knowledge page wires current tab pins to contextual guide and safe links',
   assert.match(html,/id="guide-context"/);
   assert.match(html,/knowledgeHref\(other.id,state\)/);
 });
+
+test('archive guide limits legacy or malformed workspace pin arrays to three distinct comparison routes',()=>{
+  const r=archiveGuide(book,'lov3:0002',{pins:['lov3:0002','lov3:0003','lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007']});
+  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005']);
+  assert.equal(r.pinnedContext.length,3);
+});
