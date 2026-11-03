@@ -47,3 +47,10 @@ Scope: public project decisions and rationale, not conversation transcripts.
 - When a visitor selects a point and follows actual relationships, highlight the traversed route on the globe so they can visually retrace how they reached a discovery. Preserve exact orientation when returning from a knowledge page.
 - Highlight only relevant links and the user's real trail to avoid visual clutter; do not invent graph edges or claim a path where no relationship is recorded.
 - This is a proposed experience direction, **not yet implemented or browser-tested**. Keep the globe a subject/category discovery portal; definition reading remains on a separate page.
+
+
+## LOV3 Connection — discovery celebration concept
+- When a visitor identifies and saves a meaningful new discovery, celebrate it as **“You made a LOV3 Connection!”**. This is a user-acknowledged discovery, not an automatic award for filling three comparison slots or a claim that an unverified relationship is factual.
+- Presentation direction: playful, warm, nostalgic television game-show reveal energy, loosely recalling the emotional payoff of the classic Love Connection show. Create **original** animation, graphic identity, spoken wording and musical sting; do not copy the show's theme song, protected audiovisual expression, logos or trade dress.
+- A heartstring/path illumination and subtle globe pulse can accompany the reveal. Respect reduced-motion settings, muted audio by default unless explicitly enabled, and accessible text announcements. Keep it brief and optional, not an interruption to reading.
+- The celebration can link to a saved discovery and its traceable route and sources. This is approved concept direction; not yet implemented or tested.
