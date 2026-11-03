@@ -109,8 +109,24 @@ try{
   q('#guide-intro').textContent=guide.introduction;
   q('#guide-next').textContent=guide.next;
   const pinned=q('#guide-context');
-  for(const other of guide.pinnedContext)
-    li(pinned,other.title+' — '+other.relationship,knowledgeHref(other.id,state));
+  for(const other of guide.pinnedContext){
+    const item=document.createElement('li');
+    const link=document.createElement('a');
+    link.href=knowledgeHref(other.id,state);
+    link.textContent=other.title+' — '+other.relationship;
+    item.append(link);
+    const evidence=document.createElement('p');
+    evidence.className='note';
+    evidence.textContent='Evidence status: '+other.provenance;
+    item.append(evidence);
+    if(other.directLinkSourceIds.length){
+      const pointers=document.createElement('p');
+      pointers.className='note';
+      pointers.textContent='Editorial source IDs (not independently verified): '+other.directLinkSourceIds.join(', ');
+      item.append(pointers);
+    }
+    pinned.append(item);
+  }
   if(!guide.pinnedContext.length)
     li(pinned,'No other pinned discoveries in this tab yet. Pin concepts to compare them here.');
   function askGuide(question){
