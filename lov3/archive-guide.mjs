@@ -36,7 +36,9 @@ export function archiveGuide(book,id,workspace=null) {
       .flatMap(({owner,link})=>(link.sourceIds??[]).map(sourceId=>{
         const source=(owner.sources??[]).find(item=>item.id===sourceId);
         return {ownerId:owner.id,id:sourceId,title:source?.title??'Source record unavailable',
-          reviewStatus:source?.reviewStatus??'unreviewed',url:source?.url??null};
+          kind:source?.kind??null,reviewStatus:source?.reviewStatus??'unreviewed',
+          url:source?.url??null,
+          evidenceStatus:source?.reviewStatus==='reviewed'?'editorially reviewed; factual verification not established':'unreviewed; factual verification not established'};
       }));
     // Source IDs are entry-local editorial pointers, not independently verified evidence.
     return {id:pin,title:other.title,
