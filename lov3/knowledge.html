@@ -124,6 +124,12 @@ try{
       pointers.className='note';
       pointers.textContent='Editorial source IDs (not independently verified): '+other.directLinkSourceIds.join(', ');
       item.append(pointers);
+      const sourceList=document.createElement('ul');
+      sourceList.setAttribute('aria-label','Source records for this comparison');
+      for(const source of other.directLinkSources){
+        li(sourceList,source.title+' — '+source.reviewStatus+' (record '+source.ownerId+')',source.url);
+      }
+      item.append(sourceList);
     }
     pinned.append(item);
   }
