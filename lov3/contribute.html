@@ -93,7 +93,21 @@ try{
     sourceTitle:q('#source-title').value,sourceUrl:q('#source-url').value,
     credit:q('#credit').value
   },book);
-  q('#reasoning-template').addEventListener('click',()=>{\n    const field=q('#explanation');\n    const template='What I am connecting:\\n\\nWhy this connection makes sense (evidence or mechanism):\\n\\nAlternative explanations or limitations:\\n\\nWhat this connection establishes (and what remains uncertain):\\n';\n    if(field.value.trim()){status.textContent='Your existing explanation was preserved. Add the three reasoning distinctions manually or clear the draft before inserting the template.';field.focus();return;}\n    field.value=template;field.focus();q('#proposal-preview').hidden=true;\n    status.textContent='Reasoning prompts inserted. Explain each step before previewing or downloading.';\n  });\n  q('#clear-proposal').addEventListener('click',()=>{
+  q('#reasoning-template').addEventListener('click',()=>{
+    const field=q('#explanation');
+    const template='What I am connecting:\
+\
+Why this connection makes sense (evidence or mechanism):\
+\
+Alternative explanations or limitations:\
+\
+What this connection establishes (and what remains uncertain):\
+';
+    if(field.value.trim()){status.textContent='Your existing explanation was preserved. Add the three reasoning distinctions manually or clear the draft before inserting the template.';field.focus();return;}
+    field.value=template;field.focus();q('#proposal-preview').hidden=true;
+    status.textContent='Reasoning prompts inserted. Explain each step before previewing or downloading.';
+  });
+  q('#clear-proposal').addEventListener('click',()=>{
     q('#explanation').value='';q('#source-title').value='';q('#source-url').value='';q('#credit').value='';
     q('#classification').value='hypothesis';q('#proposal-preview').hidden=true;
     status.textContent='Local draft fields cleared. No proposal was submitted.';
