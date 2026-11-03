@@ -99,3 +99,20 @@ test('untouched reasoning template is rejected but answered prompts and freeform
   assert.equal(createRelationshipProposal({...input,explanation:answered},book).reviewStatus,'unreviewed');
   assert.equal(createRelationshipProposal(input,book).reviewStatus,'unreviewed');
 });
+
+test('structured proposals require meaningful answers to every question',()=>{
+  const labels=['What I am connecting:','Why this connection makes sense (evidence or mechanism):',
+    'Alternative explanations or limitations:','What this connection establishes (and what remains uncertain):'];
+  const responses=[
+    'Two geometric forms in an archive.',
+    'Their constructions both use overlapping circles.',
+    'The resemblance does not establish a common historical origin.',
+    'A testable structural comparison, not a historical conclusion.'
+  ];
+  const full=labels.map((label,index)=>label+' '+responses[index]).join('\n\n');
+  assert.equal(createRelationshipProposal({...input,explanation:full},book).reviewStatus,'unreviewed');
+  const blankMiddle=labels.map((label,index)=>label+' '+(index===1?'':responses[index])).join('\n\n');
+  assert.throws(()=>createRelationshipProposal({...input,explanation:blankMiddle},book),/substantive answer/);
+  assert.throws(()=>createRelationshipProposal({...input,explanation:labels.slice(0,2).join(' ')+' '+responses.join(' ')},book),/all four reasoning prompts/);
+  assert.throws(()=>createRelationshipProposal({...input,explanation:labels.slice().reverse().map((label,index)=>label+' '+responses[index]).join('\n')},book),/original order/);
+});
