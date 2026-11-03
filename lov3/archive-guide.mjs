@@ -29,10 +29,20 @@ export function archiveGuide(book,id,workspace=null) {
       matches.push('direct editorial graph link');
     const directLinks=[...entry.links.filter(link=>link.to===pin),...other.links.filter(link=>link.to===id)];
     const sourceIds=[...new Set(directLinks.flatMap(link=>link.sourceIds??[]))];
+    // Relation citations are scoped to the entry that owns each link.
+    // Never resolve an incoming link's source ID against the current entry.
+    const directLinkSources=[...entry.links.filter(link=>link.to===pin).map(link=>({owner:entry,link})),
+      ...other.links.filter(link=>link.to===id).map(link=>({owner:other,link}))]
+      .flatMap(({owner,link})=>(link.sourceIds??[]).map(sourceId=>{
+        const source=(owner.sources??[]).find(item=>item.id===sourceId);
+        return {ownerId:owner.id,id:sourceId,title:source?.title??'Source record unavailable',
+          reviewStatus:source?.reviewStatus??'unreviewed',url:source?.url??null};
+      }));
     // Source IDs are entry-local editorial pointers, not independently verified evidence.
     return {id:pin,title:other.title,
       relationship:matches.join('; ')||'no shared classification or direct graph link recorded',
       directLinkSourceIds:sourceIds,
+      directLinkSources,
       provenance:directLinks.length===0?'no direct editorial link recorded':
         sourceIds.length===0?'direct editorial link has no attached source pointers':
           'direct editorial link has attached source pointers (review status not established here)'};
