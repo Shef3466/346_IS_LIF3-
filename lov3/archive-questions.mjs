@@ -98,7 +98,16 @@ export function answerArchiveQuestion(book,id,workspace,question) {
     const answer=links.length
       ? 'Among your other pinned discoveries: '+guide.pinnedContext.map(x=>x.title+' — '+x.relationship).join('; ')+'. These are editorial comparisons, not independently verified correlations.'
       : 'No other valid discoveries are pinned for comparison in this tab. Pin a second concept in the Discovery Workspace to compare recorded classifications.';
-    return {kind:'comparison',answer,links,sources:[]};
+    // Comparison evidence is limited to sources explicitly cited by a direct edge.
+    // Preserve the originating record because source IDs are entry-local.
+    const sources=guide.pinnedContext.flatMap(item=>item.directLinkSources.map(source=>({
+      title:source.title,kind:'editorial relation pointer',reviewStatus:source.reviewStatus,
+      ...(source.url?{url:source.url}:{}),
+      relation:'record '+source.ownerId+' → comparison with '+item.title
+    })));
+    return {kind:'comparison',answer:answer+' '+(sources.length
+      ? sources.length+' direct-link source pointer(s) are listed below; review status does not establish factual verification.'
+      : 'No direct-link source pointers are attached to these comparisons.'),links,sources};
   }
   // Offer testable research questions without manufacturing historical answers.
   // Only cite a neighbor as an editorial route, never as verified evidence.
