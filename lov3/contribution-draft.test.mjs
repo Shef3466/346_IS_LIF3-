@@ -65,3 +65,12 @@ test('preview moves keyboard focus to the newly displayed review panel',()=>{
   assert.match(html,/id="proposal-preview"[^>]*tabindex="-1"/);
   assert.match(html,/q\('#proposal-preview'\)\.hidden=false;q\('#proposal-preview'\)\.focus\(\)/);
 });
+
+
+test('changing starting concept automatically avoids a self-relationship',()=>{
+  const html=readFileSync(new URL('./contribute.html',import.meta.url),'utf8');
+  assert.match(html,/q\('#from'\)\.addEventListener\('change',\(\)=>\{/);
+  assert.match(html,/if\(q\('#to'\)\.value===q\('#from'\)\.value\)\{/);
+  assert.match(html,/q\('#to'\)\.value=alternative\.id;status\.textContent='Related concept adjusted/);
+  assert.match(html,/updateReturn\(\);/);
+});
