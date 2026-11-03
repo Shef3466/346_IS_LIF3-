@@ -27,8 +27,15 @@ export function archiveGuide(book,id,workspace=null) {
     if(entry.category && entry.category===other.category) matches.push('same recorded category');
     if(entry.links.some(link=>link.to===pin)||other.links.some(link=>link.to===id))
       matches.push('direct editorial graph link');
+    const directLinks=[...entry.links.filter(link=>link.to===pin),...other.links.filter(link=>link.to===id)];
+    const sourceIds=[...new Set(directLinks.flatMap(link=>link.sourceIds??[]))];
+    // Source IDs are entry-local editorial pointers, not independently verified evidence.
     return {id:pin,title:other.title,
-      relationship:matches.join('; ')||'no shared classification or direct graph link recorded'};
+      relationship:matches.join('; ')||'no shared classification or direct graph link recorded',
+      directLinkSourceIds:sourceIds,
+      provenance:directLinks.length===0?'no direct editorial link recorded':
+        sourceIds.length===0?'direct editorial link has no attached source pointers':
+          'direct editorial link has attached source pointers (review status not established here)'};
   });
   const sources=entry.sources??[];
   const coverage=citationCoverage(entry);
