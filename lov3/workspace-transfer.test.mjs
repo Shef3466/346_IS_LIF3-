@@ -7,14 +7,14 @@ import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from '
 const ids=new Set(['lov3:0001','lov3:0002','lov3:0003']);
 const edition='genesis-draft-001';
 test('local export and import preserve valid pins, capacity and trail',()=>{
-  const state={capacity:6,pins:['lov3:0002','lov3:0001'],trail:['lov3:0001','lov3:0002']};
+  const state={capacity:3,pins:['lov3:0002','lov3:0001'],trail:['lov3:0001','lov3:0002']};
   const exported=exportDiscoverySession(state,ids,edition);
   assert.deepEqual(importDiscoverySession(exported,ids,edition),{workspace:state,editionMatches:true});
   assert.ok(!exported.includes('credentials'));
 });
 test('import sanitizes stale IDs, duplicate pins, overflow and long history',()=>{
   const raw=JSON.stringify({schema:'lov3.discovery.session.v1',genesisEdition:'older-draft',workspace:{
-    capacity:4,pins:['lov3:0001','lov3:9999','lov3:0001','lov3:0002'],
+    capacity:6,pins:['lov3:0001','lov3:9999','lov3:0001','lov3:0002'],
     trail:[...Array(30).fill('lov3:0003'),'https://evil.example','lov3:0002']
   }});
   const result=importDiscoverySession(raw,ids,edition);
