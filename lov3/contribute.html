@@ -19,7 +19,7 @@ textarea{min-height:130px;resize:vertical}button{width:auto;cursor:pointer;backg
 <p>LOV3 is built for contributors. Show how two existing concepts relate, describe your reasoning, and attach a source when available. This is a <strong>local proposal builder</strong>, not a public submission or a verified finding.</p>
 <p class="note">Nothing is submitted to a server. Only the Genesis draft is fetched. Your explanation and optional contributor credit remain in this page until you download the JSON file. Do not include private or sensitive information. A display credit is not authenticated.</p>
 <p id="proposal-status" role="status" aria-live="polite">Loading Genesis concepts…</p>
-<form id="proposal-form">
+<form id="proposal-form" hidden>
 <label for="from">Starting concept</label><select id="from" name="from" required></select>
 <label for="to">Related concept</label><select id="to" name="to" required></select>
 <label for="relation">Proposed relationship type</label><select id="relation" name="relation" required></select>
