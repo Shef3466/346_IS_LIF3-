@@ -372,3 +372,15 @@ test('conversational retrace requests use the actual tab trail rather than gener
   assert.equal(missing.kind,'trail');
   assert.deepEqual(missing.sources,[]);
 });
+
+
+test('Archive Guide response is keyboard-focusable after its links and sources render',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/id="guide-answer"[^>]*role="status"[^>]*tabindex="-1"/);
+  const response=html.indexOf("q('#guide-answer').textContent=result.answer;");
+  const sourceLoop=html.indexOf('for(const source of result.sources)',response);
+  const focus=html.indexOf("q('#guide-answer').focus({preventScroll:true});",sourceLoop);
+  const close=html.indexOf("q('#guide-form').addEventListener",sourceLoop);
+  assert.ok(response>=0 && sourceLoop>response && focus>sourceLoop && close>focus,
+    'Guide focuses the answer after updating the linked evidence, before registering submit');
+});
