@@ -360,3 +360,15 @@ test('natural-language similarity and difference questions use only valid pinned
   assert.deepEqual(empty.links,[]);
   assert.match(empty.answer,/No other valid discoveries are pinned/);
 });
+
+test('conversational retrace requests use the actual tab trail rather than generic exploration',()=>{
+  const state={trail:['lov3:0002','lov3:0004','lov3:0005']};
+  for(const question of ['Walk me through my discoveries','Walk me back through my journey','Show me my discovery path','How did I reach this?']){
+    const result=answerArchiveQuestion(book,'lov3:0005',state,question);
+    assert.equal(result.kind,'trail',question);
+    assert.deepEqual(result.sources,[],question);
+  }
+  const missing=answerArchiveQuestion(book,'lov3:0005',null,'Show my navigation journey');
+  assert.equal(missing.kind,'trail');
+  assert.deepEqual(missing.sources,[]);
+});
