@@ -72,6 +72,15 @@ export function archiveGuide(book,id,workspace=null) {
     ? 'Explore '+nextChoice.title+' via a recorded '+nextChoice.direction+' '+nextChoice.type+
       ' relationship. '+nextChoice.evidenceStatus+'.'
     : 'A useful next step is to propose a connection, then look for independent supporting or conflicting evidence.';
-  return {entry,identity,outgoing,incoming,sources,coverage,introduction,evidence,next,nextChoice,pinnedContext,
+  // Questions are grounded in recorded classifications and links, not inferred histories.
+  // A missing direct link is an invitation to investigate, never proof of no relationship.
+  const questions=pinnedContext.length
+    ? pinnedContext.map(pin=>pin.directLinkSourceIds.length
+      ? 'What does the attached source material actually establish about '+identity.word+' and '+pin.title+'?'
+      : 'What evidence could support or challenge a proposed relationship between '+identity.word+' and '+pin.title+'?')
+    : [nextChoice
+      ? 'What evidence supports or challenges the recorded connection to '+nextChoice.title+'?'
+      : 'Which other concept would you compare with '+identity.word+', and what evidence would you seek?'];
+  return {entry,identity,outgoing,incoming,sources,coverage,introduction,evidence,next,nextChoice,pinnedContext,questions,
     label:'LOV3 Archive Guide — retrieval preview (not a live AI conversation)'};
 }
