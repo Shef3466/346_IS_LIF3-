@@ -97,7 +97,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
       : 'This unpublished draft has '+count.sourceCount+' attached editorial source(s), '+count.reviewedCount+' marked reviewed. A review label is not proof that a claim is true. Inspect the listed records directly.';
     return {kind:'evidence',answer,links:[],sources};
   }
-  if(/\b(compare|comparison|pinned|pins?|workspace|similarit(?:y|ies)|differences?|alike|differ(?:ent|ence|ences)?)\b/.test(q)){
+  if(/\b(compare|comparison|pinned|pins?|workspace|similarit(?:y|ies)|differences?|alike|differ(?:ent|ence|ences)?)\b/.test(q) ||\n     /\b(what do (?:these|they|my discoveries) have in common|what (?:do|does) (?:these|they|my discoveries) share|how (?:are|do) (?:these|they) (?:related|connect))\b/.test(q)){
     const links=guide.pinnedContext.map(x=>({id:x.id,title:x.title}));
     const answer=links.length
       ? 'Among your other pinned discoveries: '+guide.pinnedContext.map(x=>x.title+' — '+x.relationship).join('; ')+'. These are editorial comparisons, not independently verified correlations.'
