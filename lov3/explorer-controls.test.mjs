@@ -81,3 +81,10 @@ test('Escape clears a focused globe selection without resetting the globe pose',
   assert.doesNotMatch(clear, /angle\s*=|tilt\s*=/);
   assert.match(html, /Escape clears selection without changing the globe position/);
 });
+
+
+test('globe Enter/Space previews first concept before opening a page', () => {
+  assert.match(html, /else if\(e\.key==='Enter'\|\|e\.key===' '\)\{/);
+  assert.match(html, /if\(selected!==null\)openKnowledge\(selected\)/);
+  assert.match(html, /else if\(entries\.length\)select\(0\)/);
+});
