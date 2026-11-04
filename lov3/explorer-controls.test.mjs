@@ -59,7 +59,9 @@ test('globe canvas is focusable with documented keyboard navigation', () => {
 
 
 test('pointer interaction pauses auto-rotation before dragging or selecting a concept', () => {
-  assert.match(html, /canvas\.addEventListener\("pointerdown",e=>\{running=false;syncRotation\(\);inertiaVelocity=0;drag=/);
+  assert.match(html, /canvas\.addEventListener\("pointerdown",e=>\{if\(drag\)return;running=false;syncRotation\(\);inertiaVelocity=0;drag=/);
+  assert.match(html, /pointerId:e\.pointerId/);
+  assert.match(html, /if\(!drag\|\|e\.pointerId!==drag\.pointerId\)return/);
   assert.match(html, /toggle\.onclick=\(\)=>\{running=!running;inertiaVelocity=0;syncRotation\(\);scheduleDraw\(\);\}/);
 });
 
