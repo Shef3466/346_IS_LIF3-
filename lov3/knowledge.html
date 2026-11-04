@@ -38,6 +38,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading">LOV3 Archive Guide</h2>
 <p class="note">Original retrieval preview · Not a live conversational AI</p>
 <p id="guide-intro"></p><p id="guide-next"></p>
+<p><a id="guide-next-link" href="./knowledge.html" hidden>Explore recommended discovery →</a></p>
 <h3 id="guide-context-heading">Compare with your pinned discoveries</h3><ul id="guide-context" aria-labelledby="guide-context-heading"></ul>
 <p class="note">These comparisons show recorded editorial classifications and links only—not verified historical or numerical connections.</p>
 <h3>Ask about this archive record</h3>
@@ -108,6 +109,12 @@ try{
   q('#media').textContent='No source-attributed images or historical scenes have been attached to this record.';
   q('#guide-intro').textContent=guide.introduction;
   q('#guide-next').textContent=guide.next;
+  if(guide.nextChoice && ids.has(guide.nextChoice.id)){
+    const nextLink=q('#guide-next-link');
+    nextLink.href=knowledgeHref(guide.nextChoice.id,state);
+    nextLink.textContent='Explore '+guide.nextChoice.title+' →';
+    nextLink.hidden=false;
+  }
   const pinned=q('#guide-context');
   for(const other of guide.pinnedContext){
     const item=document.createElement('li');
