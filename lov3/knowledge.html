@@ -103,7 +103,7 @@ try{
   q('#evidence').textContent=guide.evidence;
   const sources=q('#sources');
   for(const source of guide.sources){
-    li(sources,source.title+' — '+source.kind+'; '+source.reviewStatus,source.url);
+    li(sources,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established',source.url);
   }
   if(!guide.sources.length)li(sources,'No source records attached to this draft.');
   q('#media').textContent='No source-attributed images or historical scenes have been attached to this record.';
