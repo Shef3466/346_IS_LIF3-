@@ -70,3 +70,14 @@ test('focused globe supports Home/End jumps to the first or last concept without
   assert.match(html, /Home\/End jumps to the first\/last concept/);
   assert.match(html, /Home and End to jump to the first or last concept/);
 });
+
+
+test('Escape clears a focused globe selection without resetting the globe pose', () => {
+  assert.match(html, /e\.key==='Escape'&&selected!==null/);
+  assert.match(html, /e\.preventDefault\(\);clearSelection\(\)/);
+  const clear = html.slice(html.indexOf('function clearSelection('), html.indexOf('function openKnowledge('));
+  assert.match(clear, /selected=null/);
+  assert.match(clear, /spotlight\.classList\.remove\('is-active'\)/);
+  assert.doesNotMatch(clear, /angle\s*=|tilt\s*=/);
+  assert.match(html, /Escape clears selection without changing the globe position/);
+});
