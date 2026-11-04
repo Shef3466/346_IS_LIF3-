@@ -37,7 +37,7 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   const empty={kind:'unsupported',answer:'Ask about evidence, recorded connections, pinned comparisons, or the draft record. I cannot answer open-ended historical questions from this limited archive yet.',links:[],sources:[]};
   if(typeof question!=='string' || question.length>240 || !question.trim()) return empty;
   const q=question.toLowerCase().trim();
-  if(/\b(how did i get here|my (?:discovery |navigation )?trail|my (?:discovery |navigation )?history|retrace my steps|where have i been)\b/.test(q))
+  if(/\b(how did i get here|my (?:discovery |navigation )?trail|my (?:discovery |navigation )?history|retrace my steps|where have i been|walk me (?:back )?through my (?:discoveries|journey|visits)|show (?:me )?my (?:discovery |navigation )?(?:path|journey)|how did i reach (?:this|here))\b/.test(q))
     return explainDiscoveryTrail(book,id,workspace);
   // A question about evidence FOR a relationship needs edge citations, not
   // every source attached to the current entry. Preserve this intent even
