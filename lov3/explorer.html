@@ -253,7 +253,9 @@ canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.g
 canvas.addEventListener('pointercancel',()=>{drag=null;inertiaVelocity=0;scheduleDraw();});
 // Browsers can revoke pointer capture (e.g. a gesture is interrupted or focus moves).
 // Clear stale drag state so keyboard and touch navigation remain responsive.
-canvas.addEventListener('lostpointercapture',()=>{drag=null;inertiaVelocity=0;scheduleDraw();});
+// A normal pointerup clears drag before capture is released; preserve its intentional glide.
+// Only an interrupted capture should cancel drag and momentum.
+canvas.addEventListener('lostpointercapture',()=>{if(drag){drag=null;inertiaVelocity=0;scheduleDraw();}});
 toggle.onclick=()=>{running=!running;inertiaVelocity=0;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);open.onclick=()=>{if(selected!==null)openKnowledge(selected);};
 document.querySelector("#reset").onclick=()=>{inertiaVelocity=0;angle=.2;tilt=.12;clearSelection('View reset; no concept selected.');};
