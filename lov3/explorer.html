@@ -136,8 +136,10 @@ canvas.addEventListener('keydown',e=>{
    e.preventDefault();select(e.key==='Home'?0:entries.length-1);
  }else if(e.key==='Escape'&&selected!==null){
    e.preventDefault();clearSelection();
- }else if((e.key==='Enter'||e.key===' ')&&selected!==null){
-   e.preventDefault();openKnowledge(selected);
+ }else if(e.key==='Enter'||e.key===' '){
+   e.preventDefault();
+   if(selected!==null)openKnowledge(selected);
+   else if(entries.length)select(0); // First activation previews a concept; second opens it.
  }
 });
 list.addEventListener('keydown',e=>{
