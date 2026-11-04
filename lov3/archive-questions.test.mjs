@@ -6,9 +6,9 @@ import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-quest
 const book=JSON.parse(readFileSync(new URL('./genesis.json',import.meta.url),'utf8'));
 
 test('question suggestions route to bounded archive topics',()=>{
-  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,7);
+  assert.equal(SUGGESTED_ARCHIVE_QUESTIONS.length,8);
   assert.deepEqual(SUGGESTED_ARCHIVE_QUESTIONS.map(q=>answerArchiveQuestion(book,'lov3:0002',null,q).kind),
-    ['evidence','relationships','comparison','record','exploration','inquiry','boundaries']);
+    ['evidence','relationships','comparison','record','exploration','inquiry','boundaries','trail']);
 });
 test('unreferenced Genesis draft cannot invent evidence or media',()=>{
   const result=answerArchiveQuestion(book,'lov3:0009',null,'What evidence is attached?');
