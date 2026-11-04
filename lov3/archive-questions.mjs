@@ -1,6 +1,7 @@
 // Local, bounded question routing over reviewed/unreviewed Genesis metadata.
 // No model calls, transcript storage, external requests, or invented citations.
 import {archiveGuide} from './archive-guide.mjs';
+import {explainDiscoveryTrail} from './archive-trail.mjs';
 
 // Resolve a directed edge's source pointers against the entry declaring it.
 // A source attached to a concept is not automatically evidence for an edge.
@@ -27,7 +28,8 @@ export const SUGGESTED_ARCHIVE_QUESTIONS = Object.freeze([
   'What does this draft record say?',
   'Where should I explore next?',
   'What should I investigate?',
-  'What is verified versus interpreted?'
+  'What is verified versus interpreted?',
+  'How did I get here?'
 ]);
 
 export function answerArchiveQuestion(book,id,workspace,question) {
@@ -35,6 +37,8 @@ export function answerArchiveQuestion(book,id,workspace,question) {
   const empty={kind:'unsupported',answer:'Ask about evidence, recorded connections, pinned comparisons, or the draft record. I cannot answer open-ended historical questions from this limited archive yet.',links:[],sources:[]};
   if(typeof question!=='string' || question.length>240 || !question.trim()) return empty;
   const q=question.toLowerCase().trim();
+  if(/\b(how did i get here|my (?:discovery |navigation )?trail|my (?:discovery |navigation )?history|retrace my steps|where have i been)\b/.test(q))
+    return explainDiscoveryTrail(book,id,workspace);
   // A question about evidence FOR a relationship needs edge citations, not
   // every source attached to the current entry. Preserve this intent even
   // when the question includes words like "sources" or "proof".
