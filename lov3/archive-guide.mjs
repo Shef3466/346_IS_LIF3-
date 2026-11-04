@@ -58,11 +58,20 @@ export function archiveGuide(book,id,workspace=null) {
     : coverage.reviewedCount===0
       ? 'Sources are attached but none have been marked reviewed; treat the record as unverified.'
       : coverage.reviewedCount+' of '+coverage.sourceCount+' attached sources have been marked reviewed. Review the underlying material before drawing conclusions.';
-  const next=outgoing.length
-    ? 'A useful next step is to inspect the recorded '+outgoing[0].type+' connection to '+outgoing[0].title+' and ask what evidence supports it.'
-    : incoming.length
-      ? 'A useful next step is to examine how '+incoming[0].title+' connects to this concept.'
-      : 'A useful next step is to propose a connection, then look for independent supporting or conflicting evidence.';
-  return {entry,identity,outgoing,incoming,sources,coverage,introduction,evidence,next,pinnedContext,
+  // Offer a real graph destination; source pointers are editorial, never proof.
+  // Prefer a cited outgoing relationship when one exists, otherwise retain graph order.
+  const suggested=outgoing.find(link=>link.sourceIds.length>0)??outgoing[0]??incoming[0]??null;
+  const nextChoice=suggested?{
+    id:suggested.id,title:suggested.title,type:suggested.type,
+    direction:outgoing.includes(suggested)?'outgoing':'incoming',
+    evidenceStatus:suggested.sourceIds.length>0
+      ? 'editorial source pointers attached; factual verification not established'
+      : 'no source pointers attached; factual verification not established'
+  }:null;
+  const next=nextChoice
+    ? 'Explore '+nextChoice.title+' via a recorded '+nextChoice.direction+' '+nextChoice.type+
+      ' relationship. '+nextChoice.evidenceStatus+'.'
+    : 'A useful next step is to propose a connection, then look for independent supporting or conflicting evidence.';
+  return {entry,identity,outgoing,incoming,sources,coverage,introduction,evidence,next,nextChoice,pinnedContext,
     label:'LOV3 Archive Guide — retrieval preview (not a live AI conversation)'};
 }
