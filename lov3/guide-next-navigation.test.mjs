@@ -26,3 +26,14 @@ test('knowledge page renders nextChoice as an actual keyboard-focusable anchor',
   assert.match(html,/nextLink\.hidden=false/);
   assert.doesNotMatch(html,/<button id="guide-next-link"/);
 });
+
+
+test('recommended navigation shows its editorial evidence boundary next to the link',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/<p id="guide-next-evidence" class="note" hidden><\\/p>/);
+  assert.match(html,/evidenceNote\\.textContent='Recommended link evidence: '\\+guide\\.nextChoice\\.evidenceStatus/);
+  assert.match(html,/evidenceNote\\.hidden=false/);
+  const next=archiveGuide(book,'lov3:0009').nextChoice;
+  assert.ok(next);
+  assert.match(next.evidenceStatus,/factual verification not established/);
+});
