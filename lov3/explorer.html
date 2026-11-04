@@ -37,9 +37,9 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 </style>
 <main><a class="return-link" href="../index.html#universe">← Back to the Living Universe</a><h1 class="lov3-portal-title">BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
 <div><button id="toggle" type="button" aria-pressed="false">Auto-rotate: off</button><button id="reset" type="button">Reset view</button><button id="previous" type="button" disabled>Previous concept</button><button id="next" type="button" disabled>Next concept</button><button id="open" type="button" disabled>Open selected knowledge page</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
-<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="group" tabindex="0" aria-label="Interactive relationship globe. Use left and right arrows to rotate, up and down arrows to select concepts, Home and End to jump to the first or last concept, and Enter to open a selected knowledge page. Concept buttons beside the globe provide another route." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
+<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="group" tabindex="0" aria-label="Interactive relationship globe. Use left and right arrows to rotate, up and down arrows to select concepts, Home and End to jump to the first or last concept, Enter to open a selected knowledge page, and Escape to clear selection. Concept buttons beside the globe provide another route." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
 <aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
-<p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). On the focused globe, Left/Right rotates, Up/Down selects concepts, Home/End jumps to the first/last concept, and Enter or Space opens the selected page. Arrow Up/Down also moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
+<p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). On the focused globe, Left/Right rotates, Up/Down selects concepts, Home/End jumps to the first/last concept, Enter or Space opens the selected page, and Escape clears selection without changing the globe position. Arrow Up/Down also moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
 <script type="module">
 import { nextEntryIndex, initialAutoRotate, focusRestoredKnowledgeControl } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
@@ -111,6 +111,14 @@ function select(i){
  selectionStatus.textContent='Selected '+identity.path.join(' → ');
  scheduleDraw();
 }
+function clearSelection(message='Selection cleared; globe orientation preserved.'){
+ selected=null;open.disabled=true;
+ buttons.forEach(b=>b.setAttribute('aria-pressed','false'));
+ detail.textContent='Select a glowing concept or a subject/category/word button to inspect its relationships.';
+ spotlight.classList.remove('is-active');
+ selectionStatus.textContent=message;
+ scheduleDraw();
+}
 function openKnowledge(i){
  const e=entries[i];if(!e)return;
  window.location.assign(knowledgeHref(e.id,{angle,tilt,edges:document.querySelector('#edges').checked,running}));
@@ -126,6 +134,8 @@ canvas.addEventListener('keydown',e=>{
    e.preventDefault();step(e.key==='ArrowDown'?1:-1);
  }else if((e.key==='Home'||e.key==='End')&&entries.length){
    e.preventDefault();select(e.key==='Home'?0:entries.length-1);
+ }else if(e.key==='Escape'&&selected!==null){
+   e.preventDefault();clearSelection();
  }else if((e.key==='Enter'||e.key===' ')&&selected!==null){
    e.preventDefault();openKnowledge(selected);
  }
@@ -241,7 +251,7 @@ canvas.addEventListener("pointerup",e=>{if(drag&&!drag.moved){const box=canvas.g
 canvas.addEventListener('pointercancel',()=>{drag=null;inertiaVelocity=0;});
 toggle.onclick=()=>{running=!running;inertiaVelocity=0;syncRotation();scheduleDraw();};
 previous.onclick=()=>step(-1);next.onclick=()=>step(1);open.onclick=()=>{if(selected!==null)openKnowledge(selected);};
-document.querySelector("#reset").onclick=()=>{inertiaVelocity=0;angle=.2;tilt=.12;selected=null;open.disabled=true;buttons.forEach(b=>b.setAttribute('aria-pressed','false'));detail.textContent='Select a glowing concept or a subject/category/word button to inspect its relationships.';spotlight.classList.remove('is-active');selectionStatus.textContent='View reset; no concept selected.';scheduleDraw();};
+document.querySelector("#reset").onclick=()=>{inertiaVelocity=0;angle=.2;tilt=.12;clearSelection('View reset; no concept selected.');};
 document.querySelector('#edges').addEventListener('change',scheduleDraw);
 // Keep the globe sharp on high-DPI screens, with a capped pixel budget.
 if(typeof ResizeObserver==='function')new ResizeObserver(resizeCanvas).observe(canvas);
