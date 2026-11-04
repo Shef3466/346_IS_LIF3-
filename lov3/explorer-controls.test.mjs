@@ -62,3 +62,11 @@ test('pointer interaction pauses auto-rotation before dragging or selecting a co
   assert.match(html, /canvas\.addEventListener\("pointerdown",e=>\{running=false;syncRotation\(\);inertiaVelocity=0;drag=/);
   assert.match(html, /toggle\.onclick=\(\)=>\{running=!running;inertiaVelocity=0;syncRotation\(\);scheduleDraw\(\);\}/);
 });
+
+
+test('focused globe supports Home/End jumps to the first or last concept without scrolling', () => {
+  assert.match(html, /\(e\.key==='Home'\|\|e\.key==='End'\)\&\&entries\.length/);
+  assert.match(html, /e\.preventDefault\(\);select\(e\.key==='Home'\?0:entries\.length-1\)/);
+  assert.match(html, /Home\/End jumps to the first\/last concept/);
+  assert.match(html, /Home and End to jump to the first or last concept/);
+});
