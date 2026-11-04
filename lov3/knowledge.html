@@ -5,7 +5,7 @@
 :root{color-scheme:dark}*{box-sizing:border-box}
 body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 65%);color:#f1f6ff;font:16px/1.6 system-ui,sans-serif}
 main{max-width:920px;margin:auto;padding:clamp(16px,4vw,44px)}
-a{color:#baddff;text-underline-offset:4px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+a{color:#baddff;text-underline-offset:4px}.skip-link{position:absolute;left:12px;top:-90px;z-index:10;background:#173b60;color:#fff;padding:10px 14px;border:2px solid #ffdc85;border-radius:8px}.skip-link:focus{top:12px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
 .question-form{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .question-form label{flex-basis:100%}.question-form input{flex:1 1 220px;min-width:0}
 .question-form input,.question-form button,.question-prompts button{background:#173b60;color:#f1f6ff;border:1px solid #8ba7c5;border-radius:9px;padding:9px 12px;font:inherit}
@@ -23,7 +23,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 .status{color:#ffd99c} .pill{font-size:.8rem;border:1px solid #667f95;border-radius:20px;padding:3px 10px}
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
-</style></head><body><main>
+</style></head><body><a class="skip-link" href="#guide-heading">Skip to LOV3 Archive Guide</a><main>
 <nav><a id="back" href="./explorer.html">← Return to the globe at your saved position</a> · <a id="previous-discovery" href="./knowledge.html" hidden>← Previous discovery</a></nav>
 <p class="eyebrow">Book of LOV3 · Knowledge archive</p>
 <h1 id="title">Loading archive record…</h1>
@@ -35,7 +35,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <section aria-labelledby="sources-heading"><h2 id="sources-heading">Evidence and media</h2>
 <p id="evidence"></p><ul id="sources"></ul><p id="media" class="note"></p></section>
 </div><div>
-<section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading">LOV3 Archive Guide</h2>
+<section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading" tabindex="-1">LOV3 Archive Guide</h2>
 <p class="note">Original retrieval preview · Not a live conversational AI</p>
 <p id="guide-intro"></p><p id="guide-next"></p>
 <p><a id="guide-next-link" href="./knowledge.html" hidden>Explore recommended discovery →</a></p>
