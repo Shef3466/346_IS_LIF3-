@@ -345,3 +345,18 @@ test('natural-language trust questions receive evidence boundaries, not a fabric
     assert.deepEqual(result.links,[]);
   }
 });
+
+test('natural-language similarity and difference questions use only valid pinned context',()=>{
+  const state={pins:['lov3:0003','lov3:0005','lov3:9999']};
+  for(const question of ['How are my discoveries alike?','What are the differences?','What similarities exist?']){
+    const result=answerArchiveQuestion(book,'lov3:0002',state,question);
+    assert.equal(result.kind,'comparison',question);
+    assert.deepEqual(result.links.map(link=>link.id),['lov3:0003','lov3:0005']);
+    assert.deepEqual(result.sources,[]);
+    assert.match(result.answer,/editorial comparisons, not independently verified correlations/);
+  }
+  const empty=answerArchiveQuestion(book,'lov3:0002',null,'How are these alike?');
+  assert.equal(empty.kind,'comparison');
+  assert.deepEqual(empty.links,[]);
+  assert.match(empty.answer,/No other valid discoveries are pinned/);
+});
