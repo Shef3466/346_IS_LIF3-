@@ -39,6 +39,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="note">Original retrieval preview · Not a live conversational AI</p>
 <p id="guide-intro"></p><p id="guide-next"></p>
 <p><a id="guide-next-link" href="./knowledge.html" hidden>Explore recommended discovery →</a></p>
+<p id="guide-next-evidence" class="note" hidden></p>
 <h3 id="guide-context-heading">Compare with your pinned discoveries</h3><ul id="guide-context" aria-labelledby="guide-context-heading"></ul>
 <p class="note">These comparisons show recorded editorial classifications and links only—not verified historical or numerical connections.</p>
 <h3>Ask about this archive record</h3>
@@ -114,6 +115,9 @@ try{
     nextLink.href=knowledgeHref(guide.nextChoice.id,state);
     nextLink.textContent='Explore '+guide.nextChoice.title+' →';
     nextLink.hidden=false;
+    const evidenceNote=q('#guide-next-evidence');
+    evidenceNote.textContent='Recommended link evidence: '+guide.nextChoice.evidenceStatus;
+    evidenceNote.hidden=false;
   }
   const pinned=q('#guide-context');
   for(const other of guide.pinnedContext){
