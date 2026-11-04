@@ -45,3 +45,14 @@ test('explorer focuses its open-knowledge control only after a valid restored se
   assert.match(html,/if\(restoredIndex>=0\)\{select\(restoredIndex\);focusRestoredKnowledgeControl\(open,restoredIndex\);\}/);
   assert.match(html,/selectionStatus\.textContent='Selected '/);
 });
+
+
+test('globe canvas is focusable with documented keyboard navigation', () => {
+  assert.match(html, /<canvas[^>]+tabindex="0"[^>]+aria-label="Interactive relationship globe/);
+  assert.match(html, /canvas:focus-visible/);
+  assert.match(html, /canvas\.addEventListener\('keydown',e=>\{/);
+  assert.match(html, /e\.key==='ArrowLeft'\|\|e\.key==='ArrowRight'/);
+  assert.match(html, /e\.key==='ArrowDown'\|\|e\.key==='ArrowUp'/);
+  assert.match(html, /e\.key==='Enter'\|\|e\.key===' '/);
+  assert.match(html, /running=false;inertiaVelocity=0;syncRotation\(\)/);
+});
