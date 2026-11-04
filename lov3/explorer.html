@@ -15,7 +15,7 @@ canvas{display:block;box-sizing:border-box;width:100%;height:auto;aspect-ratio:4
 .focus-number[hidden]{display:none}
 aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
 button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
-button:focus-visible{outline:3px solid #ffdc85}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,canvas:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
 small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 #entrylist button{display:block;width:100%;text-align:left;margin:8px 0;line-height:1.4;overflow-wrap:anywhere}
 .concept-path{font-size:.86rem;color:#e4d09a;line-height:1.6;overflow-wrap:anywhere}
@@ -37,9 +37,9 @@ small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
 </style>
 <main><a class="return-link" href="../index.html#universe">← Back to the Living Universe</a><h1 class="lov3-portal-title">BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
 <div><button id="toggle" type="button" aria-pressed="false">Auto-rotate: off</button><button id="reset" type="button">Reset view</button><button id="previous" type="button" disabled>Previous concept</button><button id="next" type="button" disabled>Next concept</button><button id="open" type="button" disabled>Open selected knowledge page</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
-<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="img" aria-label="Visual rotating relationship globe. Concept buttons beside it open separate knowledge pages." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
+<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="group" tabindex="0" aria-label="Interactive relationship globe. Use left and right arrows to rotate, up and down arrows to select concepts, and Enter to open a selected knowledge page. Concept buttons beside the globe provide another route." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
 <aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
-<p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). Arrow Up/Down moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
+<p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). On the focused globe, Left/Right rotates, Up/Down selects concepts, and Enter opens the selected page. Arrow Up/Down also moves between focused concept buttons. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
 <script type="module">
 import { nextEntryIndex, initialAutoRotate, focusRestoredKnowledgeControl } from './explorer-controls.mjs';
 import { citationCoverage } from './sources.mjs';
@@ -116,6 +116,18 @@ function openKnowledge(i){
  window.location.assign(knowledgeHref(e.id,{angle,tilt,edges:document.querySelector('#edges').checked,running}));
 }
 function step(direction){const i=nextEntryIndex(selected,entries.length,direction);if(i!==null)select(i);}
+// Keyboard-only globe navigation complements the adjacent semantic concept buttons.
+// Avoid intercepting keys when focus is on other controls.
+canvas.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+   e.preventDefault();running=false;inertiaVelocity=0;syncRotation();
+   angle+=(e.key==='ArrowRight'?.15:-.15);scheduleDraw();
+ }else if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+   e.preventDefault();step(e.key==='ArrowDown'?1:-1);
+ }else if((e.key==='Enter'||e.key===' ')&&selected!==null){
+   e.preventDefault();openKnowledge(selected);
+ }
+});
 list.addEventListener('keydown',e=>{
  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
  e.preventDefault();const focused=buttons.indexOf(document.activeElement);
