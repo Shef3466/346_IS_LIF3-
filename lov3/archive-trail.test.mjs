@@ -21,3 +21,10 @@ test('missing trail does not fabricate navigation',()=>{
 test('trail is discoverable in suggested guide questions',()=>{
  assert.ok(SUGGESTED_ARCHIVE_QUESTIONS.includes('How did I get here?'));
 });
+
+test('missing or stale visits never create an invented adjacent graph transition',()=>{
+ const result=answerArchiveQuestion(book,'lov3:0009',{trail:['lov3:0008','lov3:9999','lov3:0009']},'How did I get here?');
+ assert.deepEqual(result.links.map(link=>link.id),['lov3:0008','lov3:0009']);
+ assert.match(result.answer,/unavailable visit\(s\) between these records; relationship not inferred/);
+ assert.doesNotMatch(result.answer,/recorded graph neighbors/);
+});
