@@ -28,3 +28,13 @@ test('MVP exposes the core journey without six-slot copy',()=>{
   assert.ok(workspace.includes('capacity:3'));
   assert.ok(workspace.includes('state.pins.length>=3'));
 });
+
+
+test('homepage knowledge entry opens a real Genesis record instead of an error page',()=>{
+  const home=readFileSync(resolve(root,'index.html'),'utf8');
+  const book=JSON.parse(readFileSync(resolve(root,'lov3/genesis.json'),'utf8'));
+  const match=home.match(/href=["']\.\/lov3\/knowledge\.html\?id=([^"']+)["']/);
+  assert.ok(match,'homepage knowledge link must select a concept');
+  const id=decodeURIComponent(match[1]);
+  assert.ok(book.entries.some(entry=>entry.id===id),'homepage target must exist in Genesis');
+});
