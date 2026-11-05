@@ -38,3 +38,19 @@ test('homepage knowledge entry opens a real Genesis record instead of an error p
   const id=decodeURIComponent(match[1]);
   assert.ok(book.entries.some(entry=>entry.id===id),'homepage target must exist in Genesis');
 });
+
+
+test('MVP HTML module imports and local data fetches resolve to real files',()=>{
+  for(const page of pages){
+    const filename=resolve(root,page);
+    const html=readFileSync(filename,'utf8');
+    for(const match of html.matchAll(/(?:import\s+(?:[^;]*?\s+from\s+)?|import\s*\()\s*['"](\.[^'"]+\.mjs)['"]/g)){
+      const target=resolve(dirname(filename),match[1]);
+      assert.ok(existsSync(target),page+' imports missing '+match[1]);
+    }
+    for(const match of html.matchAll(/fetch\(\s*['"](\.[^'"]+\.json)['"]/g)){
+      const target=resolve(dirname(filename),match[1]);
+      assert.ok(existsSync(target),page+' fetches missing '+match[1]);
+    }
+  }
+});
