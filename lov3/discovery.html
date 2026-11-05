@@ -39,7 +39,7 @@ const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),compari
 // A bookmarked section URL should focus its destination after initial render,
 // not merely scroll to it. Only the three fixed local targets are eligible.
 function focusInitialSection(){
- const id=decodeURIComponent(location.hash.slice(1));
+ const id=location.hash.slice(1);
  if(!['cards','comparison-heading','history-heading'].includes(id))return;
  const target=document.getElementById(id);
  if(target)requestAnimationFrame(()=>target.focus({preventScroll:true}));
