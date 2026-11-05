@@ -36,6 +36,14 @@ const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),compari
      if(target)requestAnimationFrame(()=>target.focus({preventScroll:true}));
    });
  }
+// A bookmarked section URL should focus its destination after initial render,
+// not merely scroll to it. Only the three fixed local targets are eligible.
+function focusInitialSection(){
+ const id=decodeURIComponent(location.hash.slice(1));
+ if(!['cards','comparison-heading','history-heading'].includes(id))return;
+ const target=document.getElementById(id);
+ if(target)requestAnimationFrame(()=>target.focus({preventScroll:true}));
+}
 q('#back').href=globeReturnHref(location.search);
 q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
 const stateView=readGlobeState(location.search);
@@ -160,7 +168,7 @@ try{
    }catch(err){q('#status').textContent='Session import rejected; existing discoveries kept. '+err.message;}
    finally{input.value='';}
  });
- persist();render();
+ persist();render();focusInitialSection();
  q('#status').textContent=(message||state.pins.length+' pinned of '+state.capacity+' slots.')+(storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
  // Consuming ?pin= is a one-time action: refreshing after Clear must not re-pin.
  // Keep angle, tilt, selected discovery and all other navigation parameters.
