@@ -7,7 +7,7 @@ import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from '
 const ids=new Set(['lov3:0001','lov3:0002','lov3:0003']);
 const edition='genesis-draft-001';
 test('local export and import preserve valid pins, capacity and trail',()=>{
-  const state={capacity:3,pins:['lov3:0002','lov3:0001'],trail:['lov3:0001','lov3:0002']};
+  const state={capacity:6,pins:['lov3:0002','lov3:0001'],trail:['lov3:0001','lov3:0002']};
   const exported=exportDiscoverySession(state,ids,edition);
   assert.deepEqual(importDiscoverySession(exported,ids,edition),{workspace:state,editionMatches:true});
   assert.ok(!exported.includes('credentials'));
