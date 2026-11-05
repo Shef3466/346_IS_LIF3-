@@ -28,6 +28,14 @@ import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from '
 import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
 import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from './workspace-transfer.mjs';
 const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
+ // Fragment links must move keyboard focus as well as scroll position.
+ // Targets are fixed local sections, never arbitrary URL-supplied selectors.
+ for(const link of document.querySelectorAll('nav[aria-label="Discovery navigation"] a[href^="#"]')){
+   link.addEventListener('click',()=>{
+     const target=document.getElementById(link.getAttribute('href').slice(1));
+     if(target)requestAnimationFrame(()=>target.focus({preventScroll:true}));
+   });
+ }
 q('#back').href=globeReturnHref(location.search);
 q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
 const stateView=readGlobeState(location.search);
