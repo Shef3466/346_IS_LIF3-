@@ -384,3 +384,12 @@ test('Archive Guide response is keyboard-focusable after its links and sources r
   assert.ok(response>=0 && sourceLoop>response && focus>sourceLoop && close>focus,
     'Guide focuses the answer after updating the linked evidence, before registering submit');
 });
+
+
+test('Archive Guide response supports Escape back to question input without trapping other controls',()=>{
+  const html=readFileSync(new URL('./knowledge.html',import.meta.url),'utf8');
+  assert.match(html,/q\('#guide-answer'\)\.addEventListener\('keydown',event=>\{/);
+  assert.match(html,/if\(event\.key==='Escape'\)\{/);
+  assert.match(html,/event\.preventDefault\(\);\s*q\('#guide-question'\)\.focus\(\)/);
+  assert.match(html,/q\('#guide-ask-again'\)\.addEventListener\('click'/);
+});
