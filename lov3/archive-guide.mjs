@@ -19,7 +19,7 @@ export function archiveGuide(book,id,workspace=null) {
   // Only current user-controlled tab pins are considered; never infer undocumented facts.
   const byId=new Map(book.entries.map(item=>[item.id,item]));
   const pinnedIds=Array.isArray(workspace?.pins)
-    ? [...new Set(workspace.pins)].filter(pin=>typeof pin==='string' && pin!==id && byId.has(pin)).slice(0,3)
+    ? [...new Set(workspace.pins)].filter(pin=>typeof pin==='string' && pin!==id && byId.has(pin)).slice(0,6)
     : [];
   const pinnedContext=pinnedIds.map(pin=>{
     const other=byId.get(pin),matches=[];
