@@ -54,10 +54,10 @@ test('knowledge page wires current tab pins to contextual guide and safe links',
   assert.match(html,/knowledgeHref\(other.id,state\)/);
 });
 
-test('archive guide limits legacy or malformed workspace pin arrays to three distinct comparison routes',()=>{
+test('archive guide accepts up to six unique valid comparison contexts without inventing relationships',()=>{
   const r=archiveGuide(book,'lov3:0002',{pins:['lov3:0002','lov3:0003','lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007']});
-  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005']);
-  assert.equal(r.pinnedContext.length,3);
+  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007']);
+  assert.equal(r.pinnedContext.length,5);
 });
 
 
@@ -112,4 +112,12 @@ test('public workspace guidance matches the current three-route UI',()=>{
  assert.match(readme,/three active comparison routes maximum/i);
  assert.match(html,/Three routes maximum/);
  assert.doesNotMatch(readme,/Four slots appear by default; expand to five or six/);
+});
+
+test('guide bounds six comparison contexts even with oversized imported pin arrays',()=>{
+  const pins=book.entries.filter(e=>e.id!=='lov3:0002').map(e=>e.id);
+  const result=archiveGuide(book,'lov3:0002',{pins});
+  assert.equal(result.pinnedContext.length,6);
+  assert.deepEqual(result.pinnedContext.map(x=>x.id),pins.slice(0,6));
+  assert.ok(result.pinnedContext.every(x=>typeof x.provenance==='string'));
 });
