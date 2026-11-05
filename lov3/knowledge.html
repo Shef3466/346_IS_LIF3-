@@ -76,6 +76,7 @@ try{
   validate(book);
   const state=readGlobeState(location.search);
   const ids=new Set(book.entries.map(e=>e.id));
+  if(!ids.has(id)) throw new Error('This concept is not in the current Genesis edition. Return to the globe to choose an available discovery.');
   let storage;try{storage=sessionStorage;}catch{storage=null;}
   const history=navigateKnowledgeTrail(readWorkspace(storage,ids),id,ids,new URLSearchParams(location.search).get('trail')==='back');
   saveWorkspace(storage,history);
