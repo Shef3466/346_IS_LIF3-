@@ -391,7 +391,7 @@ test('Archive Guide response supports Escape back to question input without trap
   assert.match(html,/q\('#guide-response-region'\)\.addEventListener\('keydown',event=>\{/);
   assert.match(html,/id="guide-response-region"/);
   assert.match(html,/event\.key==='Escape' && !event\.defaultPrevented/);
-  assert.match(html,/if\(event\.key==='Escape'\)\{/);
+  assert.match(html,/if\(event\.key==='Escape' && !event\.defaultPrevented\)\{/);
   assert.match(html,/event\.preventDefault\(\);\s*q\('#guide-question'\)\.focus\(\)/);
   assert.match(html,/q\('#guide-ask-again'\)\.addEventListener\('click'/);
 });
