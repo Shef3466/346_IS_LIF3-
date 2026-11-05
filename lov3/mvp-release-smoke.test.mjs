@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const pages=['index.html','lov3/explorer.html','lov3/knowledge.html','lov3/discovery.html','lov3/contribute.html'];
+
+test('MVP pages exist and all relative HTML navigation destinations resolve',()=>{
+  for(const page of pages){
+    const filename=resolve(root,page);
+    assert.ok(existsSync(filename),page+' must exist');
+    const html=readFileSync(filename,'utf8');
+    for(const match of html.matchAll(/\\bhref=["'](\\.[^"']+\\.html(?:[?#][^"']*)?)["']/g)){
+      const target=match[1].split(/[?#]/)[0];
+      assert.ok(existsSync(resolve(dirname(filename),target)),page+' links to missing '+target);
+    }
+  }
+});
+
+test('MVP exposes the core journey without six-slot copy',()=>{
+  const home=readFileSync(resolve(root,'index.html'),'utf8');
+  assert.match(home,/\\.\\/lov3\\/explorer\\.html/);
+  assert.match(home,/\\.\\/lov3\\/discovery\\.html/);
+  assert.match(home,/\\.\\/lov3\\/contribute\\.html/);
+  const workspace=readFileSync(resolve(root,'lov3/discovery-workspace.mjs'),'utf8');
+  assert.match(workspace,/capacity:3/);
+  assert.match(workspace,/state\\.pins\\.length>=3/);
+});
