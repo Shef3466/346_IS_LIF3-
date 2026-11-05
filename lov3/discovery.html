@@ -78,7 +78,7 @@ try{
      cards.append(card);
    });
    for(let i=state.pins.length;i<state.capacity;i++){
-     const card=el('article','');card.className='card';card.append(el('h3','Slot '+(i+1)+' — Empty'),el('p','Open a knowledge page and choose “Pin to Discovery Workspace.”'));cards.append(card);
+     const card=el('article','');card.className='card';card.append(el('h3','Slot '+(i+1)+' — Empty'),el('p','Choose a subject from the globe, then pin it from its knowledge page.'));const browse=el('a','Explore subjects for slot '+(i+1));browse.href=q('#back').href;card.append(browse);cards.append(card);
    }
    const pairs=comparePins(book,state);
    for(const pair of pairs){
