@@ -12,7 +12,7 @@ test('MVP pages exist and all relative HTML navigation destinations resolve',()=
     const filename=resolve(root,page);
     assert.ok(existsSync(filename),page+' must exist');
     const html=readFileSync(filename,'utf8');
-    for(const match of html.matchAll(/\\bhref=["'](\\.[^"']+\\.html(?:[?#][^"']*)?)["']/g)){
+    for(const match of html.matchAll(/\bhref=["'](\.[^"']+\.html(?:[?#][^"']*)?)["']/g)){
       const target=match[1].split(/[?#]/)[0];
       assert.ok(existsSync(resolve(dirname(filename),target)),page+' links to missing '+target);
     }
@@ -21,10 +21,10 @@ test('MVP pages exist and all relative HTML navigation destinations resolve',()=
 
 test('MVP exposes the core journey without six-slot copy',()=>{
   const home=readFileSync(resolve(root,'index.html'),'utf8');
-  assert.match(home,/\\.\\/lov3\\/explorer\\.html/);
-  assert.match(home,/\\.\\/lov3\\/discovery\\.html/);
-  assert.match(home,/\\.\\/lov3\\/contribute\\.html/);
+  assert.ok(home.includes('./lov3/explorer.html'));
+  assert.ok(home.includes('./lov3/discovery.html'));
+  assert.ok(home.includes('./lov3/contribute.html'));
   const workspace=readFileSync(resolve(root,'lov3/discovery-workspace.mjs'),'utf8');
-  assert.match(workspace,/capacity:3/);
-  assert.match(workspace,/state\\.pins\\.length>=3/);
+  assert.ok(workspace.includes('capacity:3'));
+  assert.ok(workspace.includes('state.pins.length>=3'));
 });
