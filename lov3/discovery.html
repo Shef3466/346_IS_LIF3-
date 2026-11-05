@@ -128,7 +128,7 @@ try{
    const prior=state.trail.length>1?state.trail.at(-2):null;
    const priorLink=q('#prior-visit');
    priorLink.hidden=!prior;
-   if(prior)priorLink.href=knowledgeHref(prior,stateView);
+   if(prior)priorLink.href=knowledgeHref(prior,stateView)+'&trail=back'; // Retrace the recorded visit instead of appending a duplicate.
  }
  q('#clear').addEventListener('click',()=>{
    if(!state.pins.length&&!state.trail.length){q('#status').textContent='Workspace is already empty.';return;}
