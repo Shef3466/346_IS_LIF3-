@@ -47,7 +47,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 <p class="note">Local question routing over draft metadata. Not a live AI model; questions are not stored or sent to a server.</p>
 <form id="guide-form" class="question-form"><label for="guide-question">Your question</label><input id="guide-question" name="question" type="search" maxlength="240" required placeholder="What evidence is attached?"><button type="submit">Ask guide</button></form>
 <div id="guide-prompts" class="question-prompts" aria-label="Suggested archive questions"></div>
-<p id="guide-answer" role="status" aria-live="polite" tabindex="-1"></p><ul id="guide-answer-boundaries" aria-label="Evidence and interpretation distinctions"></ul><ul id="guide-answer-questions" aria-label="Suggested research questions"></ul><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul><p><button id="guide-ask-again" type="button" hidden>Ask another question</button></p>
+<div id="guide-response-region" aria-label="Archive Guide response and references"><p id="guide-answer" role="status" aria-live="polite" tabindex="-1"></p><ul id="guide-answer-boundaries" aria-label="Evidence and interpretation distinctions"></ul><ul id="guide-answer-questions" aria-label="Suggested research questions"></ul><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul><p><button id="guide-ask-again" type="button" hidden>Ask another question</button></p></div>
 <p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
 </section>
 </div></div>
@@ -164,10 +164,10 @@ try{
     // Prevent a long archive answer from leaving keyboard users at the form.
     q('#guide-answer').focus({preventScroll:true});
   }
-  // Escape returns keyboard users from an answer to the question field.
-  // Do not intercept Escape inside source links or other interactive controls.
-  q('#guide-answer').addEventListener('keydown',event=>{
-    if(event.key==='Escape'){
+  // Escape also works while reviewing response links, sources and questions.
+  // Scope the shortcut to the response region, not the question form.
+  q('#guide-response-region').addEventListener('keydown',event=>{
+    if(event.key==='Escape' && !event.defaultPrevented){
       event.preventDefault();
       q('#guide-question').focus();
     }
