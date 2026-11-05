@@ -164,6 +164,14 @@ try{
     // Prevent a long archive answer from leaving keyboard users at the form.
     q('#guide-answer').focus({preventScroll:true});
   }
+  // Escape returns keyboard users from an answer to the question field.
+  // Do not intercept Escape inside source links or other interactive controls.
+  q('#guide-answer').addEventListener('keydown',event=>{
+    if(event.key==='Escape'){
+      event.preventDefault();
+      q('#guide-question').focus();
+    }
+  });
   q('#guide-ask-again').addEventListener('click',()=>q('#guide-question').focus());
   q('#guide-form').addEventListener('submit',event=>{
     event.preventDefault();
