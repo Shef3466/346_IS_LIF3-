@@ -12,3 +12,11 @@ test('workspace offers keyboard-accessible section jump links',()=>{
 test('pinned cards destination has a stable accessible region',()=>{
  assert.match(html,/<div id="cards"[^>]*role="region"[^>]*aria-label="Pinned discoveries"[^>]*tabindex="-1"/);
 });
+
+test('section jumps transfer focus without changing the selected globe state',()=>{
+ assert.match(html,/nav\[aria-label="Discovery navigation"\] a\[href\^="#"\]/);
+ assert.match(html,/document\.getElementById\(link\.getAttribute\('href'\)\.slice\(1\)\)/);
+ assert.match(html,/requestAnimationFrame\(\(\)=>target\.focus\(\{preventScroll:true\}\)\)/);
+ for(const id of ['cards','comparison-heading','history-heading'])
+   assert.match(html,new RegExp('id="'+id+'"[^>]*tabindex="-1"'));
+});
