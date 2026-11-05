@@ -54,3 +54,12 @@ test('MVP HTML module imports and local data fetches resolve to real files',()=>
     }
   }
 });
+
+// An outdated shared knowledge link must not contaminate a visitor's trail.
+test('knowledge page rejects missing Genesis IDs before recording a visit',()=>{
+  const html=readFileSync(resolve(root,'lov3/knowledge.html'),'utf8');
+  const check=html.indexOf('if(!ids.has(id))');
+  const visit=html.indexOf('navigateKnowledgeTrail(');
+  assert.ok(check>=0,'knowledge page must validate the requested concept');
+  assert.ok(visit>check,'unknown concept must be rejected before writing the trail');
+});
