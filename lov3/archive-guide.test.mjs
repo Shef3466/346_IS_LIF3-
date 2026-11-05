@@ -121,3 +121,11 @@ test('guide bounds six comparison contexts even with oversized imported pin arra
   assert.deepEqual(result.pinnedContext.map(x=>x.id),pins.slice(0,6));
   assert.ok(result.pinnedContext.every(x=>typeof x.provenance==='string'));
 });
+
+test('archive guide uses exactly six distinct valid other concepts when seven are pinned',()=>{
+  const pins=['lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007','lov3:0008','lov3:0009'];
+  const result=archiveGuide(book,'lov3:0002',{pins});
+  assert.deepEqual(result.pinnedContext.map(item=>item.id),pins.slice(0,6));
+  assert.equal(result.pinnedContext.length,6);
+  assert.ok(result.pinnedContext.every(item=>typeof item.provenance==='string'));
+});
