@@ -100,7 +100,10 @@ try{
      comparisons.append(comparison);
    }
    if(!pairs.length)item(comparisons,'Pin at least two discoveries to compare their recorded relationships.');
-   for(const id of [...state.trail].reverse())item(trail,byId.get(id).title,knowledgeHref(id,stateView));
+   for(let i=state.trail.length-1;i>=0;i--){
+     const id=state.trail[i];
+     item(trail,'Visit '+(i+1)+': '+byId.get(id).title,knowledgeHref(id,stateView));
+   }
    if(!state.trail.length)item(trail,'No exploration history in this tab yet.');
    const lastVisited=state.trail.at(-1);
    const resume=q('#resume');
