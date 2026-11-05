@@ -22,7 +22,7 @@ export function saveWorkspace(storage, state) {
 export function pinWorkspace(state,id,validIds) {
   if (!allow(id,validIds)) return {state,reason:'invalid'};
   if (state.pins.includes(id)) return {state,reason:'already-pinned'};
-  if (state.pins.length>=state.capacity) return {state,reason:'full'};
+  if (state.pins.length>=3) return {state,reason:'full'};
   return {state:{...state,pins:[...state.pins,id]},reason:'pinned'};
 }
 export function unpinWorkspace(state,id) {
