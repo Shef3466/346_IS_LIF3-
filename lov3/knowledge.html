@@ -201,5 +201,9 @@ try{
 }catch(error){
   q('#title').textContent='Archive record unavailable';
   q('#status').textContent=error.message;
+  q('#status').setAttribute('role','alert');
+  // Do not offer pinning, comparisons or questions for a record that failed to load.
+  for(const selector of ['#pin-workspace','#open-workspace','#propose-relationship','#guide-form','#guide-prompts','#guide-ask-again']) q(selector).hidden=true;
+  q('#record').textContent='This archive record could not be loaded. Return to the globe and select an available concept.';
 }
 </script></body></html>
