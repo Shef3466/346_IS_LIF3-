@@ -10,6 +10,13 @@ test('three optional discovery routes, never more',()=>{
   assert.equal(setWorkspaceCapacity(s,3).capacity,3);
   assert.throws(()=>setWorkspaceCapacity(s,4),RangeError);
 });
+test('stale or forged six-slot state cannot bypass approved three-route ceiling',()=>{
+  let state={capacity:6,pins:[],trail:[]};
+  for(const id of ['lov3:0001','lov3:0002','lov3:0003']) state=pinWorkspace(state,id,ids).state;
+  const result=pinWorkspace(state,'lov3:0004',ids);
+  assert.equal(result.reason,'full');
+  assert.deepEqual(result.state.pins,['lov3:0001','lov3:0002','lov3:0003']);
+});
 test('pin valid unique concepts; reject invalid and overflow',()=>{
   let s=emptyWorkspace();
   for(let i=1;i<=3;i++)s=pinWorkspace(s,'lov3:000'+i,ids).state;
