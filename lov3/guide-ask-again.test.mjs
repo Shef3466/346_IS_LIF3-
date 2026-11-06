@@ -12,6 +12,6 @@ test('response receives focus after citations and questions are rendered',()=>{
   const start=page.indexOf('function askGuide(question)');
   const end=page.indexOf("q('#guide-form').addEventListener",start);
   const block=page.slice(start,end);
-  assert.ok(block.indexOf('for(const source of result.sources)')<block.indexOf("q('#guide-answer').focus({preventScroll:true})"));
+  assert.ok(block.indexOf('for(const source of result.sources)')<block.indexOf("q('#guide-answer').focus()"));
   assert.match(page,/id="guide-answer" role="status" aria-live="polite" tabindex="-1"/);
 });
