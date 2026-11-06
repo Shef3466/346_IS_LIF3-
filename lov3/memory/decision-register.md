@@ -30,6 +30,15 @@ This register captures approved project decisions, not full conversation transcr
 - Affected: homepage, explorer, knowledge, discovery, guide, contribution, navigation and tests.
 - Evidence: homepage links integrated in commit `24340ba`. Full browser verification and release approval outstanding.
 
+
+### LOV3-DEC-003 — Creator-first friction testing
+- Status: **Approved 2026-11-06; delivery sequencing updated**
+- Requirement: The project creator is the first hands-on tester. Prioritize a compelling, runnable, integrated entry experience for creator-led friction testing over hypothetical external visitor-journey acceptance. Do not require outside testers before handing over the local/browser-testable MVP.
+- Preserve: the glowing globe as portal, separate knowledge pages, exact return state, maximum three routes, source-aware guide, and basic keyboard/mobile/reduced-motion functionality. This does not authorize deployment or skipping basic build/smoke verification.
+- Supersedes: any implied requirement that external visitor acceptance precede creator-first access; does not supersede LOV3-DEC-001 or LOV3-DEC-002.
+- Affected: MVP release gate, demo/run instructions, PR checklist, integrated UI.
+- Implementation evidence: decision recorded first; build, smoke-test outcome, handoff and blockers pending.
+
 ## Required build-run checklist
 1. Read Mustard Seed, project memory and this register; use approved decisions rather than stale prompts.
 2. Select one MVP integration blocker, not an optional enhancement.
