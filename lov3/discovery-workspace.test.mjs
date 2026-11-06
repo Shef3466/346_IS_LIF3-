@@ -234,3 +234,10 @@ test('workspace renders relation-specific source links and explicit uncited stat
   assert.match(html,/No editorial source records cited for this relationship/);
   assert.match(html,/Source records and review labels do not independently verify claims/);
 });
+
+test('comparison results link to both knowledge pages using saved globe orientation',()=>{
+  const html=readFileSync(new URL('./discovery.html',import.meta.url),'utf8');
+  assert.match(html,/openA\.href=knowledgeHref\(a\.id,stateView\)/);
+  assert.match(html,/openB\.href=knowledgeHref\(b\.id,stateView\)/);
+  assert.match(html,/comparison\.append\(el\('br',''\),openA,document\.createTextNode\(' · '\),openB\)/);
+});
