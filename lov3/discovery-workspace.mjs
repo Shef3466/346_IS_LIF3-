@@ -72,7 +72,8 @@ export function navigateKnowledgeTrail(state,id,validIds,back=false) {
 
 export function comparePins(book,state) {
   const byId=new Map(book.entries.map(entry=>[entry.id,entry]));
-  const pins=state.pins.map(id=>byId.get(id)).filter(Boolean);
+  const pins=[...new Set(Array.isArray(state?.pins)?state.pins:[])]
+    .filter(id=>byId.has(id)).slice(0,3).map(id=>byId.get(id));
   const pairs=[];
   for(let i=0;i<pins.length;i++) for(let j=i+1;j<pins.length;j++){
     const a=pins[i],b=pins[j];
