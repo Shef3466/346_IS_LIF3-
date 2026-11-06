@@ -75,6 +75,14 @@ try{
      card.append(el('p','Slot '+(i+1)),el('p',identity.subject+' → '+identity.category),el('h3',identity.word));
      if(identity.number)card.append(el('p','Recorded number: '+identity.number));
      card.append(el('p','Draft entry: '+e.title));
+     // Genesis has no authored definitions yet. Do not substitute the title or an AI guess.
+     card.append(el('p',typeof e.definition==='string'&&e.definition.trim()?'Editorial definition: '+e.definition:'Definition not yet authored for this draft concept.'));
+     const linked=(e.links??[]).filter(link=>byId.has(link.to));
+     if(linked.length){
+       const related=el('ul','');
+       for(const relation of linked)item(related,'Related: '+byId.get(relation.to).title+' ('+relation.type+'; editorial link)',knowledgeHref(relation.to,stateView));
+       card.append(el('p','Recorded related discoveries:'),related);
+     }
      const sources=e.sources??[];
      card.append(el('p',sources.length? sources.length+' attached editorial source(s); review status below.':'No editorial sources attached.'));
      const list=el('ul','');
