@@ -7,7 +7,7 @@ test('bookmarked workspace sections restore keyboard focus after rendering',()=>
  assert.match(html,/function focusInitialSection\(\)/);
  assert.match(html,/location\.hash\.slice\(1\)/);
  assert.match(html,/\['cards','comparison-heading','history-heading'\]\.includes\(id\)/);
- assert.match(html,/requestAnimationFrame\(\(\)=>target\.focus\(\{preventScroll:true\}\)\)/);
+ assert.match(html,/requestAnimationFrame\(\(\)=>target\.focus\(\)\)/);
  assert.match(html,/persist\(\);render\(\);focusInitialSection\(\)/);
 });
 
