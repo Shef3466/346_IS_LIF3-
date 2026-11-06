@@ -2,6 +2,16 @@
 
 **Project:** 346 IS LIF3 / Book of LOV3. **Status:** development preview, not production. **Target:** usable MVP preview by November 8, 2026, subject to verification. This document describes what exists and what still needs work; it does not grant permission to deploy or publish private data.
 
+## Creator-first friction-test handoff (LOV3-DEC-003)
+
+The project creator is the **first** hands-on evaluator. External visitor testing is **not** a prerequisite for the November 8 MVP handoff. Do not call this a production launch or an approved release.
+
+**Entry:** Start the local HTTP server as instructed below and open `http://localhost:8000/`. The landing page should provide a clear route into the glowing discovery globe. The globe must open a separate knowledge page; the page must return to the same globe orientation. Pin up to three concepts, inspect comparisons and the local Archive Guide, draft a contribution, then return without losing the current tab's discovery trail.
+
+**Minimal pre-handoff gate:** The Node test command completes successfully, all local HTML/JSON/ES-module resources load without browser-console errors, the globe can be entered, one knowledge page opens and returns correctly, three pins work and a fourth is rejected, and the guide/contribution screens open. Check keyboard focus and a narrow viewport; record any limitations rather than silently substituting placeholders. The creator—not an outside tester—decides which friction to fix after this initial handoff.
+
+**Evidence ledger:** Record test command, exit code, GitHub Actions run and conclusion, browser/version/device, observed failures, and exact preview entry URL. A successful CI run alone does not satisfy the browser gate. No production deployment is authorized.
+
 ## What to demonstrate
 
 1. Start at `index.html`, enter the glowing relationship globe at `lov3/explorer.html`. It is a **discovery portal**, not a definition page.
@@ -26,7 +36,7 @@ From the repository root, use any local static HTTP server (for example `python3
 
 ## What help is useful now
 
-**First:** test the complete visitor journey in real browsers on desktop and mobile; report exact reproducible failures with browser, page, steps, expected and observed behavior. Fix broken links, rendering, keyboard traps, state restoration and responsive layout before adding features.
+**First:** clear the minimal creator-first smoke gate above, then hand the runnable preview to the creator for friction testing. Fix startup failures, broken links, rendering, keyboard traps, state restoration and responsive layout before optional features. External visitor testing follows creator review, not precedes it.
 
 **Second:** improve the coherence and visual polish of the existing experience without changing its design decisions. Keep the glowing globe, separate knowledge page, original LOV3 guide, provenance boundaries and maximum of three active comparison routes.
 
