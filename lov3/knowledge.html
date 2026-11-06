@@ -52,6 +52,7 @@ section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding
 </section>
 </div></div>
 <p class="note">This archive is a developing research environment. The Discovery Workspace provides tab-scoped pinned comparisons; a generative AI dialogue is not yet implemented.</p>
+<nav aria-label="End of knowledge record"><a id="back-bottom" href="./explorer.html">← Return to the globe at your saved position</a></nav>
 </main>
 <script type="module">
 import {validate} from './graph.mjs';
@@ -61,6 +62,7 @@ import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-
 import {readWorkspace,saveWorkspace,navigateKnowledgeTrail,previousDiscoveryId} from './discovery-workspace.mjs';
 const q=selector=>document.querySelector(selector);
 q('#back').href=globeReturnHref(location.search);
+q('#back-bottom').href=q('#back').href;
 function li(parent,label,href){
   const item=document.createElement('li');
   if(href){const a=document.createElement('a');a.href=href;a.textContent=label;item.append(a);}
