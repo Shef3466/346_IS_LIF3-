@@ -27,7 +27,7 @@ test('workspace exposes only three routes and persists pin, compare and history 
   assert.match(page,/saveWorkspace\(storage,state\)/);
   assert.match(page,/state\.trail/);
   assert.match(page,/withoutWorkspacePin\(location\.search\)/);
-  assert.match(page,/three-route limit/);
+  assert.match(page,/Three routes maximum/);
 });
 
 test('Archive Guide answer focus scrolls into view for mobile and keyboard visitors',()=>{
