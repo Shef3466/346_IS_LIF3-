@@ -36,3 +36,11 @@ test('Archive Guide answer focus scrolls into view for mobile and keyboard visit
   assert.doesNotMatch(page,/q\('#guide-answer'\)\.focus\(\{preventScroll:true\}\);/);
   assert.match(page,/q\('#guide-response-region'\)\.addEventListener\('keydown'/);
 });
+
+// Fragment navigation should expose its destination on small screens, not only move focus.
+test('workspace section links scroll focused destinations into view',()=>{
+  const page=html('./discovery.html');
+  assert.match(page,/requestAnimationFrame\(\(\)=>target\.focus\(\)\)/);
+  assert.doesNotMatch(page,/target\.focus\(\{preventScroll:true\}\)/);
+  assert.match(page,/\['cards','comparison-heading','history-heading'\]/);
+});
