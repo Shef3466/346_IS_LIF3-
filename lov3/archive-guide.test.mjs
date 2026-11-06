@@ -54,10 +54,10 @@ test('knowledge page wires current tab pins to contextual guide and safe links',
   assert.match(html,/knowledgeHref\(other.id,state\)/);
 });
 
-test('archive guide accepts up to six unique valid comparison contexts without inventing relationships',()=>{
+test('archive guide accepts at most three unique valid comparison contexts without inventing relationships',()=>{
   const r=archiveGuide(book,'lov3:0002',{pins:['lov3:0002','lov3:0003','lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007']});
-  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007']);
-  assert.equal(r.pinnedContext.length,5);
+  assert.deepEqual(r.pinnedContext.map(x=>x.id),['lov3:0003','lov3:0011','lov3:0005']);
+  assert.equal(r.pinnedContext.length,3);
 });
 
 
@@ -114,15 +114,15 @@ test('public workspace guidance matches the current three-route UI',()=>{
  assert.doesNotMatch(readme,/Four slots appear by default; expand to five or six/);
 });
 
-test('guide bounds six comparison contexts even with oversized imported pin arrays',()=>{
+test('guide bounds three comparison contexts even with oversized imported pin arrays',()=>{
   const pins=book.entries.filter(e=>e.id!=='lov3:0002').map(e=>e.id);
   const result=archiveGuide(book,'lov3:0002',{pins});
-  assert.equal(result.pinnedContext.length,6);
-  assert.deepEqual(result.pinnedContext.map(x=>x.id),pins.slice(0,6));
+  assert.equal(result.pinnedContext.length,3);
+  assert.deepEqual(result.pinnedContext.map(x=>x.id),pins.slice(0,3));
   assert.ok(result.pinnedContext.every(x=>typeof x.provenance==='string'));
 });
 
-test('archive guide uses exactly six distinct valid other concepts when seven are pinned',()=>{
+test('archive guide uses exactly three distinct valid other concepts when seven are pinned',()=>{
   const pins=['lov3:0003','lov3:0011','lov3:0005','lov3:0006','lov3:0007','lov3:0008','lov3:0009'];
   const result=archiveGuide(book,'lov3:0002',{pins});
   assert.deepEqual(result.pinnedContext.map(item=>item.id),pins.slice(0,6));
