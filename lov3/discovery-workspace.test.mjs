@@ -241,3 +241,13 @@ test('comparison results link to both knowledge pages using saved globe orientat
   assert.match(html,/openB\.href=knowledgeHref\(b\.id,stateView\)/);
   assert.match(html,/comparison\.append\(el\('br',''\),openA,document\.createTextNode\(' · '\),openB\)/);
 });
+
+test('comparison defensively caps malformed or legacy pin arrays at three distinct valid routes',()=>{
+  const legacy={capacity:6,pins:['lov3:0001','lov3:0001','lov3:0002','lov3:9999','lov3:0003','lov3:0004']};
+  const pairs=comparePins(book,legacy);
+  assert.equal(pairs.length,3);
+  assert.deepEqual(pairs.map(pair=>[pair.a,pair.b]),[
+    ['lov3:0001','lov3:0002'],['lov3:0001','lov3:0003'],['lov3:0002','lov3:0003']
+  ]);
+  assert.deepEqual(comparePins(book,{pins:null}),[]);
+});
