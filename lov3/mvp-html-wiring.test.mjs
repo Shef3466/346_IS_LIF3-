@@ -29,3 +29,10 @@ test('workspace exposes only three routes and persists pin, compare and history 
   assert.match(page,/withoutWorkspacePin\(location\.search\)/);
   assert.match(page,/three-route limit/);
 });
+
+test('Archive Guide answer focus scrolls into view for mobile and keyboard visitors',()=>{
+  const page=html('./knowledge.html');
+  assert.match(page,/q\('#guide-answer'\)\.focus\(\);/);
+  assert.doesNotMatch(page,/q\('#guide-answer'\)\.focus\(\{preventScroll:true\}\);/);
+  assert.match(page,/q\('#guide-response-region'\)\.addEventListener\('keydown'/);
+});
