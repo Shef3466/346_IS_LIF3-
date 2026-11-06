@@ -129,3 +129,14 @@ test('archive guide caps seven legacy pins at three distinct valid comparison co
   assert.equal(result.pinnedContext.length,3);
   assert.ok(result.pinnedContext.every(item=>typeof item.provenance==='string'));
 });
+
+// The guide reads user-controlled session pins but must not alter them during retrieval.
+test('archive guide preserves user session pins while normalizing its own three-route context',()=>{
+  const pins=['lov3:0003','lov3:0003','lov3:9999','lov3:0011','lov3:0005','lov3:0006'];
+  const session={pins:[...pins],history:[{id:'lov3:0002',yaw:1.25,pitch:-0.3}]};
+  const snapshot=structuredClone(session);
+  const result=archiveGuide(book,'lov3:0002',session);
+  assert.deepEqual(result.pinnedContext.map(item=>item.id),['lov3:0003','lov3:0011','lov3:0005']);
+  assert.deepEqual(session,snapshot);
+  assert.equal(result.pinnedContext.length,3);
+});
