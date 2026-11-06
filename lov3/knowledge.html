@@ -162,8 +162,8 @@ try{
       li(cited,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established'+(source.relation?' · cited for '+source.relation:''),source.url);
     q('#guide-ask-again').hidden=false;
     // Move keyboard focus to the response after its evidence and links render.
-    // Prevent a long archive answer from leaving keyboard users at the form.
-    q('#guide-answer').focus({preventScroll:true});
+    // Let the browser scroll the newly focused answer into view, including on mobile.
+    q('#guide-answer').focus();
   }
   // Escape also works while reviewing response links, sources and questions.
   // Scope the shortcut to the response region, not the question form.
