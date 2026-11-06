@@ -114,6 +114,10 @@ try{
        matches.push(from+' → '+to+' ('+relation.type+'; '+relation.citationCount+' relation citation(s))');
      }
      const comparison=el('li',a.word+' ↔ '+b.word+': '+(matches.join('; ')||'no shared classification or explicit link recorded'));
+     // Comparison results must remain actionable without losing the globe pose.
+     const openA=el('a','Open '+a.word+' knowledge page');openA.href=knowledgeHref(a.id,stateView);
+     const openB=el('a','Open '+b.word+' knowledge page');openB.href=knowledgeHref(b.id,stateView);
+     comparison.append(el('br',''),openA,document.createTextNode(' · '),openB);
      for(const relation of pair.recordedRelations){
        const cited=relationCitationDetails(book,relation);
        const sourceList=el('ul','');
