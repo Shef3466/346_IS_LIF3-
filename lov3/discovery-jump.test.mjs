@@ -16,7 +16,7 @@ test('pinned cards destination has a stable accessible region',()=>{
 test('section jumps transfer focus without changing the selected globe state',()=>{
  assert.match(html,/nav\[aria-label="Discovery navigation"\] a\[href\^="#"\]/);
  assert.match(html,/document\.getElementById\(link\.getAttribute\('href'\)\.slice\(1\)\)/);
- assert.match(html,/requestAnimationFrame\(\(\)=>target\.focus\(\{preventScroll:true\}\)\)/);
+ assert.match(html,/requestAnimationFrame\(\(\)=>target\.focus\(\)\)/);
  for(const id of ['cards','comparison-heading','history-heading'])
    assert.match(html,new RegExp('id="'+id+'"[^>]*tabindex="-1"'));
 });
