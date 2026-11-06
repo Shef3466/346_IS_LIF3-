@@ -52,5 +52,19 @@ jobs:
           grep -q 'Genesis entries:' /tmp/lov3-context.txt
           grep -q 'Publication status:' /tmp/lov3-context.txt
           grep -q 'Engineering rationale' /tmp/lov3-context.txt
+      - name: Smoke-test creator preview over local HTTP
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/lov3-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:8000/; then break; fi
+            sleep 1
+          done
+          for path in / /lov3/explorer.html /lov3/knowledge.html /lov3/discovery.html /lov3/contribute.html /lov3/genesis.json /lov3/archive-guide.mjs /lov3/archive-questions.mjs /lov3/portal-state.mjs /lov3/discovery-workspace.mjs; do
+            echo "Checking HTTP $path"
+            curl --fail --show-error --silent --output /dev/null "http://127.0.0.1:8000$path"
+          done
+          echo 'Static HTTP route smoke passed; browser interaction remains unverified.'
       - name: Run complete LOV3 Node.js test suite
         run: node --test lov3/*.test.mjs lov3/memory/*.test.mjs
