@@ -75,7 +75,7 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
       const html=await response.text();
       for(const tag of html.matchAll(/<(a|link|img|script)\b([^>]*)>/gi)){
         const attr=tag[1].toLowerCase()==='a'||tag[1].toLowerCase()==='link'?'href':'src';
-        const match=tag[2].match(new RegExp('\\b'+attr+'\\s*=\\s*["\\\']([^"\\\']+)["\\\']','i'));
+        const match=tag[2].match(/\b(?:href|src)\s*=\s*["']([^"']+)["']/i);
         if(!match||!match[1]||match[1].startsWith('#'))continue;
         const target=new URL(match[1],origin+page);
         if(target.origin!==origin)continue;
