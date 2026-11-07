@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Relationship Globe (prototype)</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#080e1b;color:#eff5ff;font:16px system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:20px}h1{margin-bottom:5px}p{color:#b9c9dd}
+.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px}
+canvas{display:block;box-sizing:border-box;width:100%;height:auto;aspect-ratio:4/3;background:radial-gradient(circle at center,#18345c,#070d1b 75%);border:1px solid #6d94b8;border-radius:18px;box-shadow:0 0 65px #2379c32e,inset 0 0 50px #2164a422;touch-action:pan-y}
+.globe-stage{position:relative;min-width:0}
+.globe-focus{position:absolute;left:16px;bottom:16px;max-width:min(75%,360px);padding:12px 16px;border:1px solid #e7c98599;border-radius:14px;background:linear-gradient(135deg,#142f4cf0,#0a182eea);box-shadow:0 0 35px #4fb8f92a,inset 0 1px #e8d69e40;pointer-events:none;opacity:0;transform:translate3d(0,12px,0);transition:opacity .32s ease,transform .32s ease;overflow-wrap:anywhere}
+.globe-focus.is-active{opacity:1;transform:translate3d(0,0,0)}
+.focus-path{display:block;font-size:.72rem;letter-spacing:.04em;color:#b9d8ed}
+.focus-word{display:block;font-size:clamp(1rem,2.3vw,1.35rem);line-height:1.25;margin-top:3px;color:#ffe4a5}
+.focus-number{display:inline-block;margin-top:5px;font-size:.8rem;color:#9ee5ff}
+.focus-number[hidden]{display:none}
+aside{border:1px solid #52677f;border-radius:18px;padding:16px;max-height:500px;overflow:auto}
+button{background:#174573;color:white;border:1px solid #8399b2;border-radius:8px;padding:10px;margin:5px;cursor:pointer}
+button:focus-visible,canvas:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}button:hover{background:#235d91}button:disabled{opacity:.5;cursor:not-allowed}
+small{color:#b9c9dd}#status,#selection-status{min-height:1.5em}
+#entrylist button{display:block;width:100%;text-align:left;margin:8px 0;line-height:1.4;overflow-wrap:anywhere}
+.concept-path{font-size:.86rem;color:#e4d09a;line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:680px){.layout{grid-template-columns:1fr}.globe-focus{left:10px;bottom:10px;padding:9px 12px;max-width:80%}}
+/* Native same-origin portal transitions; unsupported browsers navigate normally. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  #universe h2, main > h1.lov3-portal-title { view-transition-name: lov3-portal-title; }
+  ::view-transition-old(root) { animation: .24s ease-in both lov3-portal-exit; }
+  ::view-transition-new(root) { animation: .4s cubic-bezier(.2,.7,.2,1) both lov3-portal-enter; }
+  ::view-transition-old(lov3-portal-title),
+  ::view-transition-new(lov3-portal-title) { animation-duration: .4s; }
+  @keyframes lov3-portal-exit { to { opacity: 0; transform: translate3d(0,-10px,0); } }
+  @keyframes lov3-portal-enter { from { opacity: 0; transform: translate3d(0,14px,0); } }
+}
+.return-link{display:inline-block;color:#baddff;margin-bottom:12px;text-underline-offset:4px}
+.return-link:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.globe-focus{transition:none;transform:none}}
+</style>
+<main><a class="return-link" href="../index.html#universe">← Back to the Living Universe</a><h1 class="lov3-portal-title">BOOK OF LOV3</h1><p>Relationship Globe · Genesis draft explorer · Not a blockchain deployment</p>
+<div><button id="toggle" type="button" aria-pressed="false">Auto-rotate: off</button><button id="reset" type="button">Reset view</button><button id="previous" type="button" disabled>Previous concept</button><button id="next" type="button" disabled>Next concept</button><button id="open" type="button" disabled>Open selected knowledge page</button><label><input id="edges" type="checkbox" checked> Show relationships</label></div>
+<div class="layout"><div class="globe-stage"><canvas id="globe" width="720" height="540" role="group" tabindex="0" aria-label="Interactive relationship globe. Use left and right arrows to rotate, up and down arrows to select concepts, Home and End to jump to the first or last concept, Enter to open a selected knowledge page, and Escape to clear selection. Concept buttons beside the globe provide another route." aria-describedby="globe-help">The concepts and their relationships are available in the adjacent subject/category/word list.</canvas><div id="globe-focus" class="globe-focus" aria-hidden="true"><span id="focus-path" class="focus-path"></span><strong id="focus-word" class="focus-word"></strong><span id="focus-number" class="focus-number" hidden></span></div></div>
+<aside><h2 id="heading">Genesis entries</h2><div id="status" role="status"></div><div id="selection-status" role="status" aria-live="polite"></div><div id="detail">Select a glowing concept or a subject/category/word button to inspect its relationships.</div><div id="entrylist" role="group" aria-label="Choose a Genesis concept"></div></aside></div>
+<p id="globe-help"><small>Drag the globe to rotate; tap a glowing concept or activate its concept button to open a separate knowledge page. Previous/Next previews a concept; Open selected enters its page. Returning restores the same globe orientation and pauses rotation. Labels follow Subject → Category → Word → Number (only when explicitly correlated). On the focused globe, Left/Right rotates, Up/Down selects concepts, Home/End jumps to the first/last concept, Enter or Space opens the selected page, and Escape clears selection without changing the globe position. Arrow Up/Down also moves between focused concept buttons; Escape from a concept button clears selection and returns focus to the globe. Automatic rotation respects reduced-motion settings. Spherical coordinates are a navigation visualization, not claims about historical locations or celestial geometry.</small></p></main>
+<script type="module">
+import { nextEntryIndex, initialAutoRotate, focusRestoredKnowledgeControl } from './explorer-controls.mjs';
+import { citationCoverage } from './sources.mjs';
+import { conceptIdentity, globeLabel } from './taxonomy.mjs';
+import { placeGlobeLabels } from './label-layout.mjs';
+import { validate } from './graph.mjs';
+import {readGlobeState,knowledgeHref,selectedId} from './portal-state.mjs';
+import { projectConcepts, hitTestConcept, advanceAngle, canvasPixelSize, canvasDrawSpace } from './globe-geometry.mjs';
+const canvas=document.querySelector("#globe"),cx=canvas.getContext("2d"),status=document.querySelector("#status"),selectionStatus=document.querySelector("#selection-status"),detail=document.querySelector("#detail"),list=document.querySelector("#entrylist");
+const toggle=document.querySelector("#toggle"),previous=document.querySelector("#previous"),next=document.querySelector("#next"),open=document.querySelector("#open");
+const spotlight=document.querySelector('#globe-focus'),focusPath=document.querySelector('#focus-path'),focusWord=document.querySelector('#focus-word'),focusNumber=document.querySelector('#focus-number');
+function showSpotlight(identity){
+ focusPath.textContent=identity.subject+' / '+identity.category;
+ focusWord.textContent=identity.word;
+ focusNumber.textContent=identity.number??'';
+ focusNumber.hidden=!identity.number;
+ spotlight.classList.add('is-active');
+}
+const motionQuery=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+const savedView=readGlobeState(location.search);
+document.querySelector('#edges').checked=savedView.edges;
+let entries=[],buttons=[],angle=savedView.angle,tilt=savedView.tilt,running=initialAutoRotate(motionQuery?.matches)&&savedView.running,selected=null,points=[],drag=null;
+let frameId=null,lastFrame=null,inView=true,inertiaVelocity=0;
+// Reuse expensive gradient stops across animation frames; rebuild only on canvas resize.
+let lightingCache=null;
+const labelWidths=new Map(); // Cache measured word widths across animation frames.
+function globeLighting(w,h,r){
+ if(lightingCache?.w===w && lightingCache?.h===h)return lightingCache;
+ const aura=cx.createRadialGradient(0,0,r*.2,0,0,r*1.38);
+ aura.addColorStop(0,'rgba(38,146,212,.24)');
+ aura.addColorStop(.7,'rgba(31,97,164,.13)');
+ aura.addColorStop(1,'rgba(8,20,41,0)');
+ const sphere=cx.createRadialGradient(-r*.36,-r*.4,r*.04,0,0,r);
+ sphere.addColorStop(0,'rgba(37,105,160,.40)');
+ sphere.addColorStop(.65,'rgba(12,41,80,.35)');
+ sphere.addColorStop(1,'rgba(3,12,30,.9)');
+ lightingCache={w,h,aura,sphere};
+ return lightingCache;
+}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function syncRotation(){toggle.textContent='Auto-rotate: '+(running?'on':'off');toggle.setAttribute('aria-pressed',String(running));}
+syncRotation();
+motionQuery?.addEventListener?.('change',e=>{if(e.matches){running=false;inertiaVelocity=0;syncRotation();scheduleDraw();}});
+try{
+ const result=await fetch("./genesis.json");
+ if(!result.ok)throw new Error("HTTP "+result.status);
+ const book=await result.json();
+ validate(book); // Reject malformed or dangling Genesis records before rendering.
+ entries=book.entries;
+ entries.forEach((e,i)=>{
+ const b=document.createElement("button");b.type="button";b.textContent=conceptIdentity(e).path.join(" → ");b.setAttribute('aria-pressed','false');
+ b.addEventListener("click",()=>openKnowledge(i));buttons.push(b);list.append(b);
+ });
+ previous.disabled=next.disabled=entries.length===0;
+ status.textContent=entries.length+" draft concepts loaded";
+ const restored=selectedId(location.search,'selected');
+ const restoredIndex=entries.findIndex(e=>e.id===restored);
+ if(restoredIndex>=0){select(restoredIndex);focusRestoredKnowledgeControl(open,restoredIndex);}
+ scheduleDraw();
+}catch(err){status.textContent="Cannot load genesis.json: "+err.message;}
+function select(i){
+ const e=entries[i];if(!e)return;
+ selected=i;open.disabled=false;buttons.forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));
+ const related=e.links.map(x=>entries.find(t=>t.id===x.to)?.title).filter(Boolean);
+ const coverage=citationCoverage(e);
+ const identity=conceptIdentity(e);
+ showSpotlight(identity);
+ detail.innerHTML="<p class=\"concept-path\">"+identity.path.map(esc).join(" → ")+"</p><h3>"+esc(e.title)+"</h3><p>Outgoing links: "+(related.length?related.map(esc).join(", "):"none yet")+"</p><p>Editorial references: "+coverage.sourceCount+" attached ("+coverage.reviewedCount+" reviewed). Relations with citations: "+coverage.citedRelationCount+"/"+coverage.relationCount+".</p><small>Source pointers do not establish the truth of a claim. Editorial draft; source texts pending review.</small>";
+ selectionStatus.textContent='Selected '+identity.path.join(' → ');
+ scheduleDraw();
+}
+function clearSelection(message='Selection cleared; globe orientation preserved.'){
+ selected=null;open.disabled=true;
+ buttons.forEach(b=>b.setAttribute('aria-pressed','false'));
+ detail.textContent='Select a glowing concept or a subject/category/word button to inspect its relationships.';
+ spotlight.classList.remove('is-active');
+ selectionStatus.textContent=message;
+ scheduleDraw();
+}
+function openKnowledge(i){
+ const e=entries[i];if(!e)return;
+ window.location.assign(knowledgeHref(e.id,{angle,tilt,edges:document.querySelector('#edges').checked,running}));
+}
+function step(direction){const i=nextEntryIndex(selected,entries.length,direction);if(i!==null)select(i);}
+// Keyboard-only globe navigation complements the adjacent semantic concept buttons.
+// Avoid intercepting keys when focus is on other controls.
+canvas.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+   e.preventDefault();running=false;inertiaVelocity=0;syncRotation();
+   angle+=(e.key==='ArrowRight'?.15:-.15);scheduleDraw();
+ }else if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+   e.preventDefault();step(e.key==='ArrowDown'?1:-1);
+ }else if((e.key==='Home'||e.key==='End')&&entries.length){
+   e.preventDefault();select(e.key==='Home'?0:entries.length-1);
+ }else if(e.key==='Escape'&&selected!==null){
+   e.preventDefault();clearSelection();
+ }else if(e.key==='Enter'||e.key===' '){
+   e.preventDefault();
+   if(selected!==null)openKnowledge(selected);
+   else if(entries.length)select(0); // First activation previews a concept; second opens it.
+ }
+});
+list.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&selected!==null){
+   e.preventDefault();clearSelection();canvas.focus();return;
+ }
+ if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+ e.preventDefault();const focused=buttons.indexOf(document.activeElement);
+ const i=nextEntryIndex(focused<0?selected:focused,entries.length,e.key==='ArrowDown'?1:-1);
+ if(i!==null){select(i);buttons[i].focus();}
+});
+function scheduleDraw(){
+ if(frameId===null && inView && !document.hidden)
+   frameId=requestAnimationFrame(time=>{frameId=null;draw(time);});
+}
+function resizeCanvas(){
+ const box=canvas.getBoundingClientRect();
+ if(box.width<=0 || box.height<=0)return;
+ const {width,height}=canvasPixelSize(box.width,box.height,window.devicePixelRatio||1);
+ if(canvas.width!==width || canvas.height!==height){
+   canvas.width=width;canvas.height=height;
+   lastFrame=null; // Reset animation timing after a backing-store resize.
+   lightingCache=null;
+   scheduleDraw();
+ }
+}
+function draw(time){
+ const elapsed=lastFrame===null?16.67:time-lastFrame;
+ lastFrame=time;
+ angle=advanceAngle(angle,elapsed,running);
+ // A short, bounded glide after dragging makes touch and mouse rotation feel continuous.
+ const dt=Math.min(50,Math.max(0,elapsed));
+ if(inertiaVelocity!==0){
+   angle+=inertiaVelocity*dt;
+   inertiaVelocity*=Math.exp(-dt/240);
+   if(Math.abs(inertiaVelocity)<0.00004)inertiaVelocity=0;
+ }
+ const box=canvas.getBoundingClientRect();
+ if(box.width<=0 || box.height<=0)return;
+ const {width:w,height:h,scaleX,scaleY}=canvasDrawSpace(box.width,box.height,canvas.width,canvas.height);
+ const r=Math.min(w,h)*.35;
+ // Render in CSS pixels so labels, glow, nodes and hit areas stay legible on Retina/mobile.
+ cx.setTransform(scaleX,0,0,scaleY,0,0);
+ cx.clearRect(0,0,w,h);cx.save();cx.translate(w/2,h/2);
+ // Keep the approved luminous layers, but avoid allocating gradients every frame.
+ const {aura,sphere}=globeLighting(w,h,r);
+ cx.fillStyle=aura;cx.beginPath();cx.arc(0,0,r*1.38,0,Math.PI*2);cx.fill();
+ cx.fillStyle=sphere;cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.fill();
+ cx.strokeStyle='rgba(105,192,243,.42)';cx.lineWidth=1;
+ cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
+ cx.strokeStyle='rgba(84,164,225,.26)';
+ for(let j=-3;j<=3;j++){
+   const lat=j*Math.PI/10,rr=r*Math.cos(lat);
+   cx.beginPath();cx.ellipse(0,r*Math.sin(lat),rr,rr*.19,0,0,Math.PI*2);cx.stroke();
+ }
+ for(let j=0;j<4;j++){
+   cx.beginPath();cx.ellipse(0,0,r*.23,r,angle+j*Math.PI/4,0,Math.PI*2);cx.stroke();
+ }
+ points=projectConcepts(entries.length,angle,tilt,r);
+ if(document.querySelector('#edges').checked){
+   const byId=new Map(points.map(p=>[entries[p.i].id,p]));
+   for(const p of points)for(const link of entries[p.i].links){
+     const q=byId.get(link.to);if(!q)continue;
+     const active=selected===p.i||selected===q.i;
+     cx.strokeStyle=active?'rgba(255,222,150,.86)':'rgba(126,202,252,.25)';
+     cx.lineWidth=active?2:1;
+     cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
+   }
+ }
+ const labels=placeGlobeLabels(points,selected,(i,active)=>{
+   const word=globeLabel(entries[i],14);
+   const font=active?'bold 13px system-ui':'11px system-ui';
+   const key=font+'|'+word;
+   if(!labelWidths.has(key)){
+     cx.font=font;
+     labelWidths.set(key,cx.measureText(word).width);
+   }
+   return labelWidths.get(key);
+ },w,h);
+ for(const p of points.slice().sort((a,b)=>a.depth-b.depth)){
+   const active=p.i===selected,front=p.depth>=-.15;
+   cx.beginPath();cx.arc(p.x,p.y,active?10:front?6:4,0,Math.PI*2);
+   cx.shadowColor=active?'#ffdf9c':'#55d5ff';
+   cx.shadowBlur=active?23:front?10:0;
+   cx.fillStyle=active?'#ffe3a5':front?'#8ce5ff':'#537491';cx.fill();
+   cx.shadowBlur=0;
+   const label=labels.get(p.i);
+   if(label){
+     cx.font=active?'bold 13px system-ui':'11px system-ui';
+     cx.fillStyle=active?'#ffe3a5':'#e0efff';
+     cx.fillText(globeLabel(entries[p.i],14),label.x,label.y);
+   }
+ }
+ cx.restore();
+ if(running || drag || inertiaVelocity!==0) scheduleDraw();
+}
+// Stop work when the globe is offscreen or the browser tab is hidden.
+if(typeof IntersectionObserver==='function'){
+ const observer=new IntersectionObserver(records=>{
+   inView=records[0]?.isIntersecting??true;
+   if(!inView){inertiaVelocity=0;if(frameId!==null){cancelAnimationFrame(frameId);frameId=null;}}
+   if(inView){lastFrame=null;scheduleDraw();}
+ },{threshold:0});
+ observer.observe(canvas);
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){inertiaVelocity=0;if(frameId!==null)cancelAnimationFrame(frameId);frameId=null;lastFrame=null;}
+ else scheduleDraw();
+});
+
+canvas.addEventListener("pointerdown",e=>{if(drag)return;running=false;syncRotation();inertiaVelocity=0;drag={pointerId:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false,t:performance.now(),velocity:0};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.pointerId)return;const now=performance.now(),dx=e.clientX-drag.x,dy=e.clientY-drag.y,dt=Math.max(8,now-drag.t);if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>5)drag.moved=true;angle+=dx*.01;tilt=Math.max(-1.3,Math.min(1.3,tilt+dy*.006));drag.velocity=Math.max(-.014,Math.min(.014,drag.velocity*.5+(dx*.01/dt)*.5));drag.x=e.clientX;drag.y=e.clientY;drag.t=now;scheduleDraw();});
+canvas.addEventListener("pointerup",e=>{if(!drag||e.pointerId!==drag.pointerId)return;if(drag&&!drag.moved){const box=canvas.getBoundingClientRect(),x=e.clientX-box.left-box.width/2,y=e.clientY-box.top-box.height/2;const hit=hitTestConcept(points,x,y,e.pointerType==='touch'?24:18);if(hit!==null)openKnowledge(hit);}else if(drag?.moved&&!motionQuery?.matches&&performance.now()-drag.t<100){inertiaVelocity=drag.velocity;}drag=null;scheduleDraw();});
+canvas.addEventListener('pointercancel',()=>{drag=null;inertiaVelocity=0;scheduleDraw();});
+// Browsers can revoke pointer capture (e.g. a gesture is interrupted or focus moves).
+// Clear stale drag state so keyboard and touch navigation remain responsive.
+// A normal pointerup clears drag before capture is released; preserve its intentional glide.
+// Only an interrupted capture should cancel drag and momentum.
+canvas.addEventListener('lostpointercapture',()=>{if(drag){drag=null;inertiaVelocity=0;scheduleDraw();}});
+toggle.onclick=()=>{running=!running;inertiaVelocity=0;syncRotation();scheduleDraw();};
+previous.onclick=()=>step(-1);next.onclick=()=>step(1);open.onclick=()=>{if(selected!==null)openKnowledge(selected);};
+document.querySelector("#reset").onclick=()=>{inertiaVelocity=0;angle=.2;tilt=.12;clearSelection('View reset; no concept selected.');};
+document.querySelector('#edges').addEventListener('change',scheduleDraw);
+// Keep the globe sharp on high-DPI screens, with a capped pixel budget.
+if(typeof ResizeObserver==='function')new ResizeObserver(resizeCanvas).observe(canvas);
+window.addEventListener('resize',resizeCanvas,{passive:true});
+resizeCanvas();
+scheduleDraw();
+</script></html>

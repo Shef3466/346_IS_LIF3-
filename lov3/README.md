@@ -1,0 +1,141 @@
+# Book of LOV3 — Genesis foundation
+
+Draft development workspace for the 346 IS LIF3 living knowledge graph.
+
+Initial targets: entries, relationships, provenance, validation, and eventual IPFS/Base Sepolia attestations.
+
+Existing website remains unchanged. No blockchain deployment is claimed.
+
+## Genesis globe accessibility
+
+Open `lov3/explorer.html` through a static HTTP server (not by double-clicking the file, because it loads `genesis.json` and an ES module). The prototype has a concept list that works without canvas interaction. Use **Previous concept** / **Next concept**, or focus a concept button and press **Arrow Up/Down**. The selected button exposes `aria-pressed`, and selection changes are announced in a status region.
+
+Automatic rotation starts disabled when the browser requests reduced motion. The user can explicitly toggle it on or off; switching the system to reduced motion pauses it again. This is a 2D canvas prototype, not WebXR/VR.
+
+From the repository root, run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` (Node.js 20+). Browser interaction still needs manual verification in a real hosted preview.
+
+## Editorial source references (draft)
+
+Entries may have an optional `sources` array. Each source has a unique entry-local `id`, nonempty `title`, `kind` (`primary`, `secondary`, or `project-note`), and `reviewStatus` (`unreviewed` or `reviewed`). An optional `url` must be an HTTPS link without embedded credentials. Links may have `sourceIds`, an array of IDs referring to sources on the **same entry**.
+
+Example (illustrative only; **not** a verified source or publication claim):
+
+```json
+{
+  "id": "lov3:example",
+  "title": "Example concept",
+  "status": "draft",
+  "sources": [
+    { "id": "note:1", "title": "Editorial note placeholder", "kind": "project-note", "reviewStatus": "unreviewed" }
+  ],
+  "links": [{ "to": "lov3:0002", "type": "questions", "sourceIds": ["note:1"] }]
+}
+```
+
+`validate(book)` rejects duplicate or missing source references and unsafe source URLs. The explorer displays how many references and relations have citations, without treating citations as proof. Existing Genesis entries remain uncited drafts; no sources have been fabricated or marked reviewed. Adding source data changes the canonical provenance hash and requires a new manifest. Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs`.
+
+## Meaning-first Book of LOV3 navigation (draft)
+
+The explorer displays **Subject → Category → Word → Number**, with the final number only when an editor explicitly records a relevant numerical relationship. Technical IDs such as `lov3:0011` remain stable graph identifiers, **not** visible knowledge labels or inferred numerical meaning. The rotating chain-link globe uses short word labels; the concept list and selected detail show the full hierarchy.
+
+Genesis entries now include editorial `subject`, `category` and `word` strings and may include `number` as a string (for example `3–4–6–9`). These draft classifications are navigational interpretations, not verified historical or mathematical correspondences. The `lov3/taxonomy.mjs` helper keeps older entries readable with explicit unclassified fallbacks. This change alters the unpublished Genesis JSON and its future provenance digest; regenerate any manifest before publication.
+
+
+## Knowledge portal and archive guide (2026-11-01 draft increment)
+
+The globe is a discovery **portal**, not a full definition screen. Tapping a glowing concept, or activating a concept button, opens a **separate** `lov3/knowledge.html` page. Previous/Next previews a selection, then **Open selected knowledge page** enters it. The knowledge page displays Subject → Category → Word → Number only when the editorial record has a meaningful number, and offers links to incoming and outgoing relationships. It uses `lov3/archive-guide.mjs` to produce a contextual, deterministic **retrieval preview**, not a live generative AI or an imitation of a film character. Historical claims, citations, images and explanations are never invented: the existing Genesis entries remain unpublished drafts with no reviewed sources.
+
+The same-origin link preserves the globe's angle, tilt, and relationship visibility through URL query parameters. **Return to globe** restores the selected concept and exact saved orientation, with automatic rotation paused so the returned pose is visible. The `lov3/portal-state.mjs` helper validates concept IDs and bounds numeric query values; it never follows an arbitrary return URL. The knowledge page uses DOM text nodes rather than untrusted HTML for record content, supports narrow/mobile layouts, keyboard links, and reduced-motion navigation.
+
+Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` to check the portal-state round trip, source-aware guide, and page wiring. **Not implemented in this initial portal increment:** interactive conversational model, source-attributed historical media, or VR. The later Discovery Workspace increment below provides tab-scoped pins and a bounded history trail. These remain future increments and must not be represented as deployed.
+
+### Continuity experiment record
+
+The MUSTARD SEED kernel is explicitly loaded at the start of each development run; the public seed and project-memory files are not private conversation transcripts or model-weight memory. During the November 1–14 evaluation window, record kernel recovery, tests, useful changes, observed drift, errors, and limitations. Begin an evidence-based interim assessment on November 11. Passing startup tests alone is not proof of flawless cross-session understanding.
+
+## Discovery Workspace (2026-11-01 increment)
+
+From any knowledge page choose **Pin to Discovery Workspace** to add that concept to a tab-scoped, user-controlled comparison view at `lov3/discovery.html`. The current approved workspace has **three active comparison routes maximum**, with optional empty slots; older four-to-six-slot descriptions are superseded. Existing pins remain tab-scoped and user-controlled. Each card shows the recorded subject/category/word/optional number, source review status, and a link back to the original knowledge page. Pairwise comparison only reports shared editorial classifications or explicit Genesis graph links; it does not invent definitions, numbers, images, or historical connections. The exploration trail keeps the 24 most recent knowledge-page visits. Remove individual pins or clear the tab's workspace; invalid or stale IDs are discarded. No network storage is used.
+
+The browser uses `sessionStorage` for pins and trail. When storage is blocked, the page still renders, but continuity across navigation cannot be guaranteed. The workspace is a draft, not a multiuser collaboration system; actual browser/mobile/assistive-tech checks remain pending. Verify with `node --test lov3/*.test.mjs lov3/memory/*.test.mjs`.
+
+## Pinned-context Archive Guide (2026-11-01 increment)
+
+The Knowledge Archive now passes the tab-scoped Discovery Workspace pins into the original deterministic Archive Guide. A visitor inspecting one concept sees links to their other pinned discoveries with only **recorded** shared subject, category, or direct graph links. When no recorded relationship exists, the guide says so explicitly. Duplicate, invalid, and self-referential pins are ignored; the page uses safe same-origin knowledge links and text nodes. This is contextual navigation, **not** historical proof or generative conversation. No external request or user profile is created. Tests cover the comparison, sanitization, and page wiring.
+
+## Archive Guide questions (2026-11-02 draft increment)
+
+The knowledge page now offers an accessible **Ask guide** form and four suggested questions. The local deterministic router in `lov3/archive-questions.mjs` can summarize the current draft record, attached editorial sources with their actual review status, recorded incoming/outgoing links, and comparisons against the visitor's existing tab-scoped pins. Answers link to only real Genesis entries or attached HTTPS editorial sources; no citations, definitions, historical events, images, or inferred correlations are fabricated. Unsupported questions receive a clear scope limitation. Questions are processed locally and are not saved to session storage, transmitted to an AI provider, or treated as a chat transcript.
+
+This is a bounded **question-and-answer prototype**, not a generative or fully conversational AI. Browser keyboard and screen-reader behavior still needs real-device testing. Run `node --test lov3/*.test.mjs lov3/memory/*.test.mjs` and review the PR checks before accepting the increment.
+
+## Trail-aware Archive Guide recommendations (2026-11-02 draft increment)
+
+The guide now offers **Where should I explore next?** as a fifth local question. It suggests up to three actual neighboring Genesis entries, prioritizing concepts not yet visited in this browser tab. If no direct graph neighbors exist, it may offer entries with a shared **recorded** subject or category, clearly labeled as an editorial classification rather than a verified relationship. If neither exists, it declines to invent a connection. Relation citation counts are shown as metadata, never as proof. The existing knowledge page renders suggestions as same-origin links using the saved globe orientation. No personal questions or trail contents are sent to a server. Automated tests cover visit-trail ranking, classification fallback, no-match behavior and revisits; real-device browser testing remains pending.
+
+## Workspace return-and-resume navigation (2026-11-02 draft increment)
+
+The Discovery Workspace now keeps both **Return to the globe** and **Explore more concepts** tied to the incoming knowledge-page globe orientation, rather than resetting the second link to the default pose. A **Resume last discovery** link points to the latest valid tab-scoped visit and is hidden when the trail is empty or cleared. The link uses only validated Genesis IDs and the existing same-origin `knowledgeHref` helper. A Node integration-style test simulates globe → knowledge → pin → workspace → resume and checks the original angle/tilt/edge visibility and paused return pose. This verifies URL/state helpers and page wiring, **not actual browser navigation, mobile touch, or screen-reader behavior**. No new media or AI model is implied.
+
+## Direction-aware pinned comparisons (2026-11-02 draft increment)
+
+The Discovery Workspace now identifies **which pinned concept points to which**, displaying the recorded relationship type and exact number of attached relation source pointers. A reciprocal link appears as a separate directed relationship; a shared subject/category alone never becomes an invented graph link. Zero pointers are displayed as zero, not disguised as verified evidence. The existing source review caveat remains: citation counts do not prove a historical claim. Added regression tests for forward, reverse, bidirectional and absent links, plus workspace rendering wiring. This is a source-conscious editorial comparison, not a new fact inference or generative AI. Real-browser/mobile/screen-reader checks are still required.
+
+## Keyboard focus after unpinning (2026-11-02 draft increment)
+
+Unpinning a discovery previously rebuilt its card list and removed the focused button, leaving keyboard focus without a stable target. The workspace now moves focus to the next surviving Unpin button (or the preceding one when removing the last card), and to the comparison-slot selector when no pins remain. An `aria-live` status announces which concept was removed and the updated slot count. When browser session storage is unavailable, the warning remains visible after unpinning. The selection and history trail remain user-controlled; no new data is sent to a server. Focus-target and HTML wiring tests cover the behavior, but real keyboard/screen-reader browser testing is still required.
+
+
+## Previous-discovery navigation (2026-11-02 draft increment)
+
+The separate knowledge page now offers **Previous discovery** when a prior valid concept exists in the current tab's visit trail. It links to the immediately preceding recorded discovery (not the browser's potentially unrelated Back destination), preserving the exact globe angle, tilt and relationship visibility through the existing same-origin link helper. The link stays hidden for the first discovery or when tab storage cannot recover a prior visit. A bounded history prevents infinite trails; no questions, personal data or external navigation destinations are stored. Node tests cover first visit, A → B → A, stale/invalid IDs, duplicate entries, and exact orientation round trips. Real-browser focus and screen-reader verification remains outstanding.
+
+## Backward trail navigation (2026-11-02 draft increment)
+
+**Previous discovery** now walks backward through the actual tab-scoped visit trail rather than appending a new visit. This fixes a loop where A → B → Previous A would make B appear as the next "previous" destination. The same-origin knowledge link carries a narrow `trail=back` intent; the trail is shortened **only** when the destination matches the immediately preceding valid record. Stale, forged, or invalid back intents cannot silently remove visits, and refreshing the returned page does not pop another entry. Pins and the saved globe angle/tilt/relationship visibility remain intact. Four Node tests cover backward walks, refresh, invalid requests and page wiring. Actual browser history, mobile touch and assistive-technology behavior still need hands-on testing.
+
+
+## Directional citation retrieval in the Archive Guide (2026-11-02 draft increment)
+
+When asked about **recorded relationships**, the guide now resolves each relation's actual `sourceIds` into its declaring Genesis entry's editorial source records. Outgoing citations belong to the current entry; incoming citations belong to the linked entry. The answer lists source title, kind, review status, HTTPS URL when supplied, and the exact **source entry → target entry** relationship. Sources attached to an entry but not cited by a relationship are **not** presented as evidence for that edge. When no relation cites a source, the guide says so; source pointers and editorial review labels never imply independent historical verification. The 13 unpublished Genesis entries currently have no attached source records, so this behavior is regression-tested using isolated illustrative fixtures, not invented production citations. No external requests or generative model calls were added. Browser and assistive-technology testing remain pending.
+
+## Relationship-evidence question routing (2026-11-02)
+
+When a visitor asks which **sources, citations or proof support a recorded relationship**, the local Archive Guide now routes that mixed-intent question to the **directed relationship** retrieval view rather than listing all sources attached to the current entry. Only `sourceIds` explicitly cited on the incoming or outgoing edge appear as relationship evidence pointers; an unrelated source attached to the entry does not become support for that edge. An ordinary question about sources attached to the record still uses the entry-source view. Editorial review status and citation counts are not proof of historical truth. Two regression tests use illustrative source fixtures; the actual Genesis draft still has no attached sources. This does not introduce a generative model or verified media. Browser and assistive-technology testing remain outstanding.
+
+
+## Source-aware next-discovery guidance (2026-11-02 draft increment)
+
+The Archive Guide's **Where should I explore next?** answer now includes the actual source records cited by each *recommended directed graph edge*, when any exist. An outgoing citation is resolved against the current record; an incoming citation is resolved against the other record that declares the edge. The guide's existing evidence list displays source title, kind, review status, optional HTTPS link, and the exact relation. Sources merely attached to a concept but **not** cited for that edge are excluded. Shared-subject/category suggestions never inherit source citations from the suggested concept. The 13 unpublished Genesis records currently have no attached sources, so this behavior is covered by illustrative tests, **not** by claims of reviewed historical evidence. The globe, separate knowledge pages, saved pose, and tab-scoped workspace remain unchanged. Run the Node tests and verify the complete flow in a real browser before claiming visual or assistive-technology acceptance.
+
+
+## Evidence-boundary audit in the Archive Guide (2026-11-02 draft increment)
+
+The guide now offers **What is verified versus interpreted?** as a local, user-triggered audit of the selected record. It separates (1) what the current unpublished JSON actually records, (2) editorial classification and graph links, (3) source counts and editorial review status, and (4) symbolic-number hypotheses and unsupported AI inferences. **Recorded metadata is not independently verified history.** A reviewed source flag is not proof; an entry-level source does not automatically support a relationship. The accessible audit list is cleared on subsequent questions, and its content is rendered as text rather than HTML. No new sources, claims, model calls, media or stored questions were introduced. Three focused regression tests were added. Real-browser/mobile/screen-reader behavior remains to be checked.
+
+
+## Number-aware archive questions (2026-11-02)
+
+On a knowledge page with an explicitly recorded `number`, the original Archive Guide offers **What does this number represent?**. A visitor can also ask, for example, **What does 72 mean?**. The answer names the number **as draft editorial metadata only**, distinguishes symbolic interpretation from independent historical or mathematical evidence, and suggests what evidence would be needed. If the current record has no number, or the question names an unrelated value, the guide refuses to infer a correlation. No source is fabricated or silently treated as support for a number claim. The prompt is not shown on unnumbered records. Four regression tests cover recorded, missing and mismatched numbers and conditional page wiring.
+
+This is a deterministic prototype; it does not establish historical correspondences or a generative AI model. Verify in hosted CI and then a real browser before describing mobile or screen-reader behavior as tested.
+
+## Relation-specific citation inspection in Discovery Workspace (2026-11-02)
+
+Each pinned pair now shows any editorial sources cited by its **directed** Genesis relationship immediately below that comparison. References are resolved from the entry declaring the link, not from its target, so identical source IDs on different entries cannot be conflated. The display retains source kind, review status, and actual HTTPS link where present. Uncited relationships explicitly say no editorial source record is cited; a reviewed label is not independent fact verification. This is a small source-provenance and keyboard-readable UI increment; the 13 draft entries still have no attached sources. Node tests cover forward/reverse attribution, missing links, and page wiring; real-browser and assistive-technology behavior remain unverified.
+
+## Portable, user-controlled Discovery sessions (2026-11-02 draft)
+
+The Discovery Workspace now offers **Download research session** and **Import research session**. This transfers only the selected slot count (4–6), pinned public Genesis concept IDs, and the last 24 public concept visits, with a Genesis edition marker. It does **not** export questions, transcripts, credentials, images or private user information; the browser creates the file locally without uploading it.
+
+Imports require the LOV3 session schema and a file of at most 32 KiB; unknown IDs, duplicate pins, and invalid history entries are removed. A mismatched Genesis edition is disclosed. An invalid file leaves the current session untouched. Import replaces the current tab's pins and trail only after validation; a user can download the current state first. Browser session storage remains tab-scoped and may be unavailable in restrictive/private browser settings.
+
+This is a source-conscious **research state transfer**, not a publication or verification of the concepts. Node tests cover export/import integrity, sanitization, invalid files and UI wiring. Real-browser file picker, mobile behavior and keyboard/screen-reader checks still require hands-on verification.
+
+## Contributor relationship proposal prototype (2026-11-02)
+
+The Book of LOV3 is a contributor-driven knowledge network, not an encyclopedia limited to one person's interpretation. From a separate knowledge page, **Propose a relationship** opens `lov3/contribute.html`, a keyboard-accessible, responsive **local-only** draft builder. A contributor selects two distinct existing Genesis concepts and a supported relation type, explains the proposed connection, labels it as a hypothesis, interpretation, or source-submitted proposal, and can optionally include an HTTPS source and a display credit. Source-submitted proposals require a titled HTTPS reference; no submitted reference is automatically marked reviewed or verified. Source records are evidence pointers, not proof.
+
+The builder downloads a JSON proposal with `publicationStatus: "local-draft"` and `reviewStatus: "unreviewed"`. It does **not** submit anything, mutate Genesis, publish a relationship, establish authenticated contributor identity, or create a public contributor account. Form content stays in the browser until the user deliberately downloads it; avoid including sensitive personal data. If the browser cannot load and validate Genesis, the form stays hidden instead of submitting text to a server. Navigation back to the original knowledge record preserves the saved globe pose.
+
+Run `node --test lov3/contribution-draft.test.mjs` and the full suite. **Not yet built:** contributor accounts, submission/review/moderation queue, independent evidence assessment, license/consent policy, or production backend. Real-browser download, touch, screen-reader and cross-browser behavior still need verification before preview or release.

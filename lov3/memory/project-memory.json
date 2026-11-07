@@ -1,0 +1,55 @@
+{
+  "schema": "lov3.project-memory.v1",
+  "updated": "2026-10-28",
+  "purpose": "Versioned public project continuity, not a transcript or ChatGPT internal memory",
+  "principles": [
+    "346 IS LIF3: Create, Innovate, Sustain are interchangeable and continuous",
+    "LOV3 is creation; creation is LOV3",
+    "Reciprocity and avoiding unnecessary harm",
+    "Knowledge should be accessible to everyone; distinguish interpretation and verifiable evidence"
+  ],
+  "project": {
+    "domain": "346Is.life",
+    "websiteStatus": "Existing placeholder; full redesign in development",
+    "repo": "Shef3466/346_IS_LIF3-",
+    "developmentBranch": "feature/lov3-genesis-foundation",
+    "deploymentStatus": "Not verified",
+    "roadmap": [
+      "Accessible Living Universe home",
+      "Interconnected Genesis concept graph",
+      "Rotating interactive globe",
+      "Source-aware collaborative entries and preserved editions",
+      "IPFS provenance and Base Sepolia/EAS tests",
+      "Future spatial/VR explorer"
+    ]
+  },
+  "decisions": [
+    {
+      "date": "2026-10-28",
+      "decision": "Use the existing GitHub repository; preserve main until reviewed",
+      "rationale": "Reuse existing version control and avoid risking the main branch while work remains under review."
+    },
+    {
+      "date": "2026-10-28",
+      "decision": "Implement 13 draft Genesis nodes and typed relationships",
+      "rationale": "Start with a bounded, testable concept graph before expanding the full knowledge network."
+    },
+    {
+      "date": "2026-10-28",
+      "decision": "Develop a rotating concept globe before a full VR experience",
+      "rationale": "Prove a navigable 2D concept experience before taking on spatial interaction and VR complexity."
+    },
+    {
+      "date": "2026-10-28",
+      "decision": "Never put private chat transcripts or sensitive information in the public repository",
+      "rationale": "Public repository history is not a safe place for confidential transcripts or personal records."
+    }
+  ],
+  "next": "Verify graph tests and preview deployment, preserve source references, add deterministic publication manifests. Review changes through PR.",
+  "limits": [
+    "This file is public project memory; not an automatic archive of ChatGPT chats",
+    "GitHub access is not a modification of the model's internal memory",
+    "Future coding sessions must explicitly load the file; scheduled tasks can be instructed to do so"
+  ],
+  "rationaleNote": "Rationales are engineering interpretations for continuity, not claims about the user's original motives."
+}

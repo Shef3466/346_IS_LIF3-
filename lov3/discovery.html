@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Discovery Workspace (draft)</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 70%);color:#f1f6ff;font:16px/1.55 system-ui,sans-serif}
+main{max-width:1200px;margin:auto;padding:clamp(14px,3vw,38px)}a{color:#baddff;text-underline-offset:4px}a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:3px}
+h1{font-size:clamp(1.8rem,4vw,3rem)}h2{font-size:1.2rem;color:#ffe4aa}p{max-width:85ch}
+.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:16px 0}.toolbar input[type=file]{display:block;max-width:100%;font:inherit;font-size:.85rem;margin-top:4px}.import-control{min-width:0;max-width:100%}
+button,select{background:#174573;color:white;border:1px solid #8aaac9;border-radius:9px;padding:9px 12px;cursor:pointer;font:inherit}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.card,section{background:#0b1c32e8;border:1px solid #52708d;border-radius:16px;padding:16px;min-width:0}
+.card{min-height:215px}.card h3{margin:8px 0;overflow-wrap:anywhere}.path{color:#d9c997;font-size:.87rem}.note{color:#c3d2e3;font-size:.91rem}
+ul{padding-left:22px}li{margin:7px 0}section{margin:18px 0}#status{color:#ffe0a3;min-height:1.4em}
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style></head><body><main>
+<nav aria-label="Discovery navigation"><a href="#cards">Skip to pinned discoveries</a> · <a href="#comparison-heading">Jump to comparisons</a> · <a href="#history-heading">Jump to exploration history</a><br><a id="back" href="./explorer.html">← Return to the globe</a> · <a id="explore-more" href="./explorer.html">Explore more concepts</a> · <a id="resume" href="./knowledge.html" hidden>Resume last discovery</a> · <a id="prior-visit" href="./knowledge.html" hidden>Revisit previous discovery</a></nav>
+<h1>Discovery Workspace</h1><p>Pin up to three concepts for side-by-side inspection. These are unpublished editorial records, not verified historical claims. Your pins and navigation trail stay in this browser tab; nothing is sent to a server.</p>
+<div class="toolbar"><span>Three routes maximum; empty routes are optional.</span><button id="clear" type="button">Clear pins and history</button><button id="undo-clear" type="button" hidden>Undo clear</button><button id="export-session" type="button">Download research session</button><label class="import-control" for="import-session">Import research session <input id="import-session" type="file" accept=".json,application/json"></label></div><p class="note">Session files contain only public Genesis IDs, your three-route limit and exploration trail. Import replaces this tab’s current pins and history; no file is uploaded.</p>
+<p id="status" role="status" aria-live="polite">Loading workspace…</p>
+<div id="cards" class="cards" role="region" aria-label="Pinned discoveries" tabindex="-1"></div>
+<section aria-labelledby="comparison-heading"><h2 id="comparison-heading" tabindex="-1">Recorded relationships for comparison</h2><ul id="comparisons"></ul><p class="note">Shared classifications and explicit graph links are editorial records, not proof of a factual connection. Source records and review labels do not independently verify claims. No new numerical or historical correlations are inferred.</p></section>
+<section aria-labelledby="history-heading"><h2 id="history-heading" tabindex="-1">Recent exploration trail</h2><ul id="trail"></ul></section>
+<p class="note">No source-attributed images are attached to the current Genesis draft. Future media must have an identifiable, reviewed source; images are never invented.</p>
+</main><script type="module">
+import {validate} from './graph.mjs';
+import {conceptIdentity} from './taxonomy.mjs';
+import {readGlobeState,knowledgeHref,globeReturnHref,withoutWorkspacePin} from './portal-state.mjs';
+import {emptyWorkspace,readWorkspace,saveWorkspace,pinWorkspace,unpinWorkspace,nextPinFocus,recordVisit,comparePins,relationCitationDetails} from './discovery-workspace.mjs';
+import {exportDiscoverySession,importDiscoverySession,MAX_TRANSFER_BYTES} from './workspace-transfer.mjs';
+const q=s=>document.querySelector(s),cards=q('#cards'),trail=q('#trail'),comparisons=q('#comparisons');
+ // Fragment links must move keyboard focus as well as scroll position.
+ // Targets are fixed local sections, never arbitrary URL-supplied selectors.
+ for(const link of document.querySelectorAll('nav[aria-label="Discovery navigation"] a[href^="#"]')){
+   link.addEventListener('click',()=>{
+     const target=document.getElementById(link.getAttribute('href').slice(1));
+     if(target)requestAnimationFrame(()=>target.focus());
+   });
+ }
+// A bookmarked section URL should focus its destination after initial render,
+// not merely scroll to it. Only the three fixed local targets are eligible.
+function focusInitialSection(){
+ const id=location.hash.slice(1);
+ if(!['cards','comparison-heading','history-heading'].includes(id))return;
+ const target=document.getElementById(id);
+ if(target)requestAnimationFrame(()=>target.focus());
+}
+q('#back').href=globeReturnHref(location.search);
+q('#explore-more').href=q('#back').href; // Preserve orientation instead of resetting the globe.
+const stateView=readGlobeState(location.search);
+function item(parent,text,href){const li=document.createElement('li');if(href){const a=document.createElement('a');a.href=href;a.textContent=text;li.append(a);}else li.textContent=text;parent.append(li);}
+function el(tag,text){const e=document.createElement(tag);e.textContent=text;return e;}
+try{
+ const response=await fetch('./genesis.json');if(!response.ok)throw Error('Genesis retrieval failed (HTTP '+response.status+')');
+ const book=await response.json();validate(book);
+ const ids=new Set(book.entries.map(e=>e.id)),byId=new Map(book.entries.map(e=>[e.id,e]));
+ let storage;try{storage=sessionStorage;}catch{storage=null;}
+ let state=readWorkspace(storage,ids);
+ const requested=new URLSearchParams(location.search).get('pin');
+ let message='';
+ if(requested){
+   const result=pinWorkspace(state,requested,ids);state=result.state;
+   message=result.reason==='pinned'?'Discovery pinned.':result.reason==='already-pinned'?'Discovery already pinned.':result.reason==='full'?'All visible slots are occupied. Unpin an item to choose another.':'Invalid discovery ID.';
+   state=recordVisit(state,requested,ids);
+ }
+ let storageAvailable=true;
+ let clearedSnapshot=null;
+ const undoClear=q('#undo-clear');
+ function persist(){storageAvailable=saveWorkspace(storage,state);}
+ function render(){
+   cards.replaceChildren();trail.replaceChildren();comparisons.replaceChildren();
+
+   state.pins.forEach((id,i)=>{
+     const e=byId.get(id),identity=conceptIdentity(e);
+     const card=el('article','');card.className='card';
+     card.append(el('p','Slot '+(i+1)),el('p',identity.subject+' → '+identity.category),el('h3',identity.word));
+     if(identity.number)card.append(el('p','Recorded number: '+identity.number));
+     card.append(el('p','Draft entry: '+e.title));
+     // Genesis has no authored definitions yet. Do not substitute the title or an AI guess.
+     card.append(el('p',typeof e.definition==='string'&&e.definition.trim()?'Editorial definition: '+e.definition:'Definition not yet authored for this draft concept.'));
+     const linked=(e.links??[]).filter(link=>byId.has(link.to));
+     if(linked.length){
+       const related=el('ul','');
+       for(const relation of linked)item(related,'Related: '+byId.get(relation.to).title+' ('+relation.type+'; editorial link)',knowledgeHref(relation.to,stateView));
+       card.append(el('p','Recorded related discoveries:'),related);
+     }
+     const sources=e.sources??[];
+     card.append(el('p',sources.length? sources.length+' attached editorial source(s); review status below.':'No editorial sources attached.'));
+     const list=el('ul','');
+     for(const source of sources)item(list,source.title+' ('+source.kind+'; '+source.reviewStatus+'; factual verification not established)',source.url);
+     card.append(list,el('p','No source-attributed images attached.'));
+     const link=el('a','Open knowledge page');link.href=knowledgeHref(id,stateView);card.append(link);
+     const remove=el('button','Unpin');remove.type='button';remove.setAttribute('aria-label','Unpin '+identity.word);
+     remove.dataset.unpinId=id;
+     remove.addEventListener('click',()=>{
+       const nextFocus=nextPinFocus(state,id);
+       state=unpinWorkspace(state,id);persist();render();
+       const candidate=[...cards.querySelectorAll('button[data-unpin-id]')].find(button=>button.dataset.unpinId===nextFocus);
+       (candidate??q('#clear')).focus();
+       q('#status').textContent=identity.word+' unpinned. '+state.pins.length+' of '+state.capacity+' slots occupied.'+
+         (storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+     });card.append(remove);
+     cards.append(card);
+   });
+   for(let i=state.pins.length;i<state.capacity;i++){
+     const card=el('article','');card.className='card';card.append(el('h3','Slot '+(i+1)+' — Empty'),el('p','Choose a subject from the globe, then pin it from its knowledge page.'));const browse=el('a','Explore subjects for slot '+(i+1));browse.href=q('#back').href;card.append(browse);cards.append(card);
+   }
+   const pairs=comparePins(book,state);
+   for(const pair of pairs){
+     const a=byId.get(pair.a),b=byId.get(pair.b),matches=[];
+     if(pair.sameSubject)matches.push('same recorded subject');
+     if(pair.sameCategory)matches.push('same recorded category');
+     for(const relation of pair.recordedRelations){
+       const from=byId.get(relation.from).word,to=byId.get(relation.to).word;
+       matches.push(from+' → '+to+' ('+relation.type+'; '+relation.citationCount+' relation citation(s))');
+     }
+     const comparison=el('li',a.word+' ↔ '+b.word+': '+(matches.join('; ')||'no shared classification or explicit link recorded'));
+     // Comparison results must remain actionable without losing the globe pose.
+     const openA=el('a','Open '+a.word+' knowledge page');openA.href=knowledgeHref(a.id,stateView);
+     const openB=el('a','Open '+b.word+' knowledge page');openB.href=knowledgeHref(b.id,stateView);
+     comparison.append(el('br',''),openA,document.createTextNode(' · '),openB);
+     for(const relation of pair.recordedRelations){
+       const cited=relationCitationDetails(book,relation);
+       const sourceList=el('ul','');
+       if(!cited.length)item(sourceList,'No editorial source records cited for this relationship.');
+       for(const source of cited)item(sourceList,source.title+' ('+source.kind+'; '+source.reviewStatus+'; factual verification not established)',source.url);
+       comparison.append(sourceList);
+     }
+     comparisons.append(comparison);
+   }
+   if(!pairs.length)item(comparisons,'Pin at least two discoveries to compare their recorded relationships.');
+   for(let i=state.trail.length-1;i>=0;i--){
+     const id=state.trail[i];
+     item(trail,'Visit '+(i+1)+': '+byId.get(id).title,knowledgeHref(id,stateView));
+   }
+   if(!state.trail.length)item(trail,'No exploration history in this tab yet.');
+   const lastVisited=state.trail.at(-1);
+   const resume=q('#resume');
+   resume.hidden=!lastVisited;
+   if(lastVisited)resume.href=knowledgeHref(lastVisited,stateView);
+   const prior=state.trail.length>1?state.trail.at(-2):null;
+   const priorLink=q('#prior-visit');
+   priorLink.hidden=!prior;
+   if(prior)priorLink.href=knowledgeHref(prior,stateView)+'&trail=back'; // Retrace the recorded visit instead of appending a duplicate.
+ }
+ q('#clear').addEventListener('click',()=>{
+   if(!state.pins.length&&!state.trail.length){q('#status').textContent='Workspace is already empty.';return;}
+   clearedSnapshot={...state,pins:[...state.pins],trail:[...state.trail]};
+   state=emptyWorkspace();persist();render();undoClear.hidden=false;undoClear.focus();
+   q('#status').textContent='Workspace cleared. Undo clear restores your pins and exploration trail in this tab.';
+ });
+ undoClear.addEventListener('click',()=>{
+   if(!clearedSnapshot)return;
+   state=clearedSnapshot;clearedSnapshot=null;persist();render();undoClear.hidden=true;q('#clear').focus();
+   q('#status').textContent='Pins and exploration trail restored.';
+ });
+ q('#export-session').addEventListener('click',()=>{
+   try{
+     const data=exportDiscoverySession(state,ids,book.edition);
+     const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+     const link=document.createElement('a');
+     link.href=url;link.download='lov3-discovery-session.json';
+     document.body.append(link);link.click();link.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),0);
+     q('#status').textContent='Research session prepared for download. No data was uploaded.';
+   }catch(err){q('#status').textContent='Session download unavailable: '+err.message;}
+ });
+ q('#import-session').addEventListener('change',async event=>{
+   const input=event.currentTarget;
+   const file=input.files?.[0];
+   if(!file)return;
+   try{
+     if(file.size>MAX_TRANSFER_BYTES)throw new RangeError('Session file must be no larger than 32 KiB');
+     const text=await file.text();
+     const result=importDiscoverySession(text,ids,book.edition);
+     clearedSnapshot=null;undoClear.hidden=true;
+     state=result.workspace;persist();render();
+     q('#status').textContent='Research session imported: '+state.pins.length+' pins, '+state.trail.length+' visits.'+
+       (result.editionMatches?'':' Different Genesis edition; unknown concept IDs were excluded.')+
+       (storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+   }catch(err){q('#status').textContent='Session import rejected; existing discoveries kept. '+err.message;}
+   finally{input.value='';}
+ });
+ persist();render();focusInitialSection();
+ q('#status').textContent=(message||state.pins.length+' pinned of '+state.capacity+' slots.')+(storageAvailable?'':' Browser session storage is unavailable; changes will not survive navigation.');
+ // Consuming ?pin= is a one-time action: refreshing after Clear must not re-pin.
+ // Keep angle, tilt, selected discovery and all other navigation parameters.
+ if(requested!==null){
+   try{
+     window.history.replaceState(window.history.state,'',location.pathname+withoutWorkspacePin(location.search)+location.hash);
+   }catch{
+     q('#status').textContent+=' The URL could not be updated; refreshing may reapply its pin request.';
+   }
+ }
+}catch(err){q('#status').textContent='Workspace unavailable: '+err.message;}
+</script></body></html>

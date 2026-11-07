@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book of LOV3 — Knowledge Archive (draft)</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:radial-gradient(circle at 50% 0,#17345b,#080e1b 65%);color:#f1f6ff;font:16px/1.6 system-ui,sans-serif}
+main{max-width:920px;margin:auto;padding:clamp(16px,4vw,44px)}
+a{color:#baddff;text-underline-offset:4px}.skip-link{position:absolute;left:12px;top:-90px;z-index:10;background:#173b60;color:#fff;padding:10px 14px;border:2px solid #ffdc85;border-radius:8px}.skip-link:focus{top:12px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffdc85;outline-offset:4px}
+.question-form{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.question-form label{flex-basis:100%}.question-form input{flex:1 1 220px;min-width:0}
+.question-form input,.question-form button,.question-prompts button{background:#173b60;color:#f1f6ff;border:1px solid #8ba7c5;border-radius:9px;padding:9px 12px;font:inherit}
+.question-form button,.question-prompts button,#guide-ask-again{cursor:pointer}
+#guide-ask-again{background:#173b60;color:#f1f6ff;border:1px solid #8ba7c5;border-radius:9px;padding:9px 12px;font:inherit}
+.question-prompts{display:flex;gap:8px;flex-wrap:wrap}.question-prompts button{font-size:.88rem}
+#guide-answer{min-height:1.5em}
+nav{margin-bottom:24px}h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.2;margin:8px 0}
+h2{font-size:1.25rem;margin-top:0;color:#ffe4aa}p{margin:8px 0 14px}
+.eyebrow{color:#9fd7f6;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
+.path{color:#d7c58f;overflow-wrap:anywhere}.number{display:inline-block;border:1px solid #9cbed9;border-radius:16px;padding:2px 12px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:18px}
+section{background:#0b1c32db;border:1px solid #52708d;border-radius:18px;padding:clamp(16px,3vw,26px);margin:18px 0;min-width:0}
+.guide{border-color:#a8905a;background:linear-gradient(140deg,#18324e,#0c1829)}
+.note{color:#bdcfe0;font-size:.91rem}ul{padding-left:22px}li{margin:10px 0}
+.status{color:#ffd99c} .pill{font-size:.8rem;border:1px solid #667f95;border-radius:20px;padding:3px 10px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+</style></head><body><a class="skip-link" href="#guide-heading">Skip to LOV3 Archive Guide</a><main>
+<nav><a id="back" href="./explorer.html">← Return to the globe at your saved position</a> · <a id="previous-discovery" href="./knowledge.html" hidden>← Previous discovery</a></nav>
+<p class="eyebrow">Book of LOV3 · Knowledge archive</p>
+<h1 id="title">Loading archive record…</h1>
+<p id="path" class="path"></p><p id="number" class="number" hidden></p>
+<p id="status" role="status" class="status">Retrieving Genesis draft.</p><p><a id="pin-workspace" href="./discovery.html">Pin to Discovery Workspace</a> · <a id="open-workspace" href="./discovery.html">Open workspace</a> · <a id="propose-relationship" href="./contribute.html">Propose a relationship</a></p>
+<div class="grid"><div>
+<section aria-labelledby="record-heading"><h2 id="record-heading">Record and relationships</h2>
+<p id="record"></p><ul id="related"></ul></section>
+<section aria-labelledby="sources-heading"><h2 id="sources-heading">Evidence and media</h2>
+<p id="evidence"></p><ul id="sources"></ul><p id="media" class="note"></p></section>
+</div><div>
+<section class="guide" aria-labelledby="guide-heading"><h2 id="guide-heading" tabindex="-1">LOV3 Archive Guide</h2>
+<p class="note">Original retrieval preview · Not a live conversational AI</p>
+<p id="guide-intro"></p><p id="guide-next"></p>
+<p><a id="guide-next-link" href="./knowledge.html" hidden>Explore recommended discovery →</a></p>
+<p id="guide-next-evidence" class="note" hidden></p>
+<h3 id="guide-context-heading">Compare with your pinned discoveries</h3><ul id="guide-context" aria-labelledby="guide-context-heading"></ul>
+<p class="note">These comparisons show recorded editorial classifications and links only—not verified historical or numerical connections.</p>
+<h3>Ask about this archive record</h3>
+<p class="note">Local question routing over draft metadata. Not a live AI model; questions are not stored or sent to a server.</p>
+<form id="guide-form" class="question-form"><label for="guide-question">Your question</label><input id="guide-question" name="question" type="search" maxlength="240" required placeholder="What evidence is attached?"><button type="submit">Ask guide</button></form>
+<div id="guide-prompts" class="question-prompts" aria-label="Suggested archive questions"></div>
+<div id="guide-response-region" aria-label="Archive Guide response and references"><p id="guide-answer" role="status" aria-live="polite" tabindex="-1"></p><ul id="guide-answer-boundaries" aria-label="Evidence and interpretation distinctions"></ul><ul id="guide-answer-questions" aria-label="Suggested research questions"></ul><ul id="guide-answer-links" aria-label="Related archive records"></ul><ul id="guide-answer-sources" aria-label="Attached editorial sources"></ul><p><button id="guide-ask-again" type="button" hidden>Ask another question</button></p></div>
+<p class="note">Verified sources, editorial interpretations, and suggested questions remain distinct. No historical scenes or images are fabricated.</p>
+</section>
+</div></div>
+<p class="note">This archive is a developing research environment. The Discovery Workspace provides tab-scoped pinned comparisons; a generative AI dialogue is not yet implemented.</p>
+<nav aria-label="End of knowledge record"><a id="back-bottom" href="./explorer.html">← Return to the globe at your saved position</a></nav>
+</main>
+<script type="module">
+import {validate} from './graph.mjs';
+import {archiveGuide} from './archive-guide.mjs';
+import {answerArchiveQuestion,SUGGESTED_ARCHIVE_QUESTIONS} from './archive-questions.mjs';
+import {readGlobeState,knowledgeHref,globeReturnHref,selectedId} from './portal-state.mjs';
+import {readWorkspace,saveWorkspace,navigateKnowledgeTrail,previousDiscoveryId} from './discovery-workspace.mjs';
+const q=selector=>document.querySelector(selector);
+q('#back').href=globeReturnHref(location.search);
+q('#back-bottom').href=q('#back').href;
+function li(parent,label,href){
+  const item=document.createElement('li');
+  if(href){const a=document.createElement('a');a.href=href;a.textContent=label;item.append(a);}
+  else item.textContent=label;
+  parent.append(item);
+}
+try{
+  const id=selectedId(location.search);
+  if(!id) throw new Error('No valid concept selected. Return to the globe to choose one.');
+  const response=await fetch('./genesis.json');
+  if(!response.ok) throw new Error('Genesis retrieval failed (HTTP '+response.status+').');
+  const book=await response.json();
+  validate(book);
+  const state=readGlobeState(location.search);
+  const ids=new Set(book.entries.map(e=>e.id));
+  if(!ids.has(id)) throw new Error('This concept is not in the current Genesis edition. Return to the globe to choose an available discovery.');
+  let storage;try{storage=sessionStorage;}catch{storage=null;}
+  const history=navigateKnowledgeTrail(readWorkspace(storage,ids),id,ids,new URLSearchParams(location.search).get('trail')==='back');
+  saveWorkspace(storage,history);
+  const previous=previousDiscoveryId(history,id,ids);
+  if(previous){
+    q('#previous-discovery').href=knowledgeHref(previous,state)+'&trail=back';
+    q('#previous-discovery').hidden=false;
+  }
+  const guide=archiveGuide(book,id,history);
+  const params=new URLSearchParams(location.search);
+  params.set('pin',id);
+  q('#pin-workspace').href='./discovery.html?'+params.toString();
+  q('#open-workspace').href='./discovery.html'+location.search;
+  q('#propose-relationship').href='./contribute.html?'+new URLSearchParams(location.search).toString();
+  q('#title').textContent=guide.identity.word;
+  document.title=guide.identity.word+' — Book of LOV3';
+  q('#path').textContent=guide.identity.path.slice(0,3).join(' → ');
+  if(guide.identity.number){q('#number').hidden=false;q('#number').textContent='Recorded number: '+guide.identity.number;}
+  q('#status').textContent='Unpublished editorial draft · '+guide.coverage.reviewedCount+' reviewed source(s)';
+  q('#record').textContent='Archive title: '+guide.entry.title+'. Relationships are recorded editorial links, not independently verified claims.';
+  const related=q('#related');
+  for(const link of guide.outgoing)
+    li(related,'Related to: '+link.title+' ('+link.type+', '+link.sourceIds.length+' relation citation(s))',knowledgeHref(link.id,state));
+  for(const link of guide.incoming)
+    li(related,'Linked from: '+link.title+' ('+link.type+', '+link.sourceIds.length+' relation citation(s))',knowledgeHref(link.id,state));
+  if(!guide.outgoing.length&&!guide.incoming.length)li(related,'No relationships recorded yet.');
+  q('#evidence').textContent=guide.evidence;
+  const sources=q('#sources');
+  for(const source of guide.sources){
+    li(sources,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established',source.url);
+  }
+  if(!guide.sources.length)li(sources,'No source records attached to this draft.');
+  q('#media').textContent='No source-attributed images or historical scenes have been attached to this record.';
+  q('#guide-intro').textContent=guide.introduction;
+  q('#guide-next').textContent=guide.next;
+  if(guide.nextChoice && ids.has(guide.nextChoice.id)){
+    const nextLink=q('#guide-next-link');
+    nextLink.href=knowledgeHref(guide.nextChoice.id,state);
+    nextLink.textContent='Explore '+guide.nextChoice.title+' →';
+    nextLink.hidden=false;
+    const evidenceNote=q('#guide-next-evidence');
+    evidenceNote.textContent='Recommended link evidence: '+guide.nextChoice.evidenceStatus;
+    evidenceNote.hidden=false;
+  }
+  const pinned=q('#guide-context');
+  for(const other of guide.pinnedContext){
+    const item=document.createElement('li');
+    const link=document.createElement('a');
+    link.href=knowledgeHref(other.id,state);
+    link.textContent=other.title+' — '+other.relationship;
+    item.append(link);
+    const evidence=document.createElement('p');
+    evidence.className='note';
+    evidence.textContent='Evidence status: '+other.provenance;
+    item.append(evidence);
+    if(other.directLinkSourceIds.length){
+      const pointers=document.createElement('p');
+      pointers.className='note';
+      pointers.textContent='Editorial source IDs (not independently verified): '+other.directLinkSourceIds.join(', ');
+      item.append(pointers);
+      const sourceList=document.createElement('ul');
+      sourceList.setAttribute('aria-label','Source records for this comparison');
+      for(const source of other.directLinkSources){
+        li(sourceList,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established (record '+source.ownerId+')',source.url);
+      }
+      item.append(sourceList);
+    }
+    pinned.append(item);
+  }
+  if(!guide.pinnedContext.length)
+    li(pinned,'No other pinned discoveries in this tab yet. Pin concepts to compare them here.');
+  function askGuide(question){
+    const result=answerArchiveQuestion(book,id,history,question);
+    q('#guide-answer').textContent=result.answer;
+    const linked=q('#guide-answer-links'),cited=q('#guide-answer-sources');
+    linked.replaceChildren();cited.replaceChildren();
+    const boundaries=q('#guide-answer-boundaries');boundaries.replaceChildren();
+    for(const item of result.distinctions??[]) li(boundaries,item.label+': '+item.detail);
+    const questions=q('#guide-answer-questions');questions.replaceChildren();
+    for(const prompt of result.questions??[]) li(questions,prompt);
+    for(const link of result.links) li(linked,link.title,knowledgeHref(link.id,state));
+    for(const source of result.sources)
+      li(cited,source.title+' — '+source.kind+'; '+source.reviewStatus+'; factual verification not established'+(source.relation?' · cited for '+source.relation:''),source.url);
+    q('#guide-ask-again').hidden=false;
+    // Move keyboard focus to the response after its evidence and links render.
+    // Let the browser scroll the newly focused answer into view, including on mobile.
+    q('#guide-answer').focus();
+  }
+  // Escape also works while reviewing response links, sources and questions.
+  // Scope the shortcut to the response region, not the question form.
+  q('#guide-response-region').addEventListener('keydown',event=>{
+    if(event.key==='Escape' && !event.defaultPrevented){
+      event.preventDefault();
+      q('#guide-question').focus();
+    }
+  });
+  q('#guide-ask-again').addEventListener('click',()=>q('#guide-question').focus());
+  q('#guide-form').addEventListener('submit',event=>{
+    event.preventDefault();
+    askGuide(q('#guide-question').value);
+  });
+  for(const question of SUGGESTED_ARCHIVE_QUESTIONS){
+    const button=document.createElement('button');
+    button.type='button';button.textContent=question;
+    button.addEventListener('click',()=>{
+      q('#guide-question').value=question;
+      askGuide(question);
+    });
+    q('#guide-prompts').append(button);
+  }
+  // Offer number interpretation only where a number is explicitly recorded.
+  if(guide.identity.number){
+    const numberButton=document.createElement('button');
+    numberButton.type='button';
+    numberButton.textContent='What does this number represent?';
+    numberButton.addEventListener('click',()=>{
+      q('#guide-question').value=numberButton.textContent;
+      askGuide(numberButton.textContent);
+    });
+    q('#guide-prompts').append(numberButton);
+  }
+}catch(error){
+  q('#title').textContent='Archive record unavailable';
+  q('#status').textContent=error.message;
+  q('#status').setAttribute('role','alert');
+  // Do not offer pinning, comparisons or questions for a record that failed to load.
+  for(const selector of ['#pin-workspace','#open-workspace','#propose-relationship','#guide-form','#guide-prompts','#guide-ask-again']) q(selector).hidden=true;
+  q('#record').textContent='This archive record could not be loaded. Return to the globe and select an available concept.';
+}
+</script></body></html>
