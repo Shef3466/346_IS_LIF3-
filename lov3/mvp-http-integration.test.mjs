@@ -81,7 +81,7 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
         if(target.origin!==origin)continue;
         const resource=await fetch(target);
         assert.equal(resource.status,200,page+' references missing '+target.pathname);
-        if(tag[1].toLowerCase()==='link' && /\\brel\\s*=\\s*["']stylesheet["']/i.test(tag[2])){
+        if(tag[1].toLowerCase()==='link' && /\brel\s*=\s*["']stylesheet["']/i.test(tag[2])){
           assert.ok(resource.headers.get('content-type')?.startsWith('text/css'),page+' stylesheet must use CSS MIME: '+target.pathname);
         }
       }
