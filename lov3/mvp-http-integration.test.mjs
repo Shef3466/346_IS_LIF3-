@@ -48,7 +48,7 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
         ? [...source.matchAll(/<script\b[^>]*type=["']module["'][^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1])
         : [source];
       for(const script of scripts){
-        const imports=[...script.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?["'](\\.[^"']+)["']/g)];
+        const imports=[...script.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?["'](\.[^"']+)["']/g)];
         for(const match of imports){
           const dependency=new URL(match[1],origin+path);
           assert.equal(dependency.origin,origin,'local module import must stay on preview origin');
