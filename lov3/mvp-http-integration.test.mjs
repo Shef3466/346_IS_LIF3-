@@ -73,11 +73,11 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
       const response=await fetch(origin+page);
       assert.equal(response.status,200,'navigation page '+page+' must load');
       const html=await response.text();
-      for(const tag of html.matchAll(/<(a|link|img|script)\\b([^>]*)>/gi)){
+      for(const tag of html.matchAll(/<(a|link|img|script)\b([^>]*)>/gi)){
         const attr=tag[1].toLowerCase()==='a'||tag[1].toLowerCase()==='link'?'href':'src';
-        const match=tag[2].match(new RegExp('\\\\b'+attr+'\\\\s*=\\\\s*(["\\\'])(.*?)\\\\1','i'));
-        if(!match||!match[2]||match[2].startsWith('#'))continue;
-        const target=new URL(match[2],origin+page);
+        const match=tag[2].match(new RegExp('\\b'+attr+'\\s*=\\s*["\\\']([^"\\\']+)["\\\']','i'));
+        if(!match||!match[1]||match[1].startsWith('#'))continue;
+        const target=new URL(match[1],origin+page);
         if(target.origin!==origin)continue;
         const resource=await fetch(target);
         assert.equal(resource.status,200,page+' references missing '+target.pathname);
