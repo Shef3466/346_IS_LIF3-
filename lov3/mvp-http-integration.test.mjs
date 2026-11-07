@@ -45,10 +45,10 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
       assert.equal(response.status,200,'module dependency '+path+' must load');
       const source=await response.text();
       const scripts=path.endsWith('.html')
-        ? [...source.matchAll(/<script\\b[^>]*type=["']module["'][^>]*>([\\s\\S]*?)<\\/script>/gi)].map(match=>match[1])
+        ? [...source.matchAll(/<script\b[^>]*type=["']module["'][^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1])
         : [source];
       for(const script of scripts){
-        const imports=[...script.matchAll(/\\b(?:import|export)\\s+(?:[^;'"\\n]*?\\s+from\\s*)?["'](\\.[^"']+)["']/g)];
+        const imports=[...script.matchAll(/\b(?:import|export)\s+(?:[^;'"\n]*?\s+from\s*)?["'](\\.[^"']+)["']/g)];
         for(const match of imports){
           const dependency=new URL(match[1],origin+path);
           assert.equal(dependency.origin,origin,'local module import must stay on preview origin');
@@ -56,7 +56,8 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
         }
       }
     }
-    assert.ok(visited.size>paths.length,'nested module dependencies must be checked');\n    // The creator must not mistake a missing or stale knowledge asset for a working preview.
+    assert.ok(visited.size>paths.length,'nested module dependencies must be checked');
+    // The creator must not mistake a missing or stale knowledge asset for a working preview.
     const missing=await fetch(origin+'/lov3/this-file-must-not-exist.json');
     assert.equal(missing.status,404,'missing preview resources must fail visibly');
     const missingBody=await missing.text();
