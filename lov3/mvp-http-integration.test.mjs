@@ -44,6 +44,17 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
       const response=await fetch(origin+path);
       assert.equal(response.status,200,'module dependency '+path+' must load');
       const source=await response.text();
+      // External module entry points are dependencies too; do not silently skip them.
+      if(path.endsWith('.html')){
+        for(const tag of source.matchAll(/<script\\b([^>]*)>/gi)){
+          if(!/\\btype\\s*=\\s*["']module["']/i.test(tag[1]))continue;
+          const src=tag[1].match(/\\bsrc\\s*=\\s*["']([^"']+)["']/i);
+          if(!src)continue;
+          const dependency=new URL(src[1],origin+path);
+          assert.equal(dependency.origin,origin,'external module script must stay on preview origin');
+          if(!visited.has(dependency.pathname))pending.push(dependency.pathname);
+        }
+      }
       const scripts=path.endsWith('.html')
         ? [...source.matchAll(/<script\b[^>]*type=["']module["'][^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1])
         : [source];
