@@ -6,7 +6,7 @@ import {resolve,dirname,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8'};
+const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml'};
 const paths=['/','/index.html','/lov3/explorer.html','/lov3/knowledge.html?id=lov3%3A0001','/lov3/discovery.html','/lov3/contribute.html','/lov3/genesis.json','/lov3/portal-state.mjs','/lov3/discovery-workspace.mjs','/lov3/archive-guide.mjs','/lov3/contribution-draft.mjs','/lov3/section-transitions.mjs','/lov3/graph.mjs','/lov3/sources.mjs'];
 
 test('MVP can be served as a coherent HTTP experience with correct resource types',async()=>{
@@ -81,6 +81,9 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
         if(target.origin!==origin)continue;
         const resource=await fetch(target);
         assert.equal(resource.status,200,page+' references missing '+target.pathname);
+        if(tag[1].toLowerCase()==='link' && /\\brel\\s*=\\s*["']stylesheet["']/i.test(tag[2])){
+          assert.ok(resource.headers.get('content-type')?.startsWith('text/css'),page+' stylesheet must use CSS MIME: '+target.pathname);
+        }
       }
     }
     assert.ok(visited.size>paths.length,'nested module dependencies must be checked');
