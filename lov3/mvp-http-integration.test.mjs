@@ -67,6 +67,22 @@ test('MVP can be served as a coherent HTTP experience with correct resource type
         }
       }
     }
+    // Catch broken internal navigation and stylesheet/media links before creator handoff.
+    // External destinations, fragment-only jumps, and dynamic JS-generated links are excluded.
+    for(const page of ['/index.html','/lov3/explorer.html','/lov3/knowledge.html','/lov3/discovery.html','/lov3/contribute.html']){
+      const response=await fetch(origin+page);
+      assert.equal(response.status,200,'navigation page '+page+' must load');
+      const html=await response.text();
+      for(const tag of html.matchAll(/<(a|link|img|script)\\b([^>]*)>/gi)){
+        const attr=tag[1].toLowerCase()==='a'||tag[1].toLowerCase()==='link'?'href':'src';
+        const match=tag[2].match(new RegExp('\\\\b'+attr+'\\\\s*=\\\\s*(["\\\'])(.*?)\\\\1','i'));
+        if(!match||!match[2]||match[2].startsWith('#'))continue;
+        const target=new URL(match[2],origin+page);
+        if(target.origin!==origin)continue;
+        const resource=await fetch(target);
+        assert.equal(resource.status,200,page+' references missing '+target.pathname);
+      }
+    }
     assert.ok(visited.size>paths.length,'nested module dependencies must be checked');
     // The creator must not mistake a missing or stale knowledge asset for a working preview.
     const missing=await fetch(origin+'/lov3/this-file-must-not-exist.json');
